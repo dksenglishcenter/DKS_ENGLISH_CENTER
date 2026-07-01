@@ -54,6 +54,7 @@ export function CareersPage() {
               {JOBS.map((job) => (
                 <AccordionItem
                   key={job.id}
+                  id={`job-${job.id}`}
                   value={String(job.id)}
                   className="bg-white rounded-2xl border border-border overflow-hidden transition-shadow hover:shadow-md border-b-0"
                 >

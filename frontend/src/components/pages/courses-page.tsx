@@ -68,7 +68,7 @@ export function CoursesPage({ setPage }: { setPage: SetPage }) {
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filtered.map((c) => (
-                <div key={c.id} className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <article key={c.id} id={c.id} className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-shadow duration-300">
                   <div className="relative h-48 overflow-hidden" style={{ background: c.bg }}>
                     <UnsplashImage id={c.imgId} alt={c.subtitle} className="w-full h-full opacity-70 hover:scale-105 transition-transform duration-500"/>
                     <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${c.accent}BB 0%, transparent 60%)` }}/>
@@ -117,7 +117,7 @@ export function CoursesPage({ setPage }: { setPage: SetPage }) {
                       Nhận tư vấn miễn phí <ArrowRight className="w-4 h-4"/>
                     </Button>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           </div>

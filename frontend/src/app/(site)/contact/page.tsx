@@ -1,4 +1,12 @@
 import { Container } from "@/components/layout/container";
+import { createPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = createPageMetadata({
+  title: "Liên hệ",
+  description: "Liên hệ DKS English Center — đang được cập nhật.",
+  path: "/contact",
+  noIndex: true,
+});
 
 export default function Page() {
   return (
