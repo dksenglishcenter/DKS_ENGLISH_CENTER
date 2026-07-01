@@ -1,7 +1,9 @@
-"use client";
-
-import { BlogPage } from "@/components/pages/blog-page";
+import { Container } from "@/components/layout/container";
 
 export default function Page() {
-  return <BlogPage />;
+  return (
+    <Container className="min-h-[50vh] py-16">
+      <div />
+    </Container>
+  );
 }

@@ -1,9 +1,9 @@
-"use client";
-
-import { HomePage } from "@/components/pages/home-page";
-import { useDksNavigation } from "@/lib/navigation";
+import { Container } from "@/components/layout/container";
 
 export default function Page() {
-  const { setPage } = useDksNavigation();
-  return <HomePage setPage={setPage} />;
+  return (
+    <Container className="min-h-[50vh] py-16">
+      <div />
+    </Container>
+  );
 }

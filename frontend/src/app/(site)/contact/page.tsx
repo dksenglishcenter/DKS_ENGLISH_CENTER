@@ -1,7 +1,9 @@
-"use client";
-
-import { ContactPage } from "@/components/pages/contact-page";
+import { Container } from "@/components/layout/container";
 
 export default function Page() {
-  return <ContactPage />;
+  return (
+    <Container className="min-h-[50vh] py-16">
+      <div />
+    </Container>
+  );
 }
