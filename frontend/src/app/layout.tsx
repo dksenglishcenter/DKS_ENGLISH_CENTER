@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { getRootMetadata } from "@/lib/seo/metadata";
 import { JsonLd } from "@/components/seo/json-ld";
+import { ThirdPartyScripts } from "@/components/seo/third-party-scripts";
 import { organizationSchema } from "@/lib/seo/schemas";
 
 import "./globals.css";
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="min-h-full">
         <JsonLd data={organizationSchema()} />
         {children}
+        <ThirdPartyScripts />
       </body>
     </html>
   );

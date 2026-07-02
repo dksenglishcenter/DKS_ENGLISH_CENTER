@@ -54,8 +54,14 @@ export function AboutPage() {
             </div>
           </div>
           <div className="relative">
-            <div className="rounded-2xl overflow-hidden h-80">
-              <UnsplashImage id="1580582932707-520aed937b7b" alt="DKS English Center" className="w-full h-full"/>
+            <div className="relative rounded-2xl overflow-hidden h-80">
+              <UnsplashImage
+                id="1580582932707-520aed937b7b"
+                alt="DKS English Center"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </div>
             <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl border border-border shadow-xl p-5">
               <div className="text-3xl font-black text-primary font-[family-name:var(--font-nunito)]">8+</div>
@@ -88,7 +94,13 @@ export function AboutPage() {
           {TEACHERS.map((t) => (
             <div key={t.name} className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
               <div className="relative h-52 bg-secondary overflow-hidden">
-                <UnsplashImage id={t.imgId} alt={t.name} className="w-full h-full group-hover:scale-105 transition-transform duration-500"/>
+                <UnsplashImage
+                  id={t.imgId}
+                  alt={t.name}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 25vw"
+                  className="group-hover:scale-105 transition-transform duration-500"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#4A2306]/60 to-transparent"/>
                 <div className="absolute bottom-3 left-3 right-3">
                   <div className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full inline-block font-[family-name:var(--font-nunito)]">
@@ -109,8 +121,14 @@ export function AboutPage() {
         <SectionHeading label="Cơ sở vật chất" title="Không Gian Học Tập Lý Tưởng" />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {facilities.map((f, i) => (
-            <div key={i} className="relative rounded-2xl overflow-hidden group cursor-pointer" style={{ height: 200 }}>
-              <UnsplashImage id={f.id} alt={f.label} className="w-full h-full group-hover:scale-110 transition-transform duration-500"/>
+            <div key={i} className="relative rounded-2xl overflow-hidden group cursor-pointer h-[200px]">
+              <UnsplashImage
+                id={f.id}
+                alt={f.label}
+                fill
+                sizes="(max-width: 768px) 50vw, 33vw"
+                className="group-hover:scale-110 transition-transform duration-500"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-[#4A2306]/70 to-transparent"/>
               <div className="absolute bottom-3 left-3">
                 <span className="text-white text-sm font-bold font-[family-name:var(--font-nunito)]">{f.label}</span>

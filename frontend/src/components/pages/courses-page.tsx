@@ -71,7 +71,13 @@ export function CoursesPage() {
               {filtered.map((c) => (
                 <article key={c.id} id={c.id} className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-shadow duration-300">
                   <div className="relative h-48 overflow-hidden" style={{ background: c.bg }}>
-                    <UnsplashImage id={c.imgId} alt={c.subtitle} className="w-full h-full opacity-70 hover:scale-105 transition-transform duration-500"/>
+                    <UnsplashImage
+                      id={c.imgId}
+                      alt={c.subtitle}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="opacity-70 hover:scale-105 transition-transform duration-500"
+                    />
                     <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${c.accent}BB 0%, transparent 60%)` }}/>
                     <div className="absolute top-4 left-4 text-4xl">{c.icon}</div>
                     <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
