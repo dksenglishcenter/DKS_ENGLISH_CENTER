@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Award,
@@ -15,9 +16,9 @@ import { PageHero } from "@/components/layout/page-hero";
 import { UnsplashImage } from "@/components/media/unsplash-image";
 import { Button } from "@/components/ui/button";
 import { COURSES } from "@/data/courses";
-import type { SetPage } from "@/lib/navigation";
+import { PAGE_PATHS } from "@/lib/navigation-paths";
 
-export function CoursesPage({ setPage }: { setPage: SetPage }) {
+export function CoursesPage() {
   const [active, setActive] = useState("all");
   const tabs = [
     { id: "all", label: "Tất cả" },
@@ -58,8 +59,8 @@ export function CoursesPage({ setPage }: { setPage: SetPage }) {
               <div className="mt-8 p-4 rounded-xl" style={{ background: "linear-gradient(135deg, #FFF4EC, #FFFBF0)" }}>
                 <div className="text-2xl mb-2">🤔</div>
                 <p className="text-sm font-semibold text-[#4A2306] mb-3 font-[family-name:var(--font-nunito)]">Chưa biết chọn khóa nào?</p>
-                <Button onClick={() => setPage("contact")} size="sm" className="w-full justify-center text-xs">
-                  Tư vấn miễn phí
+                <Button asChild size="sm" className="w-full justify-center text-xs">
+                  <Link href={PAGE_PATHS.contact}>Tư vấn miễn phí</Link>
                 </Button>
               </div>
             </div>
@@ -113,8 +114,10 @@ export function CoursesPage({ setPage }: { setPage: SetPage }) {
                       </ul>
                     </div>
 
-                    <Button onClick={() => setPage("contact")} className="w-full justify-center">
-                      Nhận tư vấn miễn phí <ArrowRight className="w-4 h-4"/>
+                    <Button asChild className="w-full justify-center">
+                      <Link href={PAGE_PATHS.contact}>
+                        Nhận tư vấn miễn phí <ArrowRight className="w-4 h-4"/>
+                      </Link>
                     </Button>
                   </div>
                 </article>

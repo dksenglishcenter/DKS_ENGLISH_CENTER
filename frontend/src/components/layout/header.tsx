@@ -4,12 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 
+import { usePathname } from "next/navigation";
+
 import { DKSLogo } from "@/components/brand/dks-logo";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
-import { PAGE_PATHS, type Page } from "@/lib/navigation";
+import { getActivePage, PAGE_PATHS, type Page } from "@/lib/navigation-paths";
 
-export function Header({ active }: { active: Page }) {
+export function Header() {
+  const pathname = usePathname();
+  const active = getActivePage(pathname);
   const [open, setOpen] = useState(false);
   const links: { label: string; page: Page }[] = [
     { label: "Trang chủ", page: "home" },

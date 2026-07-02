@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
-import { PAGE_PATHS } from "@/lib/navigation";
+import { PAGE_PATHS } from "@/lib/navigation-paths";
 
 export function Footer() {
   return (
