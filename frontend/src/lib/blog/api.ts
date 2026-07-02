@@ -10,8 +10,11 @@ export const BLOG_REVALIDATE_SECONDS = 3600 as const;
  * TODO: thay bằng fetch backend khi API sẵn sàng:
  *
  * const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog`, {
+ *   credentials: "include",
  *   next: { revalidate: BLOG_REVALIDATE_SECONDS },
  * });
+ *
+ * Hoặc dùng apiFetch() từ @/lib/api/client — đã cấu hình credentials + không Bearer token.
  * return res.json();
  */
 export const getBlogPosts = cache(async (): Promise<BlogPost[]> => {
