@@ -6,13 +6,13 @@ import { Header } from "@/components/layout/header";
 import { useDksNavigation } from "@/lib/navigation";
 
 export function SiteLayout({ children }: { children: React.ReactNode }) {
-  const { activePage, setPage } = useDksNavigation();
+  const { activePage } = useDksNavigation();
 
   return (
     <div className="min-h-screen bg-background font-[family-name:var(--font-body)]">
-      <Header active={activePage} setPage={setPage} />
+      <Header active={activePage} />
       <main>{children}</main>
-      <Footer setPage={setPage} />
+      <Footer />
       <FloatingWidgets />
     </div>
   );

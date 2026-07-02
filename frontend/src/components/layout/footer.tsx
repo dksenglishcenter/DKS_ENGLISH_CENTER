@@ -1,13 +1,14 @@
+import Link from "next/link";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
-import type { SetPage } from "@/lib/navigation";
+import { PAGE_PATHS } from "@/lib/navigation";
 
-export function Footer({ setPage }: { setPage: SetPage }) {
+export function Footer() {
   return (
     <footer className="bg-[#4A2306] text-white">
       <Container className="py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-[10px] bg-primary flex items-center justify-center text-white font-black text-lg font-[family-name:var(--font-nunito)]">D</div>
@@ -31,9 +32,52 @@ export function Footer({ setPage }: { setPage: SetPage }) {
           <div>
             <h4 className="font-bold text-white mb-4 font-[family-name:var(--font-nunito)]">Khóa học</h4>
             <ul className="space-y-2 text-sm text-orange-100 font-[family-name:var(--font-body)]">
-              {["IELTS Preparation", "9-to-10 Prep", "Communicative English", "1-on-1 Tutoring"].map((c) => (
-                <li key={c}><button onClick={() => setPage("courses")} className="hover:text-accent transition-colors">{c}</button></li>
-              ))}
+              <li>
+                <Link href={PAGE_PATHS.courses} className="hover:text-accent transition-colors">
+                  Tất cả khóa học
+                </Link>
+              </li>
+              <li>
+                <Link href={`${PAGE_PATHS.courses}#ielts`} className="hover:text-accent transition-colors">
+                  IELTS Preparation
+                </Link>
+              </li>
+              <li>
+                <Link href={`${PAGE_PATHS.courses}#highschool`} className="hover:text-accent transition-colors">
+                  9-to-10 Prep
+                </Link>
+              </li>
+              <li>
+                <Link href={`${PAGE_PATHS.courses}#comm`} className="hover:text-accent transition-colors">
+                  Communicative English
+                </Link>
+              </li>
+              <li>
+                <Link href={`${PAGE_PATHS.courses}#tutoring`} className="hover:text-accent transition-colors">
+                  1-on-1 Tutoring
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white mb-4 font-[family-name:var(--font-nunito)]">Trang web</h4>
+            <ul className="space-y-2 text-sm text-orange-100 font-[family-name:var(--font-body)]">
+              <li>
+                <Link href={PAGE_PATHS.about} className="hover:text-accent transition-colors">
+                  Về chúng tôi
+                </Link>
+              </li>
+              <li>
+                <Link href={PAGE_PATHS.careers} className="hover:text-accent transition-colors">
+                  Tuyển dụng
+                </Link>
+              </li>
+              <li>
+                <Link href={PAGE_PATHS.contact} className="hover:text-accent transition-colors">
+                  Liên hệ
+                </Link>
+              </li>
             </ul>
           </div>
 
