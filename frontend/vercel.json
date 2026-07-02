@@ -1,15 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd .. && npm install",
-  "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/sitemap.xml/",
-      "destination": "/api/sitemap"
-    }
-  ]
+  "framework": "nextjs"
 }

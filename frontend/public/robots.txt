@@ -1,5 +1,0 @@
-User-Agent: *
-Allow: /
-Disallow: /api/
-
-Sitemap: https://dks-english-center-frontend-delta.vercel.app/sitemap.xml
