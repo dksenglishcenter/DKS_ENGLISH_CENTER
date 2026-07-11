@@ -1,4 +1,5 @@
 import { getApiUrl } from "./config";
+import { parseApiErrorBody } from "@/lib/errors/format-error";
 
 type ApiFetchOptions = RequestInit & {
   /** JSON body — tự stringify và set Content-Type. */
@@ -28,8 +29,8 @@ export async function apiFetch<T = unknown>(
   });
 
   if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
-    throw new Error(message || `API error ${response.status}`);
+    const raw = await response.text().catch(() => response.statusText);
+    throw parseApiErrorBody(raw, response.status);
   }
 
   if (response.status === 204) {

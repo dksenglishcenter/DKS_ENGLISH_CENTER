@@ -36,3 +36,5 @@ next-env.d.ts
 backend/generated/
 
 .agents
+# API contract (local / nội bộ — không push lên git)
+/docs/
