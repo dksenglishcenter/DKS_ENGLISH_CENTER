@@ -34,3 +34,6 @@ next-env.d.ts
 
 # Prisma generated client
 backend/generated/
+
+# API contract (local / nội bộ — không push lên git)
+/docs/

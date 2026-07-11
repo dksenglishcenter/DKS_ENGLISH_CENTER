@@ -7,3 +7,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model ContactSubmission {
+  id             String   @id @default(cuid())
+  fullName       String   @map("full_name")
+  phone          String
+  email          String?
+  courseInterest String   @map("course_interest")
+  learningNeeds  String?  @map("learning_needs")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("contact_submissions")
+}
