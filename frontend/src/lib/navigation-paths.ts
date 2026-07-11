@@ -19,5 +19,14 @@ const PATH_PAGES: Record<string, Page> = {
 };
 
 export function getActivePage(pathname: string): Page {
-  return PATH_PAGES[pathname] ?? "home";
+  const exactMatch = PATH_PAGES[pathname];
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  const nestedMatch = Object.entries(PATH_PAGES).find(
+    ([path]) => path !== "/" && pathname.startsWith(`${path}/`),
+  );
+
+  return nestedMatch?.[1] ?? "home";
 }

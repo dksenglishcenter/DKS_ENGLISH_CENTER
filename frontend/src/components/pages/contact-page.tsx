@@ -1,0 +1,232 @@
+import Link from "next/link";
+import { Clock, FileText, Mail, MapPin, Phone } from "lucide-react";
+
+import {
+  SocialIcon,
+  type SocialNetwork,
+} from "@/components/brand/social-icon";
+import { ContactForm } from "@/components/forms/contact-form";
+import { Container } from "@/components/layout/container";
+import { PageHero } from "@/components/layout/page-hero";
+
+const CONTACT_DETAILS = [
+  {
+    label: "Địa chỉ",
+    value: "63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hai Bà Trưng, Hà Nội",
+    icon: MapPin,
+    href: "https://www.google.com/maps/search/?api=1&query=63%20Ng%C3%B5%20120%20D%C6%B0%C6%A1ng%20V%C4%83n%20B%C3%A9%2C%20V%C4%A9nh%20Tuy%2C%20Hai%20B%C3%A0%20Tr%C6%B0ng%2C%20H%C3%A0%20N%E1%BB%99i",
+  },
+  {
+    label: "Hotline",
+    value: "083 451 3456",
+    icon: Phone,
+    href: "tel:0834513456",
+  },
+  {
+    label: "Email",
+    value: "dksenglishcenter@gmail.com",
+    icon: Mail,
+    href: "mailto:dksenglishcenter@gmail.com",
+  },
+  {
+    label: "Giờ mở cửa",
+    value: "Thứ 2 – Chủ Nhật: 7:00 – 21:00",
+    icon: Clock,
+    href: undefined,
+  },
+] as const;
+
+const SOCIAL_CHANNELS = [
+  { name: "Zalo", network: "zalo", className: "bg-[#0068FF]" },
+  { name: "Facebook", network: "facebook", className: "bg-[#1877F2]" },
+  { name: "YouTube", network: "youtube", className: "bg-[#FF0000]" },
+  { name: "TikTok", network: "tiktok", className: "bg-[#1E1E1E]" },
+] as const satisfies ReadonlyArray<{
+  name: string;
+  network: SocialNetwork;
+  className: string;
+}>;
+
+export function ContactPage() {
+  return (
+    <div className="bg-background">
+      <PageHero
+        label="Liên hệ"
+        title={
+          <>
+            Chúng Tôi Sẵn Sàng
+            <br />
+            Hỗ Trợ Bạn
+          </>
+        }
+        description="Đăng ký học thử hoặc nhận tư vấn miễn phí. Đội ngũ DKS sẽ liên hệ và xây dựng lộ trình phù hợp với mục tiêu của bạn"
+      />
+
+      <Container className="py-16 md:py-20">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-14">
+          <section aria-labelledby="contact-information-title" className="space-y-8">
+            <div>
+              <h2
+                id="contact-information-title"
+                className="mb-6 text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+              >
+                Thông Tin Liên Hệ
+              </h2>
+              <address className="space-y-4 not-italic">
+                {CONTACT_DETAILS.map((detail) => {
+                  const Icon = detail.icon;
+                  const content = (
+                    <>
+                      <span className="mb-0.5 block text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                        {detail.label}
+                      </span>
+                      <span className="block text-sm font-medium leading-relaxed text-[#4A2306]">
+                        {detail.value}
+                      </span>
+                    </>
+                  );
+
+                  return (
+                    <div key={detail.label} className="flex items-start gap-4">
+                      <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <div className="pt-0.5 font-[family-name:var(--font-body)]">
+                        {detail.href ? (
+                          <a
+                            href={detail.href}
+                            className="rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            {...(detail.href.startsWith("http")
+                              ? { target: "_blank", rel: "noreferrer" }
+                              : {})}
+                          >
+                            {content}
+                          </a>
+                        ) : (
+                          content
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </address>
+            </div>
+
+            <div>
+              <h3 className="mb-4 text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                Mạng xã hội
+              </h3>
+              <ul
+                className="flex flex-wrap gap-3"
+                aria-label="Các kênh mạng xã hội của DKS"
+              >
+                {SOCIAL_CHANNELS.map((channel) => (
+                  <li key={channel.name}>
+                    <span
+                      className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${channel.className}`}
+                    >
+                      <SocialIcon network={channel.network} className="h-4 w-4" />
+                      {channel.name}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="relative min-h-[280px] overflow-hidden rounded-2xl border border-border bg-[#F8F9FA]">
+              <svg
+                className="absolute inset-0 h-full w-full opacity-[0.06]"
+                viewBox="0 0 400 280"
+                aria-hidden="true"
+              >
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <line
+                    key={`vertical-${index}`}
+                    x1={index * 44}
+                    y1="0"
+                    x2={index * 44}
+                    y2="280"
+                    stroke="currentColor"
+                  />
+                ))}
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <line
+                    key={`horizontal-${index}`}
+                    x1="0"
+                    y1={index * 40}
+                    x2="400"
+                    y2={index * 40}
+                    stroke="currentColor"
+                  />
+                ))}
+              </svg>
+              <div className="relative flex min-h-[280px] flex-col items-center justify-center gap-4 px-6 text-center">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[#D95518] text-white shadow-xl shadow-primary/20">
+                  <MapPin className="h-7 w-7" aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className="mb-1 font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                    DKS English Center
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hà Nội
+                  </p>
+                  <Link
+                    href={CONTACT_DETAILS[0].href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-[#D95518] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    Mở Google Maps →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="contact-form-title">
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-[0_4px_24px_rgba(74,35,6,0.06)] sm:p-8">
+              <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <FileText className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <h2
+                id="contact-form-title"
+                className="mb-1 text-xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+              >
+                Nhận Tư Vấn Lộ Trình Học Phù Hợp
+              </h2>
+              <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
+               Chúng tôi sẽ liên hệ trong thời gian sớm nhất để tư vấn khóa học phù hợp với trình độ và mục tiêu của bạn
+              </p>
+              <ContactForm />
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F0FF]">
+                  <SocialIcon network="zalo" className="h-5 w-5 text-[#0068FF]" />
+                </span>
+                <h3 className="mb-1 text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                  Chat Zalo
+                </h3>
+                <p className="text-xs text-muted-foreground">Phản hồi ngay lập tức</p>
+              </div>
+              <a
+                href="tel:0834513456"
+                className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                  <Phone className="h-5 w-5 text-primary" aria-hidden="true" />
+                </span>
+                <span className="mb-1 block text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                  Gọi ngay
+                </span>
+                <span className="block text-xs text-muted-foreground">083 451 3456</span>
+              </a>
+            </div>
+          </section>
+        </div>
+      </Container>
+    </div>
+  );
+}

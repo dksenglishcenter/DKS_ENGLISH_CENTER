@@ -1,38 +1,40 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-nunito: 'Nunito', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Lora', Georgia, serif;
+  --font-nunito: var(--font-heading);
+  --font-body: 'Inter', Arial, sans-serif;
   --font-size: 16px;
   --background: #ffffff;
-  --foreground: #4A2306;
+  --foreground: #1E1E1E;
   --card: #ffffff;
-  --card-foreground: #4A2306;
+  --card-foreground: #1E1E1E;
   --popover: #ffffff;
-  --popover-foreground: #4A2306;
-  --primary: #F16522;
+  --popover-foreground: #1E1E1E;
+  --primary: #F37021;
+  --primary-hover: #EB5B25;
   --primary-foreground: #ffffff;
-  --secondary: #FFF4EC;
-  --secondary-foreground: #4A2306;
-  --muted: #F5EDE6;
-  --muted-foreground: #9B6B50;
-  --accent: #FFA200;
-  --accent-foreground: #4A2306;
+  --secondary: #FFF7F0;
+  --secondary-foreground: #1E1E1E;
+  --muted: #F8F9FA;
+  --muted-foreground: #6C757D;
+  --accent: #F89A1E;
+  --accent-foreground: #1E1E1E;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
-  --border: rgba(241, 101, 34, 0.15);
+  --border: #E5E7EB;
   --input: transparent;
   --input-background: #FFF9F5;
   --switch-background: #e8c9b4;
   --font-weight-medium: 600;
   --font-weight-normal: 400;
-  --ring: #F16522;
-  --chart-1: #F16522;
-  --chart-2: #FFA200;
-  --chart-3: #E85D26;
+  --ring: #F37021;
+  --chart-1: #F37021;
+  --chart-2: #EB5B25;
+  --chart-3: #F89A1E;
   --chart-4: #C0470F;
   --chart-5: #FFD580;
-  --radius: 0.75rem;
+  --radius: 1rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: #030213;
@@ -88,6 +90,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -128,6 +131,8 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    line-height: 1.6;
   }
 
   /**
@@ -140,24 +145,28 @@
   }
 
   h1 {
+    font-family: var(--font-heading);
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h2 {
+    font-family: var(--font-heading);
     font-size: var(--text-xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h3 {
+    font-family: var(--font-heading);
     font-size: var(--text-lg);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h4 {
+    font-family: var(--font-heading);
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
@@ -179,5 +188,21 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+
+  ::selection {
+    background: rgba(243, 112, 33, 0.2);
+    color: #1E1E1E;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

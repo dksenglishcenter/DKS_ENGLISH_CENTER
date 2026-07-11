@@ -24,21 +24,25 @@ export function Header() {
     { label: "Liên hệ", page: "contact" },
   ];
   const linkClass = (page: Page) =>
-    `px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 font-[family-name:var(--font-nunito)] ${
+    `rounded-[10px] px-4 py-2.5 text-[15px] font-semibold transition-all duration-150 font-[family-name:var(--font-body)] ${
       active === page
-        ? "bg-secondary text-primary"
-        : "text-[#4A2306] hover:bg-secondary hover:text-primary"
+        ? "bg-primary/10 text-primary"
+        : "text-[#4A4A4A] hover:bg-secondary hover:text-primary"
     }`;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border shadow-sm">
+    <header className="sticky top-0 z-40 border-b border-border bg-white/[0.97] shadow-[0_1px_10px_rgba(0,0,0,0.05)] backdrop-blur-md">
       <Container>
-        <div className="flex items-center justify-between h-16 md:h-20">
-          <Link href={PAGE_PATHS.home} className="flex-shrink-0" onClick={() => setOpen(false)}>
-            <DKSLogo size="md" />
+        <div className="flex h-16 items-center justify-between md:h-[72px]">
+          <Link
+            href={PAGE_PATHS.home}
+            className="flex-shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            onClick={() => setOpen(false)}
+          >
+            <DKSLogo size="md" priority />
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Điều hướng chính">
+          <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Điều hướng chính">
             {links.map((l) => (
               <Link key={l.page} href={PAGE_PATHS[l.page]} className={linkClass(l.page)}>
                 {l.label}
@@ -56,7 +60,7 @@ export function Header() {
 
           <button
             type="button"
-            className="lg:hidden p-2 rounded-lg text-[#4A2306] hover:bg-secondary transition-colors"
+            className="min-h-11 min-w-11 rounded-[10px] p-2 text-[#4A4A4A] transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:hidden"
             onClick={() => setOpen(!open)}
             aria-expanded={open}
             aria-label={open ? "Đóng menu" : "Mở menu"}
@@ -67,15 +71,15 @@ export function Header() {
       </Container>
 
       {open && (
-        <div className="lg:hidden border-t border-border bg-white">
-          <Container className="py-4 flex flex-col gap-1">
+        <div className="border-t border-border bg-white lg:hidden">
+          <Container className="flex flex-col gap-1 py-4">
             {links.map((l) => (
               <Link
                 key={l.page}
                 href={PAGE_PATHS[l.page]}
                 onClick={() => setOpen(false)}
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-all font-[family-name:var(--font-nunito)] ${
-                  active === l.page ? "bg-secondary text-primary" : "text-[#4A2306] hover:bg-secondary"
+                className={`w-full rounded-[10px] px-4 py-3 text-left font-semibold transition-all font-[family-name:var(--font-body)] ${
+                  active === l.page ? "bg-secondary text-primary" : "text-[#1E1E1E] hover:bg-muted"
                 }`}
               >
                 {l.label}
