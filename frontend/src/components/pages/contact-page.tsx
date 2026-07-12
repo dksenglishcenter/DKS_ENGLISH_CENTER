@@ -8,6 +8,7 @@ import {
 import { ContactForm } from "@/components/forms/contact-form";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
+import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const CONTACT_DETAILS = [
   {
@@ -37,13 +38,29 @@ const CONTACT_DETAILS = [
 ] as const;
 
 const SOCIAL_CHANNELS = [
-  { name: "Zalo", network: "zalo", className: "bg-[#0068FF]" },
-  { name: "Facebook", network: "facebook", className: "bg-[#1877F2]" },
-  { name: "YouTube", network: "youtube", className: "bg-[#FF0000]" },
-  { name: "TikTok", network: "tiktok", className: "bg-[#1E1E1E]" },
+  { name: "Zalo", network: "zalo", href: SOCIAL_LINKS.zalo, className: "bg-[#0068FF]" },
+  {
+    name: "Facebook",
+    network: "facebook",
+    href: SOCIAL_LINKS.facebook,
+    className: "bg-[#1877F2]",
+  },
+  {
+    name: "YouTube",
+    network: "youtube",
+    href: SOCIAL_LINKS.youtube,
+    className: "bg-[#FF0000]",
+  },
+  {
+    name: "TikTok",
+    network: "tiktok",
+    href: SOCIAL_LINKS.tiktok,
+    className: "bg-[#1E1E1E]",
+  },
 ] as const satisfies ReadonlyArray<{
   name: string;
   network: SocialNetwork;
+  href: string;
   className: string;
 }>;
 
@@ -122,12 +139,15 @@ export function ContactPage() {
               >
                 {SOCIAL_CHANNELS.map((channel) => (
                   <li key={channel.name}>
-                    <span
-                      className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${channel.className}`}
+                    <a
+                      href={channel.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none ${channel.className}`}
                     >
                       <SocialIcon network={channel.network} className="h-4 w-4" />
                       {channel.name}
-                    </span>
+                    </a>
                   </li>
                 ))}
               </ul>

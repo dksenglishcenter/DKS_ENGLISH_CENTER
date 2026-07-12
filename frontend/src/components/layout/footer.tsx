@@ -5,6 +5,7 @@ import { DKSLogo } from "@/components/brand/dks-logo";
 import { SocialIcon } from "@/components/brand/social-icon";
 import { Container } from "@/components/layout/container";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
+import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const COURSE_LINKS = [
   { label: "IELTS Preparation", href: `${PAGE_PATHS.courses}#ielts` },
@@ -14,9 +15,9 @@ const COURSE_LINKS = [
 ] as const;
 
 const SOCIALS = [
-  { label: "Zalo", network: "zalo" },
-  { label: "Facebook", network: "facebook" },
-  { label: "TikTok", network: "tiktok" },
+  { label: "Zalo", network: "zalo", href: SOCIAL_LINKS.zalo },
+  { label: "Facebook", network: "facebook", href: SOCIAL_LINKS.facebook },
+  { label: "TikTok", network: "tiktok", href: SOCIAL_LINKS.tiktok },
 ] as const;
 
 const footerLinkClass =
@@ -24,7 +25,7 @@ const footerLinkClass =
 
 export function Footer() {
   return (
-    <footer id="site-footer" className="bg-[#1E1E1E] text-white">
+    <footer id="site-footer" className="bg-[#4A2306] text-white">
       <Container className="py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
@@ -42,14 +43,17 @@ export function Footer() {
             </p>
             <div className="flex gap-4" aria-label="Mạng xã hội của DKS">
               {SOCIALS.map((social) => (
-                <span
+                <a
                   key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   title={social.label}
-                  aria-label={social.label}
-                  className="flex h-8 w-8 items-center justify-center"
+                  aria-label={`Mở ${social.label}`}
+                  className="flex h-8 w-8 items-center justify-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <SocialIcon network={social.network} variant="brand" className="h-5" />
-                </span>
+                  <SocialIcon network={social.network} className="h-5" />
+                </a>
               ))}
             </div>
           </div>

@@ -1,40 +1,40 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-heading: 'Lora', Georgia, serif;
-  --font-nunito: var(--font-heading);
-  --font-body: 'Inter', Arial, sans-serif;
+  --font-heading: 'Nunito', Arial, sans-serif;
+  --font-nunito: 'Nunito', Arial, sans-serif;
+  --font-body: 'Plus Jakarta Sans', Arial, sans-serif;
   --font-size: 16px;
   --background: #ffffff;
-  --foreground: #1E1E1E;
+  --foreground: #4A2306;
   --card: #ffffff;
-  --card-foreground: #1E1E1E;
+  --card-foreground: #4A2306;
   --popover: #ffffff;
-  --popover-foreground: #1E1E1E;
-  --primary: #F37021;
-  --primary-hover: #EB5B25;
+  --popover-foreground: #4A2306;
+  --primary: #F16522;
+  --primary-hover: #D95518;
   --primary-foreground: #ffffff;
-  --secondary: #FFF7F0;
-  --secondary-foreground: #1E1E1E;
-  --muted: #F8F9FA;
-  --muted-foreground: #6C757D;
-  --accent: #F89A1E;
-  --accent-foreground: #1E1E1E;
+  --secondary: #FFF4EC;
+  --secondary-foreground: #4A2306;
+  --muted: #F5EDE6;
+  --muted-foreground: #9B6B50;
+  --accent: #FFA200;
+  --accent-foreground: #4A2306;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
-  --border: #E5E7EB;
+  --border: rgba(241, 101, 34, 0.15);
   --input: transparent;
   --input-background: #FFF9F5;
   --switch-background: #e8c9b4;
   --font-weight-medium: 600;
   --font-weight-normal: 400;
-  --ring: #F37021;
-  --chart-1: #F37021;
-  --chart-2: #EB5B25;
-  --chart-3: #F89A1E;
+  --ring: #F16522;
+  --chart-1: #F16522;
+  --chart-2: #FFA200;
+  --chart-3: #E85D26;
   --chart-4: #C0470F;
   --chart-5: #FFD580;
-  --radius: 1rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: #030213;
@@ -191,8 +191,8 @@
   }
 
   ::selection {
-    background: rgba(243, 112, 33, 0.2);
-    color: #1E1E1E;
+    background: rgba(241, 101, 34, 0.2);
+    color: #4A2306;
   }
 }
 

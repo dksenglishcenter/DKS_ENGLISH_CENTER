@@ -1,5 +1,8 @@
 import Image from "next/image";
 
+const DKS_LOGO_URL =
+  "https://res.cloudinary.com/hw92uddx/image/upload/v1783836254/dks-english-center/brand/logo/bqf4dvjtxwqyd2whbdwh.png";
+
 export function DKSLogo({
   size = "md",
   priority = false,
@@ -16,7 +19,7 @@ export function DKSLogo({
       style={{ width: dimension, height: dimension }}
     >
       <Image
-        src="/images/dks-logo.png"
+        src={DKS_LOGO_URL}
         alt="DKS English Center"
         fill
         sizes={`${dimension}px`}
