@@ -25,20 +25,23 @@ const footerLinkClass =
 
 export function Footer() {
   return (
-    <footer id="site-footer" className="bg-[#4A2306] text-white">
+    <footer
+      id="site-footer"
+      className="bg-[#4A2306] text-white font-[family-name:var(--font-body)]"
+    >
       <Container className="py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <div className="mb-5 flex items-center gap-3">
+            <div className="mb-4 flex items-center gap-3">
               <DKSLogo size="sm" />
               <div>
-                <div className="text-lg font-bold text-white font-[family-name:var(--font-heading)]">
+                <div className="text-lg font-black text-white font-[family-name:var(--font-heading)]">
                   DKS English Center
                 </div>
-                <div className="text-sm text-white/50">Học đúng cách – Tiến xa mỗi ngày</div>
+                <div className="text-sm text-orange-200">Học đúng cách – Tiến xa mỗi ngày</div>
               </div>
             </div>
-            <p className="mb-5 max-w-xl text-sm leading-relaxed text-white/60">
+            <p className="mb-4 max-w-xl text-sm font-normal leading-relaxed text-orange-100">
               Trung tâm tiếng Anh uy tín tại Hà Nội với phương pháp giảng dạy cá nhân hóa và đội ngũ giáo viên tận tâm.
             </p>
             <div className="flex gap-4" aria-label="Mạng xã hội của DKS">
@@ -59,10 +62,10 @@ export function Footer() {
           </div>
 
           <div>
-            <h2 className="mb-5 text-sm font-bold uppercase tracking-wide text-white font-[family-name:var(--font-heading)]">
+            <h2 className="mb-4 text-base font-bold text-white font-[family-name:var(--font-heading)]">
               Khóa học
             </h2>
-            <ul className="space-y-2.5 text-sm text-white/55">
+            <ul className="space-y-2 text-sm font-bold text-orange-100 font-[family-name:var(--font-heading)]">
               {COURSE_LINKS.map((course) => (
                 <li key={course.label}>
                   <Link href={course.href} className={footerLinkClass}>
@@ -74,11 +77,11 @@ export function Footer() {
           </div>
 
           <div>
-            <h2 className="mb-5 text-sm font-bold uppercase tracking-wide text-white font-[family-name:var(--font-heading)]">
+            <h2 className="mb-4 text-base font-bold text-white font-[family-name:var(--font-heading)]">
               Liên hệ
             </h2>
             <address className="not-italic">
-              <ul className="space-y-3 text-sm leading-relaxed text-white/55">
+              <ul className="space-y-3 text-sm font-normal leading-relaxed text-orange-100">
                 <li className="flex items-start gap-2.5">
                   <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
                   <a
@@ -109,7 +112,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/[0.08] pt-6 text-xs text-white/35 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs font-normal text-orange-200 sm:flex-row">
           <span>© 2025 DKS English Center. Bảo lưu mọi quyền.</span>
           <span>Thiết kế với tình yêu dành cho học viên Việt Nam</span>
         </div>
