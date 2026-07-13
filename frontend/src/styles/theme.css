@@ -1,8 +1,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-nunito: 'Nunito', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Nunito', Arial, sans-serif;
+  --font-nunito: 'Nunito', Arial, sans-serif;
+  --font-body: 'Plus Jakarta Sans', Arial, sans-serif;
   --font-size: 16px;
   --background: #ffffff;
   --foreground: #4A2306;
@@ -11,6 +12,7 @@
   --popover: #ffffff;
   --popover-foreground: #4A2306;
   --primary: #F16522;
+  --primary-hover: #D95518;
   --primary-foreground: #ffffff;
   --secondary: #FFF4EC;
   --secondary-foreground: #4A2306;
@@ -88,6 +90,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -128,6 +131,8 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    line-height: 1.6;
   }
 
   /**
@@ -140,24 +145,28 @@
   }
 
   h1 {
+    font-family: var(--font-heading);
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h2 {
+    font-family: var(--font-heading);
     font-size: var(--text-xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h3 {
+    font-family: var(--font-heading);
     font-size: var(--text-lg);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h4 {
+    font-family: var(--font-heading);
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
@@ -179,5 +188,21 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+
+  ::selection {
+    background: rgba(241, 101, 34, 0.2);
+    color: #4A2306;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

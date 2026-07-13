@@ -1,100 +1,117 @@
 import Link from "next/link";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
+import { DKSLogo } from "@/components/brand/dks-logo";
+import { SocialIcon } from "@/components/brand/social-icon";
 import { Container } from "@/components/layout/container";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
+import { SOCIAL_LINKS } from "@/lib/social-links";
+
+const COURSE_LINKS = [
+  { label: "IELTS Preparation", href: `${PAGE_PATHS.courses}#ielts` },
+  { label: "9-to-10 Prep", href: `${PAGE_PATHS.courses}#highschool` },
+  { label: "Communicative English", href: `${PAGE_PATHS.courses}#comm` },
+  { label: "1-on-1 Tutoring", href: `${PAGE_PATHS.courses}#tutoring` },
+] as const;
+
+const SOCIALS = [
+  { label: "Zalo", network: "zalo", href: SOCIAL_LINKS.zalo },
+  { label: "Facebook", network: "facebook", href: SOCIAL_LINKS.facebook },
+  { label: "TikTok", network: "tiktok", href: SOCIAL_LINKS.tiktok },
+] as const;
+
+const footerLinkClass =
+  "rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
 export function Footer() {
   return (
-    <footer className="bg-[#4A2306] text-white">
+    <footer id="site-footer" className="bg-[#4A2306] text-white">
       <Container className="py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-[10px] bg-primary flex items-center justify-center text-white font-black text-lg font-[family-name:var(--font-nunito)]">D</div>
+            <div className="mb-5 flex items-center gap-3">
+              <DKSLogo size="sm" />
               <div>
-                <div className="font-black text-lg text-white font-[family-name:var(--font-nunito)]">DKS English Center</div>
-                <div className="text-sm text-orange-200 font-[family-name:var(--font-body)]">Học đúng cách – Tiến xa mỗi ngày</div>
+                <div className="text-lg font-bold text-white font-[family-name:var(--font-heading)]">
+                  DKS English Center
+                </div>
+                <div className="text-sm text-white/50">Học đúng cách – Tiến xa mỗi ngày</div>
               </div>
             </div>
-            <p className="text-orange-100 text-sm leading-relaxed mb-4 font-[family-name:var(--font-body)]">
-              Trung tâm tiếng Anh hàng đầu tại TP. Hồ Chí Minh với phương pháp giảng dạy sáng tạo và đội ngũ giáo viên tận tâm.
+            <p className="mb-5 max-w-xl text-sm leading-relaxed text-white/60">
+              Trung tâm tiếng Anh uy tín tại Hà Nội với phương pháp giảng dạy cá nhân hóa và đội ngũ giáo viên tận tâm.
             </p>
-            <div className="flex gap-3">
-              {["💬", "📘", "▶"].map((icon, i) => (
-                <button key={i} className="w-9 h-9 rounded-lg bg-white/10 hover:bg-primary flex items-center justify-center text-sm transition-colors">
-                  {icon}
-                </button>
+            <div className="flex gap-4" aria-label="Mạng xã hội của DKS">
+              {SOCIALS.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={social.label}
+                  aria-label={`Mở ${social.label}`}
+                  className="flex h-8 w-8 items-center justify-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <SocialIcon network={social.network} className="h-5" />
+                </a>
               ))}
             </div>
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-4 font-[family-name:var(--font-nunito)]">Khóa học</h4>
-            <ul className="space-y-2 text-sm text-orange-100 font-[family-name:var(--font-body)]">
-              <li>
-                <Link href={PAGE_PATHS.courses} className="hover:text-accent transition-colors">
-                  Tất cả khóa học
-                </Link>
-              </li>
-              <li>
-                <Link href={`${PAGE_PATHS.courses}#ielts`} className="hover:text-accent transition-colors">
-                  IELTS Preparation
-                </Link>
-              </li>
-              <li>
-                <Link href={`${PAGE_PATHS.courses}#highschool`} className="hover:text-accent transition-colors">
-                  9-to-10 Prep
-                </Link>
-              </li>
-              <li>
-                <Link href={`${PAGE_PATHS.courses}#comm`} className="hover:text-accent transition-colors">
-                  Communicative English
-                </Link>
-              </li>
-              <li>
-                <Link href={`${PAGE_PATHS.courses}#tutoring`} className="hover:text-accent transition-colors">
-                  1-on-1 Tutoring
-                </Link>
-              </li>
+            <h2 className="mb-5 text-sm font-bold uppercase tracking-wide text-white font-[family-name:var(--font-heading)]">
+              Khóa học
+            </h2>
+            <ul className="space-y-2.5 text-sm text-white/55">
+              {COURSE_LINKS.map((course) => (
+                <li key={course.label}>
+                  <Link href={course.href} className={footerLinkClass}>
+                    {course.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-4 font-[family-name:var(--font-nunito)]">Trang web</h4>
-            <ul className="space-y-2 text-sm text-orange-100 font-[family-name:var(--font-body)]">
-              <li>
-                <Link href={PAGE_PATHS.about} className="hover:text-accent transition-colors">
-                  Về chúng tôi
-                </Link>
-              </li>
-              <li>
-                <Link href={PAGE_PATHS.careers} className="hover:text-accent transition-colors">
-                  Tuyển dụng
-                </Link>
-              </li>
-              <li>
-                <Link href={PAGE_PATHS.contact} className="hover:text-accent transition-colors">
-                  Liên hệ
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-white mb-4 font-[family-name:var(--font-nunito)]">Liên hệ</h4>
-            <ul className="space-y-3 text-sm text-orange-100 font-[family-name:var(--font-body)]">
-              <li className="flex items-start gap-2"><MapPin className="w-4 h-4 mt-0.5 text-accent flex-shrink-0"/><span>63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hai Bà Trưng, Hà Nội</span></li>
-              <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-accent flex-shrink-0"/><span>083 451 3456</span></li>
-              <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-accent flex-shrink-0"/><span>dksenglishcenter@gmail.com</span></li>
-              <li className="flex items-center gap-2"><Clock className="w-4 h-4 text-accent flex-shrink-0"/><span>T2 – CN: 7:00 – 21:00</span></li>
-            </ul>
+            <h2 className="mb-5 text-sm font-bold uppercase tracking-wide text-white font-[family-name:var(--font-heading)]">
+              Liên hệ
+            </h2>
+            <address className="not-italic">
+              <ul className="space-y-3 text-sm leading-relaxed text-white/55">
+                <li className="flex items-start gap-2.5">
+                  <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=63%20Ng%C3%B5%20120%20D%C6%B0%C6%A1ng%20V%C4%83n%20B%C3%A9%2C%20V%C4%A9nh%20Tuy%2C%20Hai%20B%C3%A0%20Tr%C6%B0ng%2C%20H%C3%A0%20N%E1%BB%99i"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={footerLinkClass}
+                  >
+                    63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hai Bà Trưng, Hà Nội
+                  </a>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Phone className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                  <a href="tel:0834513456" className={footerLinkClass}>083 451 3456</a>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Mail className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                  <a href="mailto:dksenglishcenter@gmail.com" className={footerLinkClass}>
+                    dksenglishcenter@gmail.com
+                  </a>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Clock className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                  <span>T2 – CN: 7:00 – 21:00</span>
+                </li>
+              </ul>
+            </address>
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-orange-200 font-[family-name:var(--font-body)]">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/[0.08] pt-6 text-xs text-white/35 sm:flex-row">
           <span>© 2025 DKS English Center. Bảo lưu mọi quyền.</span>
-          <span>Thiết kế với ❤️ cho học viên Việt Nam</span>
+          <span>Thiết kế với tình yêu dành cho học viên Việt Nam</span>
         </div>
       </Container>
     </footer>

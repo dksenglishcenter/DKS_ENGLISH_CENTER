@@ -1,208 +1,250 @@
-"use client";
+import Link from "next/link";
+import { Clock, FileText, Mail, MapPin, Phone } from "lucide-react";
 
-import { useState } from "react";
-import { Clock, Mail, MapPin, Phone, Send } from "lucide-react";
-
-import { InputField } from "@/components/forms/input-field";
-import { SelectField } from "@/components/forms/select-field";
-import { TextareaField } from "@/components/forms/textarea-field";
+import {
+  SocialIcon,
+  type SocialNetwork,
+} from "@/components/brand/social-icon";
+import { ContactForm } from "@/components/forms/contact-form";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
-import { Button } from "@/components/ui/button";
-import { submitContactForm } from "@/lib/contact/api";
-import { CONTACT_COURSE_OPTIONS } from "@/lib/contact/types";
-import { formatError } from "@/lib/errors/format-error";
+import { SOCIAL_LINKS } from "@/lib/social-links";
 
-const SOCIAL_LINKS = [
-  { label: "Zalo", emoji: "💬", color: "#0068FF" },
-  { label: "Facebook", emoji: "📘", color: "#1877F2" },
-  { label: "YouTube", emoji: "▶", color: "#FF0000" },
-  { label: "TikTok", emoji: "🎵", color: "#111111" },
-];
+const CONTACT_DETAILS = [
+  {
+    label: "Địa chỉ",
+    value: "63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hai Bà Trưng, Hà Nội",
+    icon: MapPin,
+    href: "https://www.google.com/maps/search/?api=1&query=63%20Ng%C3%B5%20120%20D%C6%B0%C6%A1ng%20V%C4%83n%20B%C3%A9%2C%20V%C4%A9nh%20Tuy%2C%20Hai%20B%C3%A0%20Tr%C6%B0ng%2C%20H%C3%A0%20N%E1%BB%99i",
+  },
+  {
+    label: "Hotline",
+    value: "083 451 3456",
+    icon: Phone,
+    href: "tel:0834513456",
+  },
+  {
+    label: "Email",
+    value: "dksenglishcenter@gmail.com",
+    icon: Mail,
+    href: "mailto:dksenglishcenter@gmail.com",
+  },
+  {
+    label: "Giờ mở cửa",
+    value: "Thứ 2 – Chủ Nhật: 7:00 – 21:00",
+    icon: Clock,
+    href: undefined,
+  },
+] as const;
+
+const SOCIAL_CHANNELS = [
+  { name: "Zalo", network: "zalo", href: SOCIAL_LINKS.zalo, className: "bg-[#0068FF]" },
+  {
+    name: "Facebook",
+    network: "facebook",
+    href: SOCIAL_LINKS.facebook,
+    className: "bg-[#1877F2]",
+  },
+  {
+    name: "YouTube",
+    network: "youtube",
+    href: SOCIAL_LINKS.youtube,
+    className: "bg-[#FF0000]",
+  },
+  {
+    name: "TikTok",
+    network: "tiktok",
+    href: SOCIAL_LINKS.tiktok,
+    className: "bg-[#1E1E1E]",
+  },
+] as const satisfies ReadonlyArray<{
+  name: string;
+  network: SocialNetwork;
+  href: string;
+  className: string;
+}>;
 
 export function ContactPage() {
-  const [form, setForm] = useState({
-    fullName: "",
-    phone: "",
-    email: "",
-    courseInterest: "",
-    learningNeeds: "",
-  });
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [feedback, setFeedback] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("loading");
-    setFeedback("");
-
-    try {
-      const result = await submitContactForm({
-        fullName: form.fullName,
-        phone: form.phone,
-        email: form.email || undefined,
-        courseInterest: form.courseInterest as (typeof CONTACT_COURSE_OPTIONS)[number],
-        learningNeeds: form.learningNeeds || undefined,
-      });
-
-      setStatus("success");
-      setFeedback(result.message);
-      setForm({
-        fullName: "",
-        phone: "",
-        email: "",
-        courseInterest: "",
-        learningNeeds: "",
-      });
-    } catch (error) {
-      setStatus("error");
-      setFeedback(formatError(error));
-    }
-  };
-
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background">
       <PageHero
-        label="Liên hệ DKS"
-        title="Liên Hệ & Đăng Ký Tư Vấn"
-        description="Để lại thông tin — đội ngũ DKS sẽ gọi lại và tư vấn lộ trình học phù hợp nhất cho bạn."
+        label="Liên hệ"
+        title={
+          <>
+            Chúng Tôi Sẵn Sàng
+            <br />
+            Hỗ Trợ Bạn
+          </>
+        }
+        description="Đăng ký học thử hoặc nhận tư vấn miễn phí. Đội ngũ DKS sẽ liên hệ và xây dựng lộ trình phù hợp với mục tiêu của bạn"
       />
 
-      <Container className="py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <h2 className="text-2xl font-black text-[#4A2306] mb-6 font-[family-name:var(--font-nunito)]">
-              Thông tin liên hệ
-            </h2>
+      <Container className="py-16 md:py-20">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-14">
+          <section aria-labelledby="contact-information-title" className="space-y-8">
+            <div>
+              <h2
+                id="contact-information-title"
+                className="mb-6 text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+              >
+                Thông Tin Liên Hệ
+              </h2>
+              <address className="space-y-4 not-italic">
+                {CONTACT_DETAILS.map((detail) => {
+                  const Icon = detail.icon;
+                  const content = (
+                    <>
+                      <span className="mb-0.5 block text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                        {detail.label}
+                      </span>
+                      <span className="block text-sm font-medium leading-relaxed text-[#4A2306]">
+                        {detail.value}
+                      </span>
+                    </>
+                  );
 
-            <ul className="space-y-5 mb-8">
-              {[
-                {
-                  icon: <MapPin className="w-5 h-5 text-primary" />,
-                  label: "Địa chỉ",
-                  value: "63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hai Bà Trưng, Hà Nội",
-                },
-                {
-                  icon: <Phone className="w-5 h-5 text-primary" />,
-                  label: "Hotline",
-                  value: "083 451 3456",
-                },
-                {
-                  icon: <Mail className="w-5 h-5 text-primary" />,
-                  label: "Email",
-                  value: "dksenglishcenter@gmail.com",
-                },
-                {
-                  icon: <Clock className="w-5 h-5 text-primary" />,
-                  label: "Giờ mở cửa",
-                  value: "Thứ 2 – Chủ Nhật: 7:00 – 21:00",
-                },
-              ].map((item) => (
-                <li key={item.label} className="flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide font-[family-name:var(--font-nunito)]">
-                      {item.label}
+                  return (
+                    <div key={detail.label} className="flex items-start gap-4">
+                      <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <div className="pt-0.5 font-[family-name:var(--font-body)]">
+                        {detail.href ? (
+                          <a
+                            href={detail.href}
+                            className="rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            {...(detail.href.startsWith("http")
+                              ? { target: "_blank", rel: "noreferrer" }
+                              : {})}
+                          >
+                            {content}
+                          </a>
+                        ) : (
+                          content
+                        )}
+                      </div>
                     </div>
-                    <div className="text-sm text-[#4A2306] font-[family-name:var(--font-body)]">{item.value}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <h3 className="text-sm font-bold text-[#4A2306] mb-3 font-[family-name:var(--font-nunito)]">Mạng xã hội</h3>
-            <div className="flex flex-wrap gap-3 mb-8">
-              {SOCIAL_LINKS.map((social) => (
-                <button
-                  key={social.label}
-                  type="button"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-semibold font-[family-name:var(--font-nunito)]"
-                  style={{ background: social.color }}
-                >
-                  <span>{social.emoji}</span>
-                  {social.label}
-                </button>
-              ))}
+                  );
+                })}
+              </address>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-border h-64 bg-secondary">
-              <iframe
-                title="Bản đồ DKS English Center"
-                src="https://maps.google.com/maps?q=63+Ng%C3%B5+120+D%C6%B0%C6%A1ng+V%C4%83n+B%C3%A9,+V%C4%A9nh+Tuy,+Hai+B%C3%A0+Tr%C6%B0ng,+H%C3%A0+N%E1%BB%99i&output=embed"
-                className="w-full h-full border-0"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+            <div>
+              <h3 className="mb-4 text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                Mạng xã hội
+              </h3>
+              <ul
+                className="flex flex-wrap gap-3"
+                aria-label="Các kênh mạng xã hội của DKS"
+              >
+                {SOCIAL_CHANNELS.map((channel) => (
+                  <li key={channel.name}>
+                    <a
+                      href={channel.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none ${channel.className}`}
+                    >
+                      <SocialIcon network={channel.network} className="h-4 w-4" />
+                      {channel.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          <div className="bg-white rounded-2xl border border-border p-8 shadow-sm">
-            <h2 className="text-2xl font-black text-[#4A2306] mb-2 font-[family-name:var(--font-nunito)]">
-              Nhận Tư Vấn Lộ Trình Học Phù Hợp
-            </h2>
-            <p className="text-sm text-muted-foreground mb-6 font-[family-name:var(--font-body)]">
-              Điền form bên dưới — DKS sẽ liên hệ trong vòng 24 giờ.
-            </p>
+            <div className="relative min-h-[280px] overflow-hidden rounded-2xl border border-border bg-[#F8F9FA]">
+              <svg
+                className="absolute inset-0 h-full w-full opacity-[0.06]"
+                viewBox="0 0 400 280"
+                aria-hidden="true"
+              >
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <line
+                    key={`vertical-${index}`}
+                    x1={index * 44}
+                    y1="0"
+                    x2={index * 44}
+                    y2="280"
+                    stroke="currentColor"
+                  />
+                ))}
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <line
+                    key={`horizontal-${index}`}
+                    x1="0"
+                    y1={index * 40}
+                    x2="400"
+                    y2={index * 40}
+                    stroke="currentColor"
+                  />
+                ))}
+              </svg>
+              <div className="relative flex min-h-[280px] flex-col items-center justify-center gap-4 px-6 text-center">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[#D95518] text-white shadow-xl shadow-primary/20">
+                  <MapPin className="h-7 w-7" aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className="mb-1 font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                    DKS English Center
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hà Nội
+                  </p>
+                  <Link
+                    href={CONTACT_DETAILS[0].href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-[#D95518] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    Mở Google Maps →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <InputField
-                label="Họ và tên"
-                placeholder="Nguyễn Văn A"
-                value={form.fullName}
-                onChange={(v) => setForm((prev) => ({ ...prev, fullName: v }))}
-                required
-              />
-              <InputField
-                label="Số điện thoại"
-                type="tel"
-                placeholder="0901 234 567"
-                value={form.phone}
-                onChange={(v) => setForm((prev) => ({ ...prev, phone: v }))}
-                required
-              />
-              <InputField
-                label="Email"
-                type="email"
-                placeholder="email@example.com"
-                value={form.email}
-                onChange={(v) => setForm((prev) => ({ ...prev, email: v }))}
-              />
-              <SelectField
-                label="Khóa học quan tâm"
-                placeholder="-- Chọn khóa học quan tâm --"
-                value={form.courseInterest}
-                onChange={(v) => setForm((prev) => ({ ...prev, courseInterest: v }))}
-                options={[...CONTACT_COURSE_OPTIONS]}
-                required
-              />
-              <TextareaField
-                label="Nhu cầu học tập (không bắt buộc)"
-                placeholder="Mục tiêu IELTS, lịch học, câu hỏi thêm..."
-                value={form.learningNeeds}
-                onChange={(v) => setForm((prev) => ({ ...prev, learningNeeds: v }))}
-                rows={4}
-              />
+          <section aria-labelledby="contact-form-title">
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-[0_4px_24px_rgba(74,35,6,0.06)] sm:p-8">
+              <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <FileText className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <h2
+                id="contact-form-title"
+                className="mb-1 text-xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+              >
+                Nhận Tư Vấn Lộ Trình Học Phù Hợp
+              </h2>
+              <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
+               Chúng tôi sẽ liên hệ trong thời gian sớm nhất để tư vấn khóa học phù hợp với trình độ và mục tiêu của bạn
+              </p>
+              <ContactForm />
+            </div>
 
-              {feedback && (
-                <p
-                  className={`text-sm rounded-lg px-4 py-3 font-[family-name:var(--font-body)] ${
-                    status === "success"
-                      ? "bg-green-50 text-green-800 border border-green-200"
-                      : "bg-red-50 text-red-800 border border-red-200"
-                  }`}
-                >
-                  {feedback}
-                </p>
-              )}
-
-              <Button type="submit" className="w-full justify-center" disabled={status === "loading"}>
-                {status === "loading" ? "Đang gửi..." : "Gửi đăng ký tư vấn"}
-                <Send className="w-4 h-4" />
-              </Button>
-            </form>
-          </div>
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F0FF]">
+                  <SocialIcon network="zalo" className="h-5 w-5 text-[#0068FF]" />
+                </span>
+                <h3 className="mb-1 text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                  Chat Zalo
+                </h3>
+                <p className="text-xs text-muted-foreground">Phản hồi ngay lập tức</p>
+              </div>
+              <a
+                href="tel:0834513456"
+                className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                  <Phone className="h-5 w-5 text-primary" aria-hidden="true" />
+                </span>
+                <span className="mb-1 block text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                  Gọi ngay
+                </span>
+                <span className="block text-xs text-muted-foreground">083 451 3456</span>
+              </a>
+            </div>
+          </section>
         </div>
       </Container>
     </div>

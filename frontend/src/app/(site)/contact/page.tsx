@@ -1,17 +1,13 @@
-import { Container } from "@/components/layout/container";
+import { ContactPage } from "@/components/pages/contact-page";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
-  title: "Liên hệ",
-  description: "Liên hệ DKS English Center — đang được cập nhật.",
+  title: "Liên hệ và đăng ký tư vấn",
+  description:
+    "Liên hệ DKS English Center để được giải đáp câu hỏi và đăng ký tư vấn khóa học tiếng Anh phù hợp.",
   path: "/contact",
-  noIndex: true,
 });
 
 export default function Page() {
-  return (
-    <Container className="min-h-[50vh] py-16">
-      <div />
-    </Container>
-  );
+  return <ContactPage />;
 }
