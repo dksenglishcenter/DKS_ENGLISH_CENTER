@@ -222,7 +222,12 @@ export function ContactPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <div className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+              <a
+                href={SOCIAL_LINKS.zalo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
                 <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F0FF]">
                   <SocialIcon network="zalo" className="h-5 w-5 text-[#0068FF]" />
                 </span>
@@ -230,7 +235,7 @@ export function ContactPage() {
                   Chat Zalo
                 </h3>
                 <p className="text-xs text-muted-foreground">Phản hồi ngay lập tức</p>
-              </div>
+              </a>
               <a
                 href="tel:0834513456"
                 className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"

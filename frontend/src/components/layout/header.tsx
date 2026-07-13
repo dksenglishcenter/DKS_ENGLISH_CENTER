@@ -24,7 +24,7 @@ export function Header() {
     { label: "Liên hệ", page: "contact" },
   ];
   const linkClass = (page: Page) =>
-    `rounded-[10px] px-4 py-2.5 text-[15px] font-semibold transition-all duration-150 font-[family-name:var(--font-body)] ${
+    `rounded-[10px] px-4 py-2.5 text-[15px] font-semibold transition-all duration-150 font-[family-name:var(--font-heading)] ${
       active === page
         ? "bg-primary/10 text-primary"
         : "text-[#4A4A4A] hover:bg-secondary hover:text-primary"
@@ -78,7 +78,7 @@ export function Header() {
                 key={l.page}
                 href={PAGE_PATHS[l.page]}
                 onClick={() => setOpen(false)}
-                className={`w-full rounded-[10px] px-4 py-3 text-left font-semibold transition-all font-[family-name:var(--font-body)] ${
+                className={`w-full rounded-[10px] px-4 py-3 text-left font-semibold transition-all font-[family-name:var(--font-heading)] ${
                   active === l.page ? "bg-secondary text-primary" : "text-[#1E1E1E] hover:bg-muted"
                 }`}
               >
