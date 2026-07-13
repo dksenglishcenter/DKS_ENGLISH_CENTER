@@ -22,10 +22,10 @@ export function CoursesPage() {
   const [active, setActive] = useState("all");
   const tabs = [
     { id: "all", label: "Tất cả" },
+    { id: "grade-10", label: "Thi vào lớp 10" },
+    { id: "thpt-university", label: "THPT & Đại học" },
     { id: "ielts", label: "IELTS" },
-    { id: "highschool", label: "Luyện thi" },
-    { id: "comm", label: "Giao tiếp" },
-    { id: "tutoring", label: "Gia sư 1-1" },
+    { id: "global-success", label: "Global Success" },
   ];
   const filtered = active === "all" ? COURSES : COURSES.filter((c) => c.id === active);
 
@@ -34,7 +34,7 @@ export function CoursesPage() {
       <PageHero
         label="Khóa học DKS"
         title="Chọn Khóa Học Phù Hợp"
-        description="Từ IELTS đến giao tiếp hàng ngày – DKS có đủ chương trình để bạn đạt mọi mục tiêu tiếng Anh."
+        description="Các chương trình trọng tâm từ tiếng Anh lớp 1–9 đến luyện thi vào lớp 10, THPT, Đại học và IELTS."
       />
 
       <Container className="py-16">
@@ -95,7 +95,16 @@ export function CoursesPage() {
                       {[
                         { icon: <BookOpen className="w-3.5 h-3.5"/>, label: "Trình độ", val: c.level },
                         { icon: <Target className="w-3.5 h-3.5"/>, label: "Mục tiêu", val: c.target },
-                        { icon: <Clock className="w-3.5 h-3.5"/>, label: "Thời gian", val: c.imgId.includes("1434") ? "3–6 tháng" : "Linh hoạt" },
+                        {
+                          icon: <Clock className="w-3.5 h-3.5"/>,
+                          label: "Thời gian",
+                          val:
+                            c.id === "grade-10"
+                              ? "90 phút/buổi"
+                              : c.id === "thpt-university" || c.id === "ielts"
+                                ? "120 phút/buổi"
+                                : "Theo khối lớp",
+                        },
                         { icon: <Award className="w-3.5 h-3.5"/>, label: "Học phí", val: c.tuition },
                       ].map((item) => (
                         <div key={item.label} className="bg-secondary rounded-lg p-2.5">

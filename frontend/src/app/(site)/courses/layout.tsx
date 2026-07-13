@@ -5,16 +5,18 @@ import { coursesPageSchema } from "@/lib/seo/schemas";
 export const metadata = createPageMetadata({
   title: "Khóa Học Tiếng Anh",
   description:
-    "Khóa học IELTS, luyện thi THPT, giao tiếp và gia sư 1-1 tại DKS English Center. Lộ trình rõ ràng, giáo viên chuẩn quốc tế, học phí minh bạch.",
+    "Khóa luyện thi vào lớp 10, THPT và Đại học, IELTS 1:1 và tiếng Anh Global Success lớp 1–9 tại DKS English Center.",
   path: "/courses",
   keywords: [
     "khóa học tiếng Anh",
+    "luyện thi vào lớp 10",
+    "luyện thi THPT",
+    "luyện thi Đại học",
     "luyện thi IELTS",
-    "IELTS TP HCM",
-    "tiếng Anh giao tiếp",
-    "gia sư tiếng Anh 1-1",
+    "IELTS 1 kèm 1",
+    "tiếng Anh Global Success",
+    "tiếng Anh lớp 1 đến lớp 9",
     "DKS English Center",
-    "học phí IELTS",
   ],
 });
 

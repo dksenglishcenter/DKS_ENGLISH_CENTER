@@ -10,15 +10,20 @@ export function SectionHeading({
   label,
   title,
   sub,
+  titleId,
 }: {
   label: string;
   title: string;
   sub?: string;
+  titleId?: string;
 }) {
   return (
     <div className="text-center mb-14">
       <SectionLabel>{label}</SectionLabel>
-      <h2 className="text-3xl md:text-4xl font-black text-[#4A2306] mb-4 font-[family-name:var(--font-nunito)]">
+      <h2
+        id={titleId}
+        className="text-3xl md:text-4xl font-black text-[#4A2306] mb-4 font-[family-name:var(--font-nunito)]"
+      >
         {title}
       </h2>
       {sub && (

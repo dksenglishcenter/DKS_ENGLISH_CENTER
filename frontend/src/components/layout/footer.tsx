@@ -8,10 +8,10 @@ import { SOCIAL_LINKS } from "@/lib/social-links";
 import type { SocialNetwork } from "@/lib/social-links";
 
 const COURSE_LABELS = [
-  "IELTS Preparation",
-  "9-to-10 Prep",
-  "Communicative English",
-  "1-on-1 Tutoring",
+  "Luyện thi vào lớp 10",
+  "Luyện thi THPT & Đại học",
+  "IELTS 1:1",
+  "Global Success lớp 1–9",
 ] as const;
 
 const FOOTER_SOCIALS: { network: SocialNetwork; href: string; label: string }[] = [
