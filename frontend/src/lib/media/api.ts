@@ -1,12 +1,13 @@
 export const CLOUDINARY_FOLDERS = {
   brandLogo: "dks-english-center/brand/logo",
   social: "dks-english-center/social",
+  homeGallery: "dks-english-center/home/gallery",
 } as const;
 
 export const SOCIAL_PLATFORMS = ["zalo", "facebook", "youtube", "tiktok"] as const;
 
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
-export type MediaCategory = "brand-logo" | "social-icon";
+export type MediaCategory = "brand-logo" | "social-icon" | "home-gallery";
 
 export type UploadMediaResponse = {
   message: string;

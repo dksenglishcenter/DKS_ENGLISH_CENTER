@@ -3,6 +3,7 @@ export const CLOUDINARY_ROOT = 'dks-english-center';
 export const CLOUDINARY_FOLDERS = {
   brandLogo: `${CLOUDINARY_ROOT}/brand/logo`,
   social: `${CLOUDINARY_ROOT}/social`,
+  homeGallery: `${CLOUDINARY_ROOT}/home/gallery`,
   branches: `${CLOUDINARY_ROOT}/branches`,
 } as const;
 
@@ -15,7 +16,7 @@ export const SOCIAL_PLATFORMS = [
 
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 
-export type MediaCategory = 'brand-logo' | 'social-icon';
+export type MediaCategory = 'brand-logo' | 'social-icon' | 'home-gallery';
 
 export type FolderContext = {
   platform?: SocialPlatform;
@@ -35,6 +36,8 @@ const FOLDER_RESOLVERS: Record<MediaCategory, FolderResolver> = {
     }
     return `${CLOUDINARY_FOLDERS.social}/${ctx.platform}`;
   },
+
+  'home-gallery': () => CLOUDINARY_FOLDERS.homeGallery,
 };
 
 export function resolveCloudinaryFolder(

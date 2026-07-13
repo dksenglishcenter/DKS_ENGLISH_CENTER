@@ -8,7 +8,7 @@ import {
 
 export class UploadMediaDto {
   @IsString()
-  @IsIn(['brand-logo', 'social-icon'])
+  @IsIn(['brand-logo', 'social-icon', 'home-gallery'])
   category!: MediaCategory;
 
   @ValidateIf((dto: UploadMediaDto) => dto.category === 'social-icon')
