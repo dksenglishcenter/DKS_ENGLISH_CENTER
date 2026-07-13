@@ -19,3 +19,15 @@ model ContactSubmission {
 
   @@map("contact_submissions")
 }
+
+model CareerApplication {
+  id           String   @id @default(cuid())
+  fullName     String   @map("full_name")
+  email        String
+  phone        String
+  position     String
+  introduction String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("career_applications")
+}

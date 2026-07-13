@@ -14,6 +14,12 @@ import {
   type ContactFormPayload,
 } from "@/lib/contact/types";
 import { ApiError } from "@/lib/errors/format-error";
+import {
+  getPhoneValidationError,
+  normalizePhone,
+  PHONE_LIMITS,
+  sanitizePhoneInput,
+} from "@/lib/validation/phone";
 
 type SubmissionStatus =
   | { type: "idle"; message: "" }
@@ -23,7 +29,6 @@ const INITIAL_STATUS: SubmissionStatus = { type: "idle", message: "" };
 
 const FORM_LIMITS = {
   fullName: { min: 2, max: 100 },
-  phone: 10,
   email: 255,
   learningNeeds: { min: 10, max: 2000 },
 } as const;
@@ -84,10 +89,7 @@ function getFieldError(field: ContactField, rawValue: string): string | undefine
   }
 
   if (field === "phone") {
-    if (!value) return "Vui lòng nhập số điện thoại.";
-    if (!/^0\d{9}$/.test(value)) {
-      return "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0.";
-    }
+    return getPhoneValidationError(value);
   }
 
   if (field === "email" && value) {
@@ -128,7 +130,7 @@ function validateForm(values: ContactFormValues) {
 function normalizeFormValues(values: ContactFormValues): ContactFormValues {
   return {
     fullName: values.fullName.trim().replace(/\s+/g, " "),
-    phone: values.phone.trim(),
+    phone: normalizePhone(values.phone),
     email: values.email.trim().toLowerCase(),
     courseInterest: values.courseInterest,
     learningNeeds: values.learningNeeds.trim(),
@@ -164,7 +166,8 @@ export function ContactForm() {
     useState<SubmissionStatus>(INITIAL_STATUS);
 
   function updateField(field: ContactField, value: string) {
-    setValues((currentValues) => ({ ...currentValues, [field]: value }));
+    const nextValue = field === "phone" ? sanitizePhoneInput(value) : value;
+    setValues((currentValues) => ({ ...currentValues, [field]: nextValue }));
     setSubmissionStatus(INITIAL_STATUS);
 
     if (fieldErrors[field]) {
@@ -267,15 +270,13 @@ export function ContactForm() {
             id="contact-phone"
             name="phone"
             type="tel"
-            inputMode="numeric"
+            inputMode="tel"
             autoComplete="tel"
-            placeholder="0901234567"
+            placeholder="0901234567 hoặc +84901234567"
             value={values.phone}
             onChange={(event) => updateField("phone", event.target.value)}
             onBlur={() => validateField("phone")}
-            minLength={FORM_LIMITS.phone}
-            maxLength={FORM_LIMITS.phone}
-            pattern="0[0-9]{9}"
+            maxLength={PHONE_LIMITS.maxDigits + 1}
             className={fieldErrors.phone ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200" : undefined}
             aria-invalid={Boolean(fieldErrors.phone)}
             aria-describedby={fieldErrors.phone ? "contact-phone-error" : undefined}

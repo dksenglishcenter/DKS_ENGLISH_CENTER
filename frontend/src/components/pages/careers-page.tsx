@@ -8,12 +8,9 @@ import {
   Check,
   Heart,
   MapPin,
-  Send,
 } from "lucide-react";
 
-import { InputField } from "@/components/forms/input-field";
-import { SelectField } from "@/components/forms/select-field";
-import { TextareaField } from "@/components/forms/textarea-field";
+import { CareerApplicationForm } from "@/components/forms/career-application-form";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import {
@@ -26,15 +23,8 @@ import { Button } from "@/components/ui/button";
 import { JOBS } from "@/data/jobs";
 
 export function CareersPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", position: "", message: "" });
-  const [sent, setSent] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
-    setForm({ name: "", email: "", phone: "", position: "", message: "" });
-  };
+  const [selectedPosition, setSelectedPosition] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   return (
     <div className="bg-background">
@@ -104,7 +94,14 @@ export function CareersPage() {
                         </ul>
                       </div>
                     </div>
-                    <Button size="sm" onClick={() => {}}>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSuccessMessage("");
+                        setSelectedPosition(job.title);
+                        document.getElementById("career-application")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                    >
                       Ứng tuyển ngay <ArrowRight className="w-4 h-4"/>
                     </Button>
                   </AccordionContent>
@@ -113,29 +110,23 @@ export function CareersPage() {
             </Accordion>
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2" id="career-application">
             <div className="bg-white rounded-2xl border border-border p-8 sticky top-24">
               <div className="text-3xl mb-3">✉️</div>
               <h2 className="text-xl font-black text-[#4A2306] mb-1 font-[family-name:var(--font-nunito)]">Gửi Đơn Ứng Tuyển</h2>
               <p className="text-sm text-muted-foreground mb-6 font-[family-name:var(--font-body)]">Điền thông tin và chúng tôi sẽ liên hệ trong 24 giờ.</p>
 
-              {sent ? (
+              {successMessage ? (
                 <div className="bg-secondary rounded-xl p-6 text-center">
                   <div className="text-4xl mb-3">🎉</div>
                   <h3 className="font-black text-[#4A2306] mb-2 font-[family-name:var(--font-nunito)]">Đã gửi thành công!</h3>
-                  <p className="text-sm text-muted-foreground font-[family-name:var(--font-body)]">Chúng tôi sẽ liên hệ với bạn trong 24 giờ.</p>
+                  <p className="text-sm text-muted-foreground font-[family-name:var(--font-body)]">{successMessage}</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <InputField label="Họ và tên" placeholder="Nguyễn Văn A" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
-                  <InputField label="Email" type="email" placeholder="email@example.com" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
-                  <InputField label="Số điện thoại" type="tel" placeholder="0901 234 567" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} required />
-                  <SelectField label="Vị trí ứng tuyển" value={form.position} onChange={(v) => setForm({ ...form, position: v })} options={JOBS.map((j) => j.title)} required placeholder="-- Chọn vị trí ứng tuyển --" />
-                  <TextareaField label="Giới thiệu bản thân" placeholder="Chia sẻ về kinh nghiệm và lý do bạn muốn gia nhập DKS..." value={form.message} onChange={(v) => setForm({ ...form, message: v })} rows={4} />
-                  <Button type="submit" className="w-full justify-center" size="md">
-                    <Send className="w-4 h-4"/> Gửi đơn ứng tuyển
-                  </Button>
-                </form>
+                <CareerApplicationForm
+                  initialPosition={selectedPosition}
+                  onSuccess={setSuccessMessage}
+                />
               )}
             </div>
           </div>
