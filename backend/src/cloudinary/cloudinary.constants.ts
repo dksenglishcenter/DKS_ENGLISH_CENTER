@@ -4,6 +4,7 @@ export const CLOUDINARY_FOLDERS = {
   brandLogo: `${CLOUDINARY_ROOT}/brand/logo`,
   social: `${CLOUDINARY_ROOT}/social`,
   homeGallery: `${CLOUDINARY_ROOT}/home/gallery`,
+  aboutFacilities: `${CLOUDINARY_ROOT}/about/facilities`,
   branches: `${CLOUDINARY_ROOT}/branches`,
 } as const;
 
@@ -16,7 +17,11 @@ export const SOCIAL_PLATFORMS = [
 
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 
-export type MediaCategory = 'brand-logo' | 'social-icon' | 'home-gallery';
+export type MediaCategory =
+  | 'brand-logo'
+  | 'social-icon'
+  | 'home-gallery'
+  | 'about-facilities';
 
 export type FolderContext = {
   platform?: SocialPlatform;
@@ -38,6 +43,8 @@ const FOLDER_RESOLVERS: Record<MediaCategory, FolderResolver> = {
   },
 
   'home-gallery': () => CLOUDINARY_FOLDERS.homeGallery,
+
+  'about-facilities': () => CLOUDINARY_FOLDERS.aboutFacilities,
 };
 
 export function resolveCloudinaryFolder(

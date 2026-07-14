@@ -49,7 +49,7 @@ const SOCIAL_CHANNELS = [
     name: "YouTube",
     network: "youtube",
     href: SOCIAL_LINKS.youtube,
-    className: "bg-[#FF0000]",
+    className: "bg-[#B91C1C]"
   },
   {
     name: "TikTok",

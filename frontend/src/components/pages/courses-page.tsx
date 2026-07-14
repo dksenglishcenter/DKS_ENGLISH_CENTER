@@ -22,10 +22,10 @@ export function CoursesPage() {
   const [active, setActive] = useState("all");
   const tabs = [
     { id: "all", label: "Tất cả" },
+    { id: "grade-10", label: "Thi vào lớp 10" },
+    { id: "thpt-university", label: "THPT & Đại học" },
     { id: "ielts", label: "IELTS" },
-    { id: "highschool", label: "Luyện thi" },
-    { id: "comm", label: "Giao tiếp" },
-    { id: "tutoring", label: "Gia sư 1-1" },
+    { id: "global-success", label: "Global Success" },
   ];
   const filtered = active === "all" ? COURSES : COURSES.filter((c) => c.id === active);
 
@@ -34,7 +34,7 @@ export function CoursesPage() {
       <PageHero
         label="Khóa học DKS"
         title="Chọn Khóa Học Phù Hợp"
-        description="Từ IELTS đến giao tiếp hàng ngày – DKS có đủ chương trình để bạn đạt mọi mục tiêu tiếng Anh."
+        description="Các chương trình trọng tâm từ tiếng Anh lớp 1–9 đến luyện thi vào lớp 10, THPT, Đại học và IELTS."
       />
 
       <Container className="py-16">
@@ -69,8 +69,8 @@ export function CoursesPage() {
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filtered.map((c) => (
-                <article key={c.id} id={c.id} className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                  <div className="relative h-48 overflow-hidden" style={{ background: c.bg }}>
+                <article key={c.id} id={c.id} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white transition-shadow duration-300 hover:shadow-xl">
+                  <div className="relative h-48 shrink-0 overflow-hidden" style={{ background: c.bg }}>
                     <UnsplashImage
                       id={c.imgId}
                       alt={c.subtitle}
@@ -88,14 +88,23 @@ export function CoursesPage() {
                     </div>
                   </div>
 
-                  <div className="p-6">
+                  <div className="flex flex-1 flex-col p-6">
                     <p className="text-muted-foreground text-sm mb-5 leading-relaxed font-[family-name:var(--font-body)]">{c.desc}</p>
 
                     <div className="grid grid-cols-2 gap-3 mb-5 text-sm">
                       {[
                         { icon: <BookOpen className="w-3.5 h-3.5"/>, label: "Trình độ", val: c.level },
                         { icon: <Target className="w-3.5 h-3.5"/>, label: "Mục tiêu", val: c.target },
-                        { icon: <Clock className="w-3.5 h-3.5"/>, label: "Thời gian", val: c.imgId.includes("1434") ? "3–6 tháng" : "Linh hoạt" },
+                        {
+                          icon: <Clock className="w-3.5 h-3.5"/>,
+                          label: "Thời gian",
+                          val:
+                            c.id === "grade-10"
+                              ? "90 phút/buổi"
+                              : c.id === "thpt-university" || c.id === "ielts"
+                                ? "120 phút/buổi"
+                                : "Theo khối lớp",
+                        },
                         { icon: <Award className="w-3.5 h-3.5"/>, label: "Học phí", val: c.tuition },
                       ].map((item) => (
                         <div key={item.label} className="bg-secondary rounded-lg p-2.5">
@@ -120,7 +129,7 @@ export function CoursesPage() {
                       </ul>
                     </div>
 
-                    <Button asChild className="w-full justify-center">
+                    <Button asChild className="mt-auto w-full justify-center">
                       <Link href={PAGE_PATHS.contact}>
                         Nhận tư vấn miễn phí <ArrowRight className="w-4 h-4"/>
                       </Link>

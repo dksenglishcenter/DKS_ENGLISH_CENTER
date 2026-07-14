@@ -1,17 +1,13 @@
-import { Container } from "@/components/layout/container";
+import { HomePage } from "@/components/pages/home-page";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
   title: "Trang chủ",
-  description: "DKS English Center — Trang chủ đang được cập nhật.",
+  description:
+    "DKS English Center — chương trình tiếng Anh truyền cảm hứng với lộ trình phù hợp cho từng mục tiêu học tập.",
   path: "/",
-  noIndex: true,
 });
 
 export default function Page() {
-  return (
-    <Container className="min-h-[50vh] py-16">
-      <div />
-    </Container>
-  );
+  return <HomePage />;
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
+import { DKSLogo } from "@/components/brand/dks-logo";
 import { SocialIcon } from "@/components/brand/social-icon";
 import { Container } from "@/components/layout/container";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
@@ -8,10 +9,10 @@ import { SOCIAL_LINKS } from "@/lib/social-links";
 import type { SocialNetwork } from "@/lib/social-links";
 
 const COURSE_LABELS = [
-  "IELTS Preparation",
-  "9-to-10 Prep",
-  "Communicative English",
-  "1-on-1 Tutoring",
+  "Luyện thi vào lớp 10",
+  "Luyện thi THPT & Đại học",
+  "IELTS 1:1",
+  "Global Success lớp 1–9",
 ] as const;
 
 const FOOTER_SOCIALS: { network: SocialNetwork; href: string; label: string }[] = [
@@ -27,9 +28,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-lg font-black text-white font-[family-name:var(--font-nunito)]">
-                D
-              </div>
+              <DKSLogo size="sm" />
               <div>
                 <div className="text-lg font-black text-white font-[family-name:var(--font-nunito)]">
                   DKS English Center
@@ -40,7 +39,7 @@ export function Footer() {
               </div>
             </div>
             <p className="mb-4 text-sm leading-relaxed text-orange-100 font-[family-name:var(--font-body)]">
-              Trung tâm tiếng Anh hàng đầu tại TP. Hồ Chí Minh với phương pháp giảng dạy sáng tạo và đội
+              Trung tâm tiếng Anh hàng đầu tại TP. Hà Nội với phương pháp giảng dạy sáng tạo và đội
               ngũ giáo viên tận tâm.
             </p>
             <div className="flex gap-3" aria-label="Mạng xã hội của DKS">
@@ -97,8 +96,8 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-orange-200 sm:flex-row font-[family-name:var(--font-body)]">
-          <span>© 2025 DKS English Center. Bảo lưu mọi quyền.</span>
-          <span>Thiết kế với ❤️ cho học viên Việt Nam</span>
+          <span>© 2026 DKS English Center</span>
+          <span>Đồng hành cùng bạn trên hành trình chinh phục tiếng Anh</span>
         </div>
       </Container>
     </footer>

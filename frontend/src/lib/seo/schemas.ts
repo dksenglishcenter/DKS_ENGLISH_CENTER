@@ -24,10 +24,10 @@ export function organizationSchema() {
       name: "Vietnam",
     },
     knowsAbout: [
+      "English entrance exam preparation for grade 10",
+      "Vietnamese high school graduation exam preparation",
       "IELTS preparation",
-      "English communication",
-      "English tutoring",
-      "English language education",
+      "Global Success English curriculum",
     ],
   };
 }
@@ -40,7 +40,7 @@ export function coursesPageSchema() {
     "@type": "ItemList",
     name: "Khóa học tiếng Anh tại DKS",
     description:
-      "Danh sách khóa học IELTS, luyện thi, giao tiếp và gia sư 1-1 tại DKS English Center.",
+      "Các khóa luyện thi vào lớp 10, THPT và Đại học, IELTS 1:1 và tiếng Anh Global Success lớp 1–9 tại DKS English Center.",
     url: `${siteUrl}/courses`,
     numberOfItems: COURSES.length,
     itemListElement: COURSES.map((course, index) => ({
@@ -56,12 +56,16 @@ export function coursesPageSchema() {
           url: siteUrl,
         },
         educationalLevel: course.level,
-        offers: {
-          "@type": "Offer",
-          price: course.tuition,
-          priceCurrency: "VND",
-          category: course.subtitle,
-        },
+        ...(course.tuition !== "Liên hệ tư vấn"
+          ? {
+              offers: {
+                "@type": "Offer",
+                price: course.tuition,
+                priceCurrency: "VND",
+                category: course.subtitle,
+              },
+            }
+          : {}),
         url: `${siteUrl}/courses#${course.id}`,
       },
     })),
