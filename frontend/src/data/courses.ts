@@ -26,7 +26,7 @@ export const COURSES: Course[] = [
     bg: "#FFFBF0",
     icon: "🥇",
     desc: "Chương trình hệ thống kiến thức, củng cố ngữ pháp, mở rộng từ vựng và rèn kỹ năng làm bài thi vào lớp 10.",
-    perks: ["Bám sát chương trình Bộ Giáo dục", "Lớp sĩ số nhỏ, theo sát học sinh", "Luyện đề và chữa bài chi tiết", "Ưu đãi đến hết tháng 08/2026"],
+    perks: ["Bám sát chương trình Bộ Giáo dục", "Lớp sĩ số nhỏ, theo sát học sinh", "Luyện đề và chữa bài chi tiết", "Xây dựng lộ trình ôn tập hiệu quả"],
   },
   {
     id: "thpt-university",

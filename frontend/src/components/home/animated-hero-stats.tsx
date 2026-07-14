@@ -78,7 +78,7 @@ export function AnimatedHeroStats() {
   return (
     <dl
       ref={containerRef}
-      className="mt-12 flex flex-wrap gap-8 border-t border-border pt-8"
+      className="mt-12 grid grid-cols-4 gap-2 border-t border-border pt-8 md:mt-0 lg:mt-12 lg:flex lg:flex-wrap lg:gap-8"
     >
       {HERO_STATS.map((stat) => {
         const precision = 10 ** stat.decimals;
@@ -87,12 +87,12 @@ export function AnimatedHeroStats() {
         const finalValue = `${formatValue(stat.target, stat.decimals)}${stat.suffix}`;
 
         return (
-          <div key={stat.label} className="flex flex-col">
-            <dt className="order-2 text-sm font-medium text-muted-foreground">
+          <div key={stat.label} className="flex min-w-0 flex-col">
+            <dt className="order-2 text-[11px] font-medium leading-tight text-muted-foreground lg:text-sm lg:leading-normal">
               {stat.label}
             </dt>
             <dd
-              className="order-1 text-2xl font-black tabular-nums text-primary font-[family-name:var(--font-nunito)]"
+              className="order-1 text-xl font-black tabular-nums text-primary font-[family-name:var(--font-nunito)] lg:text-2xl"
               aria-label={finalValue}
             >
               <span aria-hidden="true">

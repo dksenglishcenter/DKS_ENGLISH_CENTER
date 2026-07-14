@@ -73,18 +73,18 @@ export function HomeTestimonials() {
             <p className="relative z-10 my-6 text-lg leading-relaxed text-[#4A2306] md:text-xl">
               {testimonial.text}
             </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-row sm:gap-4">
               <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary font-black text-white font-[family-name:var(--font-nunito)]">
                 {testimonial.avatar}
               </span>
-              <div>
-                <h3 className="font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+              <div className="min-w-0">
+                <h3 className="text-sm font-black text-[#4A2306] font-[family-name:var(--font-nunito)] sm:text-base">
                   {testimonial.name}
                 </h3>
-                <p className="text-sm text-muted-foreground">{testimonial.course}</p>
+                <p className="text-xs text-muted-foreground sm:text-sm">{testimonial.course}</p>
               </div>
               <div className="sm:ml-auto">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-white font-[family-name:var(--font-nunito)]">
+                <span className="inline-flex max-w-32 items-center justify-center gap-1 rounded-full bg-primary px-3 py-1.5 text-center text-[10px] font-bold leading-tight text-white font-[family-name:var(--font-nunito)] sm:max-w-none sm:gap-1.5 sm:px-4 sm:text-xs sm:leading-normal">
                   <span aria-hidden="true">🏆</span> {testimonial.badge}
                 </span>
               </div>

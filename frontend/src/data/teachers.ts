@@ -8,8 +8,36 @@ export type Teacher = {
 };
 
 export const TEACHERS: Teacher[] = [
-  { name: "Ms. Nguyễn Hương", title: "IELTS Specialist", cred: "IELTS 8.5 · CELTA Cambridge", exp: "7 năm kinh nghiệm", imgId: "1573496359142-b8d87734a5a2", bio: "Chuyên gia luyện IELTS với hơn 500 học viên đạt band 7.0+. Tốt nghiệp ĐH Hà Nội, chứng chỉ CELTA Cambridge." },
-  { name: "Mr. Trần Minh", title: "Academic English", cred: "CELTA Certified · Cambridge", exp: "8 năm kinh nghiệm", imgId: "1568602471122-7832951cc4c5", bio: "Giáo viên có chứng chỉ CELTA từ Cambridge, chuyên đào tạo tiếng Anh học thuật và chuẩn bị du học." },
-  { name: "Ms. Lê Thu Lan", title: "Communication Coach", cred: "MA Applied Linguistics", exp: "6 năm kinh nghiệm", imgId: "1607746882042-944635dfe10e", bio: "Thạc sĩ Ngôn ngữ học ứng dụng, đam mê giúp học viên tự tin giao tiếp trong môi trường quốc tế." },
-  { name: "Mr. David Wilson", title: "Native Speaker Coach", cred: "B.A. Education · UK", exp: "4 năm tại Việt Nam", imgId: "1500648767791-00dcc994a43e", bio: "Giáo viên bản ngữ người Anh, mang đến trải nghiệm phát âm và văn hóa Anh ngữ chính thống." },
+  {
+    name: "Mr. Youssef Lamine",
+    title: "ESL & IELTS Teacher",
+    cred: "M.A. TEFL · TESOL 120H",
+    exp: "8 năm kinh nghiệm",
+    imgId: "1573496359142-b8d87734a5a2",
+    bio: "Thạc sĩ chuyên ngành giảng dạy tiếng Anh, có kinh nghiệm đào tạo giao tiếp và IELTS cho học viên từ mầm non đến THPT.",
+  },
+  {
+    name: "Mr. Mo",
+    title: "English Language Teacher",
+    cred: "Cử nhân · C1 · TESOL",
+    exp: "5 năm kinh nghiệm",
+    imgId: "1568602471122-7832951cc4c5",
+    bio: "Sở hữu chứng chỉ tiếng Anh C1 và TESOL. Thầy chú trọng phương pháp giảng dạy dễ hiểu, hiệu quả và phù hợp với từng học viên.",
+  },
+  {
+    name: "Mr. Phan Duy Đức",
+    title: "TOEIC & Academic English",
+    cred: "TOEIC 880 · Tiếng Anh THPT 9.4",
+    exp: "7 năm kinh nghiệm",
+    imgId: "1607746882042-944635dfe10e",
+    bio: "Có kinh nghiệm luyện thi B1, TOEIC và tiếng Anh THPT. Thầy xây dựng lộ trình học rõ ràng theo năng lực và mục tiêu cá nhân.",
+  },
+  {
+    name: "Mr. Huỳnh Tấn Sang",
+    title: "English & SAT Tutor",
+    cred: "IELTS 7.5 · SAT 1540",
+    exp: "3 năm kinh nghiệm",
+    imgId: "1500648767791-00dcc994a43e",
+    bio: "Sở hữu IELTS 7.5 và SAT 1540, có kinh nghiệm giảng dạy học sinh lớp 5–9 với phương pháp truyền đạt logic, có hệ thống.",
+  },
 ];
