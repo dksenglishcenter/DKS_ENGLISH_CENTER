@@ -69,8 +69,8 @@ export function CoursesPage() {
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filtered.map((c) => (
-                <article key={c.id} id={c.id} className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                  <div className="relative h-48 overflow-hidden" style={{ background: c.bg }}>
+                <article key={c.id} id={c.id} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white transition-shadow duration-300 hover:shadow-xl">
+                  <div className="relative h-48 shrink-0 overflow-hidden" style={{ background: c.bg }}>
                     <UnsplashImage
                       id={c.imgId}
                       alt={c.subtitle}
@@ -88,7 +88,7 @@ export function CoursesPage() {
                     </div>
                   </div>
 
-                  <div className="p-6">
+                  <div className="flex flex-1 flex-col p-6">
                     <p className="text-muted-foreground text-sm mb-5 leading-relaxed font-[family-name:var(--font-body)]">{c.desc}</p>
 
                     <div className="grid grid-cols-2 gap-3 mb-5 text-sm">
@@ -129,7 +129,7 @@ export function CoursesPage() {
                       </ul>
                     </div>
 
-                    <Button asChild className="w-full justify-center">
+                    <Button asChild className="mt-auto w-full justify-center">
                       <Link href={PAGE_PATHS.contact}>
                         Nhận tư vấn miễn phí <ArrowRight className="w-4 h-4"/>
                       </Link>

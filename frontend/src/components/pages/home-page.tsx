@@ -1,9 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   Award,
-  Camera,
   Globe,
   GraduationCap,
   Heart,
@@ -17,6 +15,7 @@ import { AnimatedHeroStats } from "@/components/home/animated-hero-stats";
 import { HomeTestimonials } from "@/components/home/testimonials-section";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/layout/section-heading";
+import { CloudinaryGalleryImage } from "@/components/media/cloudinary-gallery-image";
 import { UnsplashImage } from "@/components/media/unsplash-image";
 import { Button } from "@/components/ui/button";
 import { COURSES } from "@/data/courses";
@@ -163,9 +162,9 @@ function CoursesSection() {
             <Link
               key={course.id}
               href={PAGE_PATHS.courses}
-              className="group overflow-hidden rounded-2xl border border-border bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
+              className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
             >
-              <div className="relative h-40 overflow-hidden" style={{ background: course.bg }}>
+              <div className="relative h-40 shrink-0 overflow-hidden" style={{ background: course.bg }}>
                 <UnsplashImage
                   id={course.imgId}
                   alt={course.subtitle}
@@ -186,16 +185,16 @@ function CoursesSection() {
                   </span>
                 </div>
               </div>
-              <div className="p-5">
-                <h3 className="mb-1 text-base font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+              <div className="flex flex-1 flex-col p-5">
+                <h3 className="mb-1 text-base font-black text-[#4A2306] font-[family-name:var(--font-nunito)] sm:min-h-6">
                   {course.title}
                 </h3>
-                <p className="mb-3 text-xs text-muted-foreground">{course.subtitle}</p>
-                <div className="mb-3 flex items-center gap-1">
-                  <Target className="h-3.5 w-3.5 flex-shrink-0 text-primary" aria-hidden="true" />
+                <p className="mb-3 text-xs text-muted-foreground sm:min-h-8">{course.subtitle}</p>
+                <div className="mb-3 flex items-start gap-1 sm:min-h-4">
+                  <Target className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" aria-hidden="true" />
                   <span className="text-xs font-semibold text-primary">{course.target}</span>
                 </div>
-                <div className="flex items-center justify-between gap-3">
+                <div className="mt-auto flex items-center justify-between gap-3">
                   <span className="text-sm font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
                     {course.tuition}
                   </span>
@@ -261,19 +260,12 @@ function GallerySection() {
   const finalPhotos = [GALLERY_PHOTOS[4], GALLERY_PHOTOS[5]];
 
   const photoContent = (photo: (typeof GALLERY_PHOTOS)[number], sizes: string) => (
-    <>
-      <Image
-        src={photo.src}
-        alt={photo.alt}
-        fill
-        sizes={sizes}
-        style={{ objectPosition: photo.objectPosition }}
-        className="object-cover bg-secondary transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
-      />
-      <span className="absolute inset-0 flex items-center justify-center bg-[#4A2306]/0 transition-colors duration-300 group-hover:bg-[#4A2306]/30 motion-reduce:transition-none">
-        <Camera className="h-8 w-8 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" aria-hidden="true" />
-      </span>
-    </>
+    <CloudinaryGalleryImage
+      src={photo.src}
+      alt={photo.alt}
+      sizes={sizes}
+      objectPosition={photo.objectPosition}
+    />
   );
 
   return (
