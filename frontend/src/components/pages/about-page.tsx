@@ -1,8 +1,42 @@
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { SectionHeading, SectionLabel } from "@/components/layout/section-heading";
+import { CloudinaryGalleryImage } from "@/components/media/cloudinary-gallery-image";
 import { UnsplashImage } from "@/components/media/unsplash-image";
 import { TEACHERS } from "@/data/teachers";
+
+const FACILITIES = [
+  {
+    src: "https://res.cloudinary.com/hw92uddx/image/upload/v1784020315/dks-english-center/about/facilities/imfrxincq533ykg5jdmc.jpg",
+    label: "Phòng học tiêu chuẩn",
+    objectPosition: "center 58%",
+  },
+  {
+    src: "https://res.cloudinary.com/hw92uddx/image/upload/v1784020413/dks-english-center/about/facilities/fyvn6ekkalj1oseb75ns.jpg",
+    label: "Phòng học trang bị màn hình",
+    objectPosition: "center 58%",
+  },
+  {
+    src: "https://res.cloudinary.com/hw92uddx/image/upload/v1784020448/dks-english-center/about/facilities/cpypxhzpasixzeut7dit.jpg",
+    label: "Không gian sinh hoạt chung",
+    objectPosition: "center 48%",
+  },
+  {
+    src: "https://res.cloudinary.com/hw92uddx/image/upload/v1784020477/dks-english-center/about/facilities/fjqblom7jhl2hluwlrxv.jpg",
+    label: "Khu vực lễ tân DKS",
+    objectPosition: "center 48%",
+  },
+  {
+    src: "https://res.cloudinary.com/hw92uddx/image/upload/v1784020589/dks-english-center/about/facilities/qv93fme2iiasoqoc07mn.jpg",
+    label: "Hoạt động học tập tại trung tâm",
+    objectPosition: "center 55%",
+  },
+  {
+    src: "https://res.cloudinary.com/hw92uddx/image/upload/v1784020643/dks-english-center/about/facilities/woyt47e6coy4ji9sq8pr.jpg",
+    label: "Lớp học thiếu nhi",
+    objectPosition: "center 62%",
+  },
+] as const;
 
 export function AboutPage() {
   const values = [
@@ -10,15 +44,6 @@ export function AboutPage() {
     { icon: "🚀", title: "Sáng Tạo", desc: "Không ngừng đổi mới phương pháp, ứng dụng công nghệ để mang lại trải nghiệm học tập tốt nhất." },
     { icon: "🌟", title: "Chất Lượng", desc: "Cam kết chất lượng giảng dạy cao nhất, với giáo viên được đào tạo bài bản và kiểm duyệt nghiêm ngặt." },
     { icon: "🤝", title: "Đồng Hành", desc: "DKS không chỉ là trung tâm – là người bạn đồng hành đáng tin cậy trên con đường chinh phục tiếng Anh." },
-  ];
-
-  const facilities = [
-    { id: "1580582932707-520aed937b7b", label: "Phòng học hiện đại" },
-    { id: "1434030216411-0b793f4b4173", label: "Thư viện tài liệu" },
-    { id: "1522202176988-66273c2fd55f", label: "Không gian học nhóm" },
-    { id: "1529400971008-f566de0e6dfc", label: "Phòng luyện speaking" },
-    { id: "1523240795612-9a054b0db644", label: "Góc tự học 24/7" },
-    { id: "1481627834876-b7833e8f5570", label: "Kho đề thi IELTS" },
   ];
 
   return (
@@ -112,7 +137,9 @@ export function AboutPage() {
                 <h3 className="font-black text-[#4A2306] mb-1 font-[family-name:var(--font-nunito)]">{t.name}</h3>
                 <div className="text-xs text-primary font-semibold mb-2 font-[family-name:var(--font-body)]">{t.title}</div>
                 <div className="text-xs text-muted-foreground mb-3 font-medium font-[family-name:var(--font-body)]">{t.cred}</div>
-                <p className="text-xs text-muted-foreground leading-relaxed font-[family-name:var(--font-body)]">{t.bio}</p>
+                <p className="text-justify text-xs leading-relaxed text-muted-foreground font-[family-name:var(--font-body)]">
+                  {t.bio}
+                </p>
               </div>
             </div>
           ))}
@@ -120,18 +147,19 @@ export function AboutPage() {
 
         <SectionHeading label="Cơ sở vật chất" title="Không Gian Học Tập Lý Tưởng" />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {facilities.map((f, i) => (
-            <div key={i} className="relative rounded-2xl overflow-hidden group cursor-pointer h-[200px]">
-              <UnsplashImage
-                id={f.id}
-                alt={f.label}
-                fill
-                sizes="(max-width: 768px) 50vw, 33vw"
-                className="group-hover:scale-110 transition-transform duration-500"
+          {FACILITIES.map((facility) => (
+            <div key={facility.src} className="group relative h-[200px] overflow-hidden rounded-2xl bg-secondary">
+              <CloudinaryGalleryImage
+                src={facility.src}
+                alt={facility.label}
+                sizes="(max-width: 767px) 50vw, 33vw"
+                objectPosition={facility.objectPosition}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#4A2306]/70 to-transparent"/>
-              <div className="absolute bottom-3 left-3">
-                <span className="text-white text-sm font-bold font-[family-name:var(--font-nunito)]">{f.label}</span>
+              <div className="absolute bottom-3 left-3 right-3">
+                <span className="text-sm font-bold text-white font-[family-name:var(--font-nunito)]">
+                  {facility.label}
+                </span>
               </div>
             </div>
           ))}

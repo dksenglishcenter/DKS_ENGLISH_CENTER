@@ -289,8 +289,8 @@ function GallerySection() {
               {photoContent(photo, "(max-width: 767px) 50vw, 33vw")}
             </div>
           ))}
-          <div className="group relative h-[200px] overflow-hidden rounded-2xl bg-secondary md:col-span-2">
-            {photoContent(GALLERY_PHOTOS[3], "(max-width: 767px) 50vw, 66vw")}
+          <div className="group relative col-span-2 h-[200px] overflow-hidden rounded-2xl bg-secondary">
+            {photoContent(GALLERY_PHOTOS[3], "(max-width: 767px) 100vw, 66vw")}
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-4">
@@ -323,13 +323,13 @@ function CallToAction() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href={PAGE_PATHS.contact}
-              className="inline-flex min-h-12 items-center justify-center rounded-lg bg-white px-8 py-4 text-lg font-bold text-primary transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary font-[family-name:var(--font-nunito)]"
+              className="inline-flex min-h-12 w-full max-w-[268px] items-center justify-center whitespace-nowrap rounded-lg bg-white px-4 py-4 text-base font-bold text-primary transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary font-[family-name:var(--font-nunito)] sm:w-auto sm:max-w-none sm:px-8 sm:text-lg"
             >
               Đăng ký học thử miễn phí
             </Link>
             <Link
               href={PAGE_PATHS.courses}
-              className="inline-flex min-h-12 items-center justify-center rounded-lg border-2 border-white px-8 py-4 text-lg font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary font-[family-name:var(--font-nunito)]"
+              className="inline-flex min-h-12 w-full max-w-[268px] items-center justify-center whitespace-nowrap rounded-lg border-2 border-white px-4 py-4 text-base font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary font-[family-name:var(--font-nunito)] sm:w-auto sm:max-w-none sm:px-8 sm:text-lg"
             >
               Xem các khóa học
             </Link>

@@ -89,7 +89,9 @@ export function CoursesPage() {
                   </div>
 
                   <div className="flex flex-1 flex-col p-6">
-                    <p className="text-muted-foreground text-sm mb-5 leading-relaxed font-[family-name:var(--font-body)]">{c.desc}</p>
+                    <p className="mb-5 text-sm leading-relaxed text-muted-foreground font-[family-name:var(--font-body)] md:min-h-[4.2rem]">
+                      {c.desc}
+                    </p>
 
                     <div className="grid grid-cols-2 gap-3 mb-5 text-sm">
                       {[
