@@ -134,18 +134,18 @@ export function ContactPage() {
                 Mạng xã hội
               </h3>
               <ul
-                className="flex flex-wrap gap-3"
+                className="flex flex-nowrap gap-1.5 sm:flex-wrap sm:gap-3"
                 aria-label="Các kênh mạng xã hội của DKS"
               >
                 {SOCIAL_CHANNELS.map((channel) => (
-                  <li key={channel.name}>
+                  <li key={channel.name} className="min-w-0 flex-1 sm:flex-none">
                     <a
                       href={channel.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none ${channel.className}`}
+                      className={`inline-flex min-h-11 w-full items-center justify-center gap-1 whitespace-nowrap rounded-xl px-1 py-2.5 text-[10px] font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none sm:w-auto sm:gap-2 sm:px-4 sm:text-sm ${channel.className}`}
                     >
-                      <SocialIcon network={channel.network} className="h-4 w-4" />
+                      <SocialIcon network={channel.network} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       {channel.name}
                     </a>
                   </li>

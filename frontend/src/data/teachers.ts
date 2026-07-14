@@ -14,7 +14,7 @@ export const TEACHERS: Teacher[] = [
     cred: "M.A. TEFL · TESOL 120H",
     exp: "8 năm kinh nghiệm",
     imgId: "1573496359142-b8d87734a5a2",
-    bio: "Với bằng thạc sĩ chuyên ngành giảng dạy tiếng anh và kinh nghiệm đứng lớp từ năm 2018, thầy đã giảng dạy tiếng anh giao tiếp, IELTS cùng các chương trình dành cho học viên từ mầm non đến THPT.",
+    bio: "Thạc sĩ chuyên ngành giảng dạy tiếng Anh, có kinh nghiệm đào tạo giao tiếp và IELTS cho học viên từ mầm non đến THPT.",
   },
   {
     name: "Mr. Mo",
@@ -22,7 +22,7 @@ export const TEACHERS: Teacher[] = [
     cred: "Cử nhân · C1 · TESOL",
     exp: "5 năm kinh nghiệm",
     imgId: "1568602471122-7832951cc4c5",
-    bio: "Giáo viên có bằng cử nhân, chứng chỉ năng lực tiếng anh C1 và chứng chỉ TESOL. Thầy kết hợp kiến thức chuyên môn với kinh nghiệm giảng dạy thực tế để xây dựng những giờ học hiệu quả, dễ tiếp thu và phù hợp với từng học viên",
+    bio: "Sở hữu chứng chỉ tiếng Anh C1 và TESOL. Thầy chú trọng phương pháp giảng dạy dễ hiểu, hiệu quả và phù hợp với từng học viên.",
   },
   {
     name: "Mr. Phan Duy Đức",
@@ -30,7 +30,7 @@ export const TEACHERS: Teacher[] = [
     cred: "TOEIC 880 · Tiếng Anh THPT 9.4",
     exp: "7 năm kinh nghiệm",
     imgId: "1607746882042-944635dfe10e",
-    bio: "Có kinh nghiệm hỗ trợ người học cải thiện kỹ năng đọc, nghe và chuẩn bị cho kỳ thi B1, TOEIC, THPT. Thầy xây dựng lộ trình học rõ ràng, phù hợp với trình độ và mục tiêu của từng học viên.",
+    bio: "Có kinh nghiệm luyện thi B1, TOEIC và tiếng Anh THPT. Thầy xây dựng lộ trình học rõ ràng theo năng lực và mục tiêu cá nhân.",
   },
   {
     name: "Mr. Huỳnh Tấn Sang",
@@ -38,6 +38,6 @@ export const TEACHERS: Teacher[] = [
     cred: "IELTS 7.5 · SAT 1540",
     exp: "3 năm kinh nghiệm",
     imgId: "1500648767791-00dcc994a43e",
-    bio: "Giáo viên trẻ có thành tích IELTS 7.5, SAT 1540. Có kinh nghiệm gia sư tiếng anh cho học sinh lớp 5–9 và chú trọng phương pháp truyền đạt có hệ thống.",
+    bio: "Sở hữu IELTS 7.5 và SAT 1540, có kinh nghiệm giảng dạy học sinh lớp 5–9 với phương pháp truyền đạt logic, có hệ thống.",
   },
 ];

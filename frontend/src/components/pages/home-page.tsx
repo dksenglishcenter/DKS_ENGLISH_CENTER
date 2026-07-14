@@ -105,13 +105,13 @@ function Hero() {
       <div className="absolute right-0 top-0 h-[600px] w-[600px] translate-x-[30%] -translate-y-[30%] rounded-full bg-[radial-gradient(circle,#FFA200_0%,transparent_70%)] opacity-20" />
       <div className="absolute bottom-0 left-0 h-[400px] w-[400px] -translate-x-[30%] translate-y-[30%] rounded-full bg-[radial-gradient(circle,#F16522_0%,transparent_70%)] opacity-15" />
 
-      <Container className="relative py-20 md:py-32">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-6">
+      <Container className="relative py-20 md:py-24 lg:py-32">
+        <div className="grid grid-cols-1 items-center gap-0 md:grid-cols-[minmax(0,1.15fr)_minmax(240px,0.85fr)] md:gap-x-6 md:gap-y-8 lg:grid-cols-2 lg:gap-y-0">
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-bold text-primary shadow-sm font-[family-name:var(--font-nunito)]">
               <span aria-hidden="true">🎓</span> Hơn 2.000 học viên đã thay đổi cuộc đời
             </div>
-            <h1 className="mb-6 text-4xl font-black leading-[1.15] text-[#4A2306] font-[family-name:var(--font-nunito)] sm:text-5xl md:text-6xl">
+            <h1 className="mb-6 text-4xl font-black leading-[1.15] text-[#4A2306] font-[family-name:var(--font-nunito)] sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl">
               HỌC ĐÚNG CÁCH
               <br />
               <span className="text-primary">TIẾN XA</span>
@@ -121,7 +121,7 @@ function Hero() {
             <p className="mb-8 max-w-md text-lg leading-relaxed text-[#6B3E26]">
               DKS English Center – nơi mỗi học viên được truyền cảm hứng, học đúng phương pháp và đạt mục tiêu tiếng Anh nhanh nhất có thể.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="inline-grid grid-cols-1 gap-4 md:flex md:flex-nowrap">
               <Button asChild size="lg">
                 <Link href={PAGE_PATHS.contact}>
                   Đăng ký ngay <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -132,14 +132,17 @@ function Hero() {
               </Button>
             </div>
 
-            <AnimatedHeroStats />
           </div>
 
-          <div className="flex items-center justify-center lg:justify-end">
-            <div className="relative h-[340px] w-[280px] sm:h-[400px] sm:w-[340px]">
+          <div className="hidden items-center justify-center md:col-start-2 md:row-start-1 md:flex lg:row-span-2 lg:justify-end">
+            <div className="relative h-[320px] w-[270px] lg:h-[400px] lg:w-[340px]">
               <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,#FFA200_0%,transparent_70%)] opacity-30" />
               <FoxMascot />
             </div>
+          </div>
+
+          <div className="md:col-span-2 md:row-start-2 lg:col-span-1 lg:col-start-1">
+            <AnimatedHeroStats />
           </div>
         </div>
       </Container>
