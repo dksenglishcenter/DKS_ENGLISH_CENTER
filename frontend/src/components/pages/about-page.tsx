@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { TeachersSlider } from "@/components/about/teachers-slider";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { SectionHeading, SectionLabel } from "@/components/layout/section-heading";
@@ -158,45 +159,7 @@ export async function AboutPage() {
           title="Những Người Thầy Tận Tâm"
           sub="Giáo viên DKS không chỉ giỏi chuyên môn mà còn đam mê giảng dạy, luôn lấy học viên làm trung tâm."
         />
-        <div className="mb-24 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {teachers.map((t) => (
-            <div
-              key={t.id}
-              className="group overflow-hidden rounded-2xl border border-border bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="relative h-52 overflow-hidden bg-secondary">
-                <Image
-                  src={t.imageUrl}
-                  alt={t.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#4A2306]/60 to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3">
-                  <div className="inline-block rounded-full bg-primary px-3 py-1 text-xs font-bold text-white font-[family-name:var(--font-nunito)]">
-                    {t.exp}
-                  </div>
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="mb-1 font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
-                  {t.name}
-                </h3>
-                <div className="mb-2 text-xs font-semibold text-primary font-[family-name:var(--font-body)]">
-                  {t.title}
-                </div>
-                <div className="mb-3 text-xs font-medium text-muted-foreground font-[family-name:var(--font-body)]">
-                  {t.cred}
-                </div>
-                <p className="text-justify text-xs leading-relaxed text-muted-foreground font-[family-name:var(--font-body)]">
-                  {t.bio}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <TeachersSlider teachers={teachers} />
 
         <SectionHeading label="Cơ sở vật chất" title="Không Gian Học Tập Lý Tưởng" />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">

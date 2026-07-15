@@ -57,6 +57,12 @@ function buildCards(stats: AdminDashboardStats): StatCard[] {
       details: [`${stats.teachers.published} đang hiển thị`],
     },
     {
+      title: "Blog",
+      href: `${PAGE_PATHS.admin}/blog`,
+      value: "—",
+      details: ["Chưa nối API — để trống cho dev khác"],
+    },
+    {
       title: "Liên hệ",
       href: `${PAGE_PATHS.admin}/contacts`,
       value: stats.contacts.total,

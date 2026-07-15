@@ -13,6 +13,7 @@ import {
   LogOut,
   Mail,
   MessageSquareQuote,
+  Newspaper,
   Users,
 } from "lucide-react";
 
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { href: `${PAGE_PATHS.admin}/gallery`, label: "Môi trường Học Tập", icon: ImageIcon },
   { href: `${PAGE_PATHS.admin}/about`, label: "Về chúng tôi", icon: Building2 },
   { href: `${PAGE_PATHS.admin}/teachers`, label: "Giáo viên", icon: GraduationCap },
+  { href: `${PAGE_PATHS.admin}/blog`, label: "Blog", icon: Newspaper },
   { href: `${PAGE_PATHS.admin}/contacts`, label: "Liên hệ", icon: Mail },
   { href: `${PAGE_PATHS.admin}/careers`, label: "Tuyển dụng", icon: Briefcase },
   { href: `${PAGE_PATHS.admin}/users`, label: "Người dùng", icon: Users },
