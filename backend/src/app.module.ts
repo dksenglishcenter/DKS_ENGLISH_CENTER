@@ -7,6 +7,7 @@ import { CareersModule } from './careers/careers.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ContactModule } from './contact/contact.module';
 import { CoursesModule } from './courses/courses.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { FacilityImagesModule } from './facility-images/facility-images.module';
 import { GalleryImagesModule } from './gallery-images/gallery-images.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -26,6 +27,7 @@ import { TeachersModule } from './teachers/teachers.module';
     FacilityImagesModule,
     AboutContentModule,
     TeachersModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

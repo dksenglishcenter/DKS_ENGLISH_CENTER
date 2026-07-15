@@ -1,6 +1,4 @@
-import Link from "next/link";
-
-import { PAGE_PATHS } from "@/lib/navigation-paths";
+import { AdminDashboard } from "@/components/admin/admin-dashboard";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
@@ -10,75 +8,6 @@ export const metadata = createPageMetadata({
   noIndex: true,
 });
 
-const CARDS = [
-  {
-    title: "Khóa học",
-    desc: "CRUD khóa học cho trang chủ và /courses.",
-    href: `${PAGE_PATHS.admin}/courses`,
-  },
-  {
-    title: "Câu chuyện thành công",
-    desc: "Testimonials học viên trên trang chủ.",
-    href: `${PAGE_PATHS.admin}/success-stories`,
-  },
-  {
-    title: "Môi trường học tập",
-    desc: "Tối đa 6 ảnh gallery trang chủ.",
-    href: `${PAGE_PATHS.admin}/gallery`,
-  },
-  {
-    title: "Về chúng tôi",
-    desc: "Ảnh tầm nhìn và cơ sở vật chất trang About.",
-    href: `${PAGE_PATHS.admin}/about`,
-  },
-  {
-    title: "Giáo viên",
-    desc: "Quản lý đội ngũ giáo viên trên trang About.",
-    href: `${PAGE_PATHS.admin}/teachers`,
-  },
-  {
-    title: "Liên hệ",
-    desc: "Xem và xử lý đơn tư vấn từ trang Contact.",
-    href: `${PAGE_PATHS.admin}/contacts`,
-  },
-  {
-    title: "Tuyển dụng",
-    desc: "Quản lý đơn ứng tuyển từ trang Careers.",
-    href: `${PAGE_PATHS.admin}/careers`,
-  },
-  {
-    title: "Người dùng",
-    desc: "Danh sách tài khoản USER / ADMIN.",
-    href: `${PAGE_PATHS.admin}/users`,
-  },
-] as const;
-
 export default function AdminDashboardPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
-          Tổng quan
-        </h2>
-        <p className="mt-1 text-sm text-[#9B6B50]">
-          Khung trang admin đã sẵn sàng. Các module CRUD sẽ được nối API ở bước tiếp theo.
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {CARDS.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            className="rounded-2xl border border-border bg-white p-5 transition-shadow hover:shadow-md"
-          >
-            <h3 className="font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
-              {card.title}
-            </h3>
-            <p className="mt-2 text-sm text-[#9B6B50]">{card.desc}</p>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
+  return <AdminDashboard />;
 }
