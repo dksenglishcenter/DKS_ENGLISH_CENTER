@@ -92,7 +92,7 @@ export function AnimatedHeroStats() {
               {stat.label}
             </dt>
             <dd
-              className="order-1 text-xl font-black tabular-nums text-primary font-[family-name:var(--font-nunito)] lg:text-2xl"
+              className="order-1 text-xl font-black tabular-nums text-primary font-[family-name:var(--font-nunito)] md:text-2xl"
               aria-label={finalValue}
             >
               <span aria-hidden="true">

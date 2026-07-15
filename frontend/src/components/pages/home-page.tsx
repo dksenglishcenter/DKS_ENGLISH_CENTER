@@ -121,13 +121,18 @@ function Hero() {
             <p className="mb-8 max-w-md text-lg leading-relaxed text-[#6B3E26]">
               DKS English Center – nơi mỗi học viên được truyền cảm hứng, học đúng phương pháp và đạt mục tiêu tiếng Anh nhanh nhất có thể.
             </p>
-            <div className="inline-grid grid-cols-1 gap-4 md:flex md:flex-nowrap">
-              <Button asChild size="lg">
+            <div className="grid w-full grid-cols-2 gap-3 sm:w-auto sm:gap-4 md:flex md:flex-nowrap">
+              <Button asChild size="lg" className="w-full whitespace-nowrap px-3 text-sm sm:px-8 sm:text-base">
                 <Link href={PAGE_PATHS.contact}>
                   Đăng ký ngay <ArrowRight className="h-5 w-5" aria-hidden="true" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="w-full whitespace-nowrap px-3 text-sm sm:px-8 sm:text-base"
+              >
                 <Link href={PAGE_PATHS.contact}>Liên hệ tư vấn</Link>
               </Button>
             </div>

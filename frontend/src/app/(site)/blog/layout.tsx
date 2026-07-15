@@ -4,7 +4,6 @@ export const metadata = createPageMetadata({
   title: "Blog",
   description: "Mẹo học tiếng Anh, luyện thi IELTS và kinh nghiệm từ DKS English Center.",
   path: "/blog",
-  noIndex: true,
 });
 
 export default function BlogLayout({ children }: { children: React.ReactNode }) {
