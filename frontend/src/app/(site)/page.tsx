@@ -1,6 +1,8 @@
 import { HomePage } from "@/components/pages/home-page";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = createPageMetadata({
   title: "Trang chủ",
   description:

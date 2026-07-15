@@ -42,11 +42,13 @@ export async function apiFetch<T = unknown>(
 ): Promise<T> {
   const { json, headers, skipAuthRefresh, ...init } = options;
   const url = path.startsWith("http") ? path : `${getApiUrl()}${path.startsWith("/") ? path : `/${path}`}`;
+  const isBrowser = typeof window !== "undefined";
 
   const doFetch = () =>
     fetch(url, {
       ...init,
-      credentials: "include",
+      // RSC/build không có cookie session — omit tránh quirks undici
+      credentials: isBrowser ? "include" : "omit",
       headers: {
         ...(json !== undefined ? { "Content-Type": "application/json" } : {}),
         ...headers,
@@ -62,7 +64,12 @@ export async function apiFetch<T = unknown>(
     path.includes("/auth/refresh") ||
     path.includes("/auth/logout");
 
-  if (response.status === 401 && !skipAuthRefresh && !isAuthEndpoint) {
+  if (
+    isBrowser &&
+    response.status === 401 &&
+    !skipAuthRefresh &&
+    !isAuthEndpoint
+  ) {
     const refreshed = await tryRefreshSession();
     if (refreshed) {
       response = await doFetch();
