@@ -166,7 +166,7 @@ function CoursesSection() {
           titleId="featured-courses-title"
         />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {COURSES.map((course) => (
+          {COURSES.map((course, index) => (
             <Link
               key={course.id}
               href={PAGE_PATHS.courses}
@@ -177,6 +177,7 @@ function CoursesSection() {
                   id={course.imgId}
                   alt={course.subtitle}
                   fill
+                  priority={index === 0}
                   sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
                   className="opacity-60 transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
                 />

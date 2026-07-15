@@ -1,4 +1,15 @@
-export type Page = "home" | "courses" | "about" | "blog" | "careers" | "contact";
+export type Page =
+  | "home"
+  | "courses"
+  | "about"
+  | "blog"
+  | "careers"
+  | "contact"
+  | "login"
+  | "register"
+  | "forgotPassword"
+  | "resetPassword"
+  | "admin";
 
 export const PAGE_PATHS: Record<Page, string> = {
   home: "/",
@@ -7,6 +18,11 @@ export const PAGE_PATHS: Record<Page, string> = {
   blog: "/blog",
   careers: "/careers",
   contact: "/contact",
+  login: "/login",
+  register: "/register",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
+  admin: "/admin",
 };
 
 const PATH_PAGES: Record<string, Page> = {

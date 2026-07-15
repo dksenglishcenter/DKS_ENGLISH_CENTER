@@ -94,6 +94,7 @@ export function AnimatedHeroStats() {
             <dd
               className="order-1 text-xl font-black tabular-nums text-primary font-[family-name:var(--font-nunito)] md:text-2xl"
               aria-label={finalValue}
+              suppressHydrationWarning
             >
               <span aria-hidden="true">
                 {formatValue(animatedValue, stat.decimals)}

@@ -51,7 +51,7 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="hidden lg:block">
+          <div className="hidden items-center gap-3 lg:flex">
             <Button asChild size="md">
               <Link href={PAGE_PATHS.contact}>
                 Đăng ký học thử <ArrowRight className="h-4 w-4" />
