@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
+import { useAuthSession } from "@/components/auth/auth-session";
 import { DKSLogo } from "@/components/brand/dks-logo";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ export function Header() {
   const pathname = usePathname();
   const active = getActivePage(pathname);
   const [open, setOpen] = useState(false);
+  const { user, ready, logout, loggingOut } = useAuthSession();
 
   const links: { label: string; page: Page }[] = [
     { label: "Trang chủ", page: "home" },
@@ -59,15 +61,34 @@ export function Header() {
             </Button>
           </div>
 
-          <button
-            type="button"
-            className="rounded-lg p-2 text-[#4A2306] transition-colors hover:bg-secondary lg:hidden"
-            onClick={() => setOpen(!open)}
-            aria-expanded={open}
-            aria-label={open ? "Đóng menu" : "Mở menu"}
-          >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center gap-1 lg:hidden">
+            {ready && !user ? (
+              <Link
+                href={PAGE_PATHS.login}
+                className="rounded-lg px-3 py-2 text-sm font-bold text-primary font-[family-name:var(--font-nunito)]"
+              >
+                Đăng nhập
+              </Link>
+            ) : null}
+            {ready && user ? (
+              <Link
+                href={user.role === "ADMIN" ? PAGE_PATHS.admin : PAGE_PATHS.home}
+                className="max-w-[7rem] truncate rounded-lg px-2 py-2 text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]"
+                title={user.role === "ADMIN" ? "Vào trang admin" : user.fullName}
+              >
+                {user.fullName}
+              </Link>
+            ) : null}
+            <button
+              type="button"
+              className="rounded-lg p-2 text-[#4A2306] transition-colors hover:bg-secondary"
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-label={open ? "Đóng menu" : "Mở menu"}
+            >
+              {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </Container>
 
@@ -88,7 +109,26 @@ export function Header() {
                 {l.label}
               </Link>
             ))}
-            <div className="pt-2">
+            <div className="space-y-2 pt-2">
+              {user ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-center"
+                  disabled={loggingOut}
+                  onClick={() => {
+                    void logout().then(() => setOpen(false));
+                  }}
+                >
+                  {loggingOut ? "Đang thoát..." : "Đăng xuất"}
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full justify-center">
+                  <Link href={PAGE_PATHS.login} onClick={() => setOpen(false)}>
+                    Đăng nhập
+                  </Link>
+                </Button>
+              )}
               <Button asChild className="w-full justify-center">
                 <Link href={PAGE_PATHS.contact} onClick={() => setOpen(false)}>
                   Đăng ký học thử <ArrowRight className="h-4 w-4" />

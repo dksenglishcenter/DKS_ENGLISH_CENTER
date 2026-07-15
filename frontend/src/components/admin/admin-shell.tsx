@@ -4,11 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  BookOpen,
   Briefcase,
-  FolderOpen,
+  Building2,
+  GraduationCap,
+  ImageIcon,
   LayoutDashboard,
   LogOut,
   Mail,
+  MessageSquareQuote,
   Users,
 } from "lucide-react";
 
@@ -20,9 +24,17 @@ import { cn } from "@/components/ui/utils";
 
 const NAV_ITEMS = [
   { href: PAGE_PATHS.admin, label: "Tổng quan", icon: LayoutDashboard },
+  { href: `${PAGE_PATHS.admin}/courses`, label: "Khóa học", icon: BookOpen },
+  {
+    href: `${PAGE_PATHS.admin}/success-stories`,
+    label: "Câu chuyện",
+    icon: MessageSquareQuote,
+  },
+  { href: `${PAGE_PATHS.admin}/gallery`, label: "Môi trường Học Tập", icon: ImageIcon },
+  { href: `${PAGE_PATHS.admin}/about`, label: "Về chúng tôi", icon: Building2 },
+  { href: `${PAGE_PATHS.admin}/teachers`, label: "Giáo viên", icon: GraduationCap },
   { href: `${PAGE_PATHS.admin}/contacts`, label: "Liên hệ", icon: Mail },
   { href: `${PAGE_PATHS.admin}/careers`, label: "Tuyển dụng", icon: Briefcase },
-  { href: `${PAGE_PATHS.admin}/media`, label: "Media", icon: FolderOpen },
   { href: `${PAGE_PATHS.admin}/users`, label: "Người dùng", icon: Users },
 ] as const;
 
@@ -133,7 +145,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <h1 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
               Bảng điều khiển
             </h1>
-            <p className="text-xs text-[#9B6B50]">Khung admin — các module sẽ bổ sung dần</p>
           </div>
           <Link href={PAGE_PATHS.home} className="text-sm font-semibold text-primary hover:underline">
             Về website

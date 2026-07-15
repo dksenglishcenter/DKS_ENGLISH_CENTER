@@ -1,5 +1,5 @@
-import { COURSES } from "@/data/courses";
 import { JOBS } from "@/data/jobs";
+import type { Course } from "@/lib/courses/types";
 import { getSiteUrl, siteConfig } from "./config";
 
 export function organizationSchema() {
@@ -32,7 +32,7 @@ export function organizationSchema() {
   };
 }
 
-export function coursesPageSchema() {
+export function coursesPageSchema(courses: Course[]) {
   const siteUrl = getSiteUrl();
 
   return {
@@ -42,14 +42,14 @@ export function coursesPageSchema() {
     description:
       "Các khóa luyện thi vào lớp 10, THPT và Đại học, IELTS 1:1 và tiếng Anh Global Success lớp 1–9 tại DKS English Center.",
     url: `${siteUrl}/courses`,
-    numberOfItems: COURSES.length,
-    itemListElement: COURSES.map((course, index) => ({
+    numberOfItems: courses.length,
+    itemListElement: courses.map((course, index) => ({
       "@type": "ListItem",
       position: index + 1,
       item: {
         "@type": "Course",
         name: course.title,
-        description: course.desc,
+        description: course.description,
         provider: {
           "@type": "Organization",
           name: siteConfig.name,
@@ -66,7 +66,7 @@ export function coursesPageSchema() {
               },
             }
           : {}),
-        url: `${siteUrl}/courses#${course.id}`,
+        url: `${siteUrl}/courses#${course.slug}`,
       },
     })),
   };

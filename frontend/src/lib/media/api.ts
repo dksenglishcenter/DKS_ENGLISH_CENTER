@@ -3,6 +3,9 @@ export const CLOUDINARY_FOLDERS = {
   social: "dks-english-center/social",
   homeGallery: "dks-english-center/home/gallery",
   aboutFacilities: "dks-english-center/about/facilities",
+  aboutVision: "dks-english-center/about/vision",
+  aboutTeachers: "dks-english-center/about/teachers",
+  courses: "dks-english-center/courses",
 } as const;
 
 export const SOCIAL_PLATFORMS = ["zalo", "facebook", "youtube", "tiktok"] as const;
@@ -12,7 +15,10 @@ export type MediaCategory =
   | "brand-logo"
   | "social-icon"
   | "home-gallery"
-  | "about-facilities";
+  | "about-facilities"
+  | "about-vision"
+  | "about-teacher"
+  | "course-cover";
 
 export type UploadMediaResponse = {
   message: string;
@@ -52,4 +58,47 @@ export async function uploadMediaAsset(
   }
 
   return response.json() as Promise<UploadMediaResponse>;
+}
+
+export async function deleteMediaAsset(url: string): Promise<{ message: string; deleted: boolean }> {
+  const { apiFetch } = await import("@/lib/api/client");
+  return apiFetch<{ message: string; deleted: boolean; publicId: string }>("/media/delete", {
+    method: "POST",
+    json: { url },
+  });
+}
+
+export async function stashMediaAsset(url: string) {
+  const { apiFetch } = await import("@/lib/api/client");
+  return apiFetch<{
+    message: string;
+    originalPublicId: string;
+    stashPublicId: string;
+    stashUrl: string;
+  }>("/media/stash", {
+    method: "POST",
+    json: { url },
+  });
+}
+
+export async function restoreMediaAsset(payload: {
+  stashPublicId: string;
+  originalPublicId: string;
+}) {
+  const { apiFetch } = await import("@/lib/api/client");
+  return apiFetch<{ message: string; url: string; publicId: string }>("/media/restore", {
+    method: "POST",
+    json: payload,
+  });
+}
+
+export async function deleteMediaByPublicId(publicId: string) {
+  const { apiFetch } = await import("@/lib/api/client");
+  return apiFetch<{ message: string; deleted: boolean; publicId: string }>(
+    "/media/delete-by-public-id",
+    {
+      method: "POST",
+      json: { publicId },
+    },
+  );
 }

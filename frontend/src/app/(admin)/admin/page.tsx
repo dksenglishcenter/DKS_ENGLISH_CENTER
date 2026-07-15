@@ -12,6 +12,31 @@ export const metadata = createPageMetadata({
 
 const CARDS = [
   {
+    title: "Khóa học",
+    desc: "CRUD khóa học cho trang chủ và /courses.",
+    href: `${PAGE_PATHS.admin}/courses`,
+  },
+  {
+    title: "Câu chuyện thành công",
+    desc: "Testimonials học viên trên trang chủ.",
+    href: `${PAGE_PATHS.admin}/success-stories`,
+  },
+  {
+    title: "Môi trường học tập",
+    desc: "Tối đa 6 ảnh gallery trang chủ.",
+    href: `${PAGE_PATHS.admin}/gallery`,
+  },
+  {
+    title: "Về chúng tôi",
+    desc: "Ảnh tầm nhìn và cơ sở vật chất trang About.",
+    href: `${PAGE_PATHS.admin}/about`,
+  },
+  {
+    title: "Giáo viên",
+    desc: "Quản lý đội ngũ giáo viên trên trang About.",
+    href: `${PAGE_PATHS.admin}/teachers`,
+  },
+  {
     title: "Liên hệ",
     desc: "Xem và xử lý đơn tư vấn từ trang Contact.",
     href: `${PAGE_PATHS.admin}/contacts`,
@@ -20,11 +45,6 @@ const CARDS = [
     title: "Tuyển dụng",
     desc: "Quản lý đơn ứng tuyển từ trang Careers.",
     href: `${PAGE_PATHS.admin}/careers`,
-  },
-  {
-    title: "Media",
-    desc: "Upload / quản lý ảnh Cloudinary.",
-    href: `${PAGE_PATHS.admin}/media`,
   },
   {
     title: "Người dùng",
@@ -45,7 +65,7 @@ export default function AdminDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {CARDS.map((card) => (
           <Link
             key={card.href}

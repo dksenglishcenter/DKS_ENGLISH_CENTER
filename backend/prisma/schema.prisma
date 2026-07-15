@@ -65,3 +65,100 @@ model CareerApplication {
 
   @@map("career_applications")
 }
+
+model Course {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  subtitle       String
+  description    String
+  level          String
+  target         String
+  tuition        String
+  duration       String   @default("90 phút/buổi")
+  perks          String[]
+  category       String
+  coverImageUrl  String   @map("cover_image_url")
+  accent         String   @default("#F16522")
+  bg             String   @default("#FFF4EC")
+  icon           String   @default("📚")
+  featured       Boolean  @default(true)
+  sortOrder      Int      @default(0) @map("sort_order")
+  isPublished    Boolean  @default(true) @map("is_published")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([featured, isPublished, sortOrder])
+  @@map("courses")
+}
+
+model SuccessStory {
+  id          String   @id @default(cuid())
+  name        String
+  course      String
+  badge       String
+  text        String
+  stars       Int      @default(5)
+  avatar      String
+  sortOrder   Int      @default(0) @map("sort_order")
+  isPublished Boolean  @default(true) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder])
+  @@map("success_stories")
+}
+
+model GalleryImage {
+  id             String   @id @default(cuid())
+  imageUrl       String   @map("image_url")
+  alt            String
+  objectPosition String   @default("center") @map("object_position")
+  sortOrder      Int      @default(0) @map("sort_order")
+  isPublished    Boolean  @default(true) @map("is_published")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder])
+  @@map("gallery_images")
+}
+
+model FacilityImage {
+  id          String   @id @default(cuid())
+  imageUrl    String   @map("image_url")
+  title       String
+  sortOrder   Int      @default(0) @map("sort_order")
+  isPublished Boolean  @default(true) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder])
+  @@map("facility_images")
+}
+
+/// Singleton content for About page (vision image, etc.)
+model AboutPageContent {
+  id             String   @id @default("about")
+  visionImageUrl String   @map("vision_image_url")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("about_page_content")
+}
+
+model Teacher {
+  id          String   @id @default(cuid())
+  name        String
+  title       String
+  cred        String
+  exp         String
+  imageUrl    String   @map("image_url")
+  bio         String
+  sortOrder   Int      @default(0) @map("sort_order")
+  isPublished Boolean  @default(true) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder])
+  @@map("teachers")
+}

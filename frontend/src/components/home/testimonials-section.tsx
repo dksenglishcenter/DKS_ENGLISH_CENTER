@@ -6,46 +6,30 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/layout/section-heading";
 import { StarRow } from "@/components/media/star-row";
+import type { SuccessStory } from "@/lib/success-stories/types";
 
-const TESTIMONIALS = [
-  {
-    name: "Nguyễn Thị Mai",
-    course: "IELTS Preparation",
-    badge: "IELTS 7.0 ↑ từ 5.0",
-    text: "Sau 6 tháng học tại DKS, điểm IELTS của tôi từ 5.0 đã lên 7.0. Giáo viên rất tận tâm và phương pháp dạy hiệu quả. Các buổi mock test giúp tôi quen áp lực thi thật rất nhiều.",
-    stars: 5,
-    avatar: "MT",
-  },
-  {
-    name: "Trần Văn Hùng",
-    course: "9-to-10 Prep",
-    badge: "9.5 điểm vào 10 chuyên",
-    text: "DKS đã giúp con trai tôi đạt 9.5 điểm thi vào lớp 10 chuyên. Giáo viên không chỉ dạy kiến thức mà còn truyền cảm hứng học tập. Rất biết ơn trung tâm!",
-    stars: 5,
-    avatar: "HT",
-  },
-  {
-    name: "Phạm Thị Linh",
-    course: "Communicative English",
-    badge: "Tự tin giao tiếp công việc",
-    text: "Tôi đã từng rất sợ nói tiếng Anh nhưng sau 3 tháng tại DKS, tôi có thể tự tin trình bày trước khách hàng nước ngoài. Lớp nhỏ giúp tôi được thực hành nhiều hơn.",
-    stars: 5,
-    avatar: "LP",
-  },
-] as const;
+type HomeTestimonialsProps = {
+  stories: SuccessStory[];
+};
 
-export function HomeTestimonials() {
+export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const testimonial = TESTIMONIALS[activeIndex];
+
+  if (stories.length === 0) {
+    return null;
+  }
+
+  const safeIndex = Math.min(activeIndex, stories.length - 1);
+  const testimonial = stories[safeIndex];
 
   const showPrevious = () => {
     setActiveIndex((current) =>
-      current === 0 ? TESTIMONIALS.length - 1 : current - 1,
+      current === 0 ? stories.length - 1 : current - 1,
     );
   };
 
   const showNext = () => {
-    setActiveIndex((current) => (current + 1) % TESTIMONIALS.length);
+    setActiveIndex((current) => (current + 1) % stories.length);
   };
 
   return (
@@ -91,38 +75,40 @@ export function HomeTestimonials() {
             </div>
           </article>
 
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={showPrevious}
-              className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              aria-label="Xem cảm nhận trước"
-            >
-              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-            {TESTIMONIALS.map((item, index) => (
+          {stories.length > 1 ? (
+            <div className="mt-8 flex items-center justify-center gap-4">
               <button
-                key={item.name}
                 type="button"
-                onClick={() => setActiveIndex(index)}
-                className={`rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none ${
-                  index === activeIndex
-                    ? "h-3 w-8 bg-primary"
-                    : "h-3 w-3 bg-border hover:bg-primary/50"
-                }`}
-                aria-label={`Xem cảm nhận ${index + 1}`}
-                aria-current={index === activeIndex ? "true" : undefined}
-              />
-            ))}
-            <button
-              type="button"
-              onClick={showNext}
-              className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              aria-label="Xem cảm nhận tiếp theo"
-            >
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </div>
+                onClick={showPrevious}
+                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                aria-label="Xem cảm nhận trước"
+              >
+                <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+              </button>
+              {stories.map((item, index) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveIndex(index)}
+                  className={`rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none ${
+                    index === safeIndex
+                      ? "h-3 w-8 bg-primary"
+                      : "h-3 w-3 bg-border hover:bg-primary/50"
+                  }`}
+                  aria-label={`Xem cảm nhận ${index + 1}`}
+                  aria-current={index === safeIndex ? "true" : undefined}
+                />
+              ))}
+              <button
+                type="button"
+                onClick={showNext}
+                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                aria-label="Xem cảm nhận tiếp theo"
+              >
+                <ChevronRight className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+          ) : null}
         </div>
       </Container>
     </section>

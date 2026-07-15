@@ -1,6 +1,7 @@
 import { IsIn, IsOptional, IsString, ValidateIf } from 'class-validator';
 
 import {
+  MEDIA_CATEGORIES,
   SOCIAL_PLATFORMS,
   type MediaCategory,
   type SocialPlatform,
@@ -8,7 +9,7 @@ import {
 
 export class UploadMediaDto {
   @IsString()
-  @IsIn(['brand-logo', 'social-icon', 'home-gallery', 'about-facilities'])
+  @IsIn(MEDIA_CATEGORIES)
   category!: MediaCategory;
 
   @ValidateIf((dto: UploadMediaDto) => dto.category === 'social-icon')

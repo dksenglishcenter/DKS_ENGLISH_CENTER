@@ -1,4 +1,5 @@
 import { JsonLd } from "@/components/seo/json-ld";
+import { listCourses } from "@/lib/courses/api";
 import { createPageMetadata } from "@/lib/seo/metadata";
 import { coursesPageSchema } from "@/lib/seo/schemas";
 
@@ -20,14 +21,22 @@ export const metadata = createPageMetadata({
   ],
 });
 
-export default function CoursesLayout({
+export default async function CoursesLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let courses: Awaited<ReturnType<typeof listCourses>>["courses"] = [];
+  try {
+    const response = await listCourses();
+    courses = response.courses;
+  } catch {
+    courses = [];
+  }
+
   return (
     <>
-      <JsonLd data={coursesPageSchema()} />
+      <JsonLd data={coursesPageSchema(courses)} />
       {children}
     </>
   );

@@ -8,6 +8,6 @@ export const metadata = createPageMetadata({
   path: "/",
 });
 
-export default function Page() {
+export default async function Page() {
   return <HomePage />;
 }

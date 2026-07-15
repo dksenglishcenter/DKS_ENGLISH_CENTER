@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Phone } from "lucide-react";
 
+import { useAuthSession } from "@/components/auth/auth-session";
 import { SocialIcon } from "@/components/brand/social-icon";
-import { getCurrentUser, logoutUser } from "@/lib/auth/api";
-import type { AuthUser } from "@/lib/auth/types";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 
@@ -17,45 +17,11 @@ const pillClass =
   "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 motion-reduce:transform-none font-[family-name:var(--font-nunito)]";
 
 function FloatingAuth() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [ready, setReady] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const response = await getCurrentUser();
-        if (!cancelled) setUser(response.user);
-      } catch {
-        if (!cancelled) setUser(null);
-      } finally {
-        if (!cancelled) setReady(true);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await logoutUser();
-    } finally {
-      setUser(null);
-      setLoggingOut(false);
-    }
-  };
+  const { user, ready, logout, loggingOut } = useAuthSession();
 
   if (!ready) {
     return (
-      <div
-        className="h-11 w-28 rounded-full bg-primary/70 shadow-lg"
-        aria-hidden="true"
-      />
+      <div className="h-11 w-28 rounded-full bg-primary/70 shadow-lg" aria-hidden="true" />
     );
   }
 
@@ -67,13 +33,18 @@ function FloatingAuth() {
     );
   }
 
-  const initial = user.fullName.trim().charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase();
+  const initial =
+    user.fullName.trim().charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase();
+  const isAdmin = user.role === "ADMIN";
+  const accountHref = isAdmin ? PAGE_PATHS.admin : PAGE_PATHS.home;
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <div
+      <Link
+        href={accountHref}
         className={`${pillClass} bg-primary text-white`}
-        title={user.email}
+        title={isAdmin ? `Vào trang admin · ${user.email}` : user.email}
+        aria-label={isAdmin ? "Vào trang quản trị" : `Tài khoản ${user.fullName}`}
       >
         <span
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#4A2306] text-xs font-black text-white"
@@ -82,12 +53,12 @@ function FloatingAuth() {
           {initial}
         </span>
         <span className="max-w-[9.5rem] truncate">{user.fullName}</span>
-      </div>
+      </Link>
       <button
         type="button"
-        onClick={handleLogout}
+        onClick={() => void logout()}
         disabled={loggingOut}
-        className={`${pillClass} border border-border bg-[#4A2306] text-white disabled:opacity-70`}
+        className="inline-flex items-center justify-center rounded-full bg-[#4A2306] px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 disabled:opacity-70 motion-reduce:transform-none font-[family-name:var(--font-nunito)]"
       >
         {loggingOut ? "Đang thoát..." : "Đăng xuất"}
       </button>
@@ -95,14 +66,17 @@ function FloatingAuth() {
   );
 }
 
-export function FloatingWidgets() {
+function FloatingWidgetsContent() {
   return (
     <>
-      <div className="fixed bottom-6 left-4 z-50">
+      <div className="pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 z-[100]">
         <FloatingAuth />
       </div>
 
-      <div className="fixed bottom-6 right-4 z-50 flex flex-col gap-3" aria-label="Liên hệ nhanh">
+      <div
+        className="pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-[100] flex flex-col gap-3"
+        aria-label="Liên hệ nhanh"
+      >
         <a
           href={SOCIAL_LINKS.zalo}
           target="_blank"
@@ -134,4 +108,16 @@ export function FloatingWidgets() {
       </div>
     </>
   );
+}
+
+export function FloatingWidgets() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(<FloatingWidgetsContent />, document.body);
 }
