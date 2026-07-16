@@ -1,4 +1,5 @@
 import { ContactPage } from "@/components/pages/contact-page";
+import { getPublicContactInformation } from "@/lib/contact/server";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
@@ -8,6 +9,8 @@ export const metadata = createPageMetadata({
   path: "/contact",
 });
 
-export default function Page() {
-  return <ContactPage />;
+export default async function Page() {
+  const contactInfo = await getPublicContactInformation();
+
+  return <ContactPage contactInfo={contactInfo} />;
 }

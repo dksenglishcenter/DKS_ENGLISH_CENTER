@@ -54,6 +54,18 @@ model ContactSubmission {
   @@map("contact_submissions")
 }
 
+model ContactInformation {
+  id        String   @id @default("contact")
+  phone     String
+  email     String
+  address   String
+  hours     String
+  mapEmbed  String   @map("map_embed")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("contact_information")
+}
+
 model CareerApplication {
   id           String   @id @default(cuid())
   fullName     String   @map("full_name")
@@ -64,6 +76,24 @@ model CareerApplication {
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("career_applications")
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  title       String
+  type        String
+  location    String
+  salary      String
+  duties      String[]
+  benefits    String[]
+  req         String
+  sortOrder   Int      @default(0) @map("sort_order")
+  isPublished Boolean  @default(true) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder])
+  @@map("jobs")
 }
 
 model Course {

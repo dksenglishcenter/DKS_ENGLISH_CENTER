@@ -20,3 +20,22 @@ export type ContactFormResponse = {
   id: string;
   createdAt: string;
 };
+
+export type ContactInformation = {
+  id: string;
+  phone: string;
+  email: string;
+  address: string;
+  hours: string;
+  mapEmbed: string;
+  updatedAt: string;
+};
+
+export type ContactInformationPayload = Pick<
+  ContactInformation,
+  "phone" | "email" | "address" | "hours" | "mapEmbed"
+>;
+
+export type ContactInformationResponse = {
+  contactInfo: ContactInformation;
+};
