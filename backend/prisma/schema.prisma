@@ -162,3 +162,26 @@ model Teacher {
   @@index([isPublished, sortOrder])
   @@map("teachers")
 }
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  excerpt         String
+  category        String
+  publishedAt     DateTime @map("published_at") @db.Date
+  readTimeMinutes Int      @map("read_time_minutes")
+  coverImageUrl   String   @map("cover_image_url")
+  featured        Boolean  @default(false)
+  intro           String
+  sections        Json
+  takeaway        String
+  isPublished     Boolean  @default(true) @map("is_published")
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([featured, isPublished, sortOrder])
+  @@map("blog_posts")
+}

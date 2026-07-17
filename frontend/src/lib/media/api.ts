@@ -6,6 +6,7 @@ export const CLOUDINARY_FOLDERS = {
   aboutVision: "dks-english-center/about/vision",
   aboutTeachers: "dks-english-center/about/teachers",
   courses: "dks-english-center/courses",
+  blog: "dks-english-center/blog",
 } as const;
 
 export const SOCIAL_PLATFORMS = ["zalo", "facebook", "youtube", "tiktok"] as const;
@@ -18,7 +19,8 @@ export type MediaCategory =
   | "about-facilities"
   | "about-vision"
   | "about-teacher"
-  | "course-cover";
+  | "course-cover"
+  | "blog-cover";
 
 export type UploadMediaResponse = {
   message: string;

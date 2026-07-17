@@ -3,15 +3,9 @@ import Link from "next/link";
 
 import { ShareButton } from "@/components/blog/share-button";
 import { Container } from "@/components/layout/container";
-import { UnsplashImage } from "@/components/media/unsplash-image";
-import type { BlogPost, BlogPostSummary } from "@/data/blog-posts";
-
-const DATE_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  timeZone: "UTC",
-});
+import { CourseCoverImage } from "@/components/media/course-cover-image";
+import { formatBlogDate } from "@/lib/blog/format";
+import type { BlogPost, BlogPostSummary } from "@/lib/blog/types";
 
 type BlogPostPageProps = {
   post: BlogPost;
@@ -24,17 +18,14 @@ export function BlogPostPage({
   relatedPosts,
   categories,
 }: BlogPostPageProps) {
-  const formattedDate = DATE_FORMATTER.format(
-    new Date(`${post.publishedAt}T00:00:00Z`),
-  );
+  const formattedDate = formatBlogDate(post.publishedAt);
 
   return (
     <article className="min-h-screen bg-white">
       <header className="relative h-72 overflow-hidden bg-muted md:h-96">
-        <UnsplashImage
-          id={post.coverImageId}
+        <CourseCoverImage
+          src={post.coverImageUrl}
           alt={post.title}
-          fill
           priority
           sizes="100vw"
         />
@@ -62,7 +53,7 @@ export function BlogPostPage({
             <div className="mb-8 flex items-center justify-between gap-4">
               <Link
                 href="/blog"
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-[#4A2306] transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg text-sm font-semibold text-[#4A2306] transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <ArrowLeft aria-hidden="true" className="size-4" /> Quay lại Blog
               </Link>
@@ -142,10 +133,9 @@ export function BlogPostPage({
                     className="group flex gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <span className="relative h-12 w-16 flex-none overflow-hidden rounded-lg bg-muted">
-                      <UnsplashImage
-                        id={relatedPost.coverImageId}
+                      <CourseCoverImage
+                        src={relatedPost.coverImageUrl}
                         alt=""
-                        fill
                         sizes="64px"
                         className="transition-opacity group-hover:opacity-90"
                       />

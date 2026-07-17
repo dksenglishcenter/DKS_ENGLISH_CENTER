@@ -19,6 +19,10 @@ export type AdminDashboardStats = {
     hasVisionImage: boolean;
   };
   teachers: CountPublished;
+  blog: CountPublished & {
+    featured: number;
+    draft: number;
+  };
   contacts: {
     total: number;
     last7Days: number;

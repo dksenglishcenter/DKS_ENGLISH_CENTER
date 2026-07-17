@@ -1,4 +1,4 @@
-import AdminPlaceholderPage from "@/components/admin/admin-placeholder";
+import { BlogAdmin } from "@/components/admin/blog-admin";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
@@ -9,10 +9,5 @@ export const metadata = createPageMetadata({
 });
 
 export default function Page() {
-  return (
-    <AdminPlaceholderPage
-      title="Blog"
-      description="Module quản lý bài viết blog để trống — sẽ được nối API và CRUD ở bước sau."
-    />
-  );
+  return <BlogAdmin />;
 }
