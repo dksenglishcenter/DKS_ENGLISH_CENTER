@@ -1,16 +1,8 @@
-export const CAREER_POSITION_OPTIONS = [
-  "Giáo Viên Tiếng Anh IELTS",
-  "Tư Vấn Tuyển Sinh",
-  "Gia Sư 1-1 (Freelance)",
-] as const;
-
-export type CareerPositionOption = (typeof CAREER_POSITION_OPTIONS)[number];
-
 export type CareerApplicationPayload = {
+  jobId: string;
   fullName: string;
   email: string;
   phone: string;
-  position: CareerPositionOption;
   introduction?: string;
 };
 
@@ -18,4 +10,33 @@ export type CareerApplicationResponse = {
   message: string;
   id: string;
   createdAt: string;
+};
+
+export type CareerApplication = {
+  id: string;
+  jobId: string | null;
+  fullName: string;
+  email: string;
+  phone: string;
+  position: string;
+  introduction: string | null;
+  createdAt: string;
+  job: {
+    id: string;
+    title: string;
+    isPublished: boolean;
+  } | null;
+};
+
+export type CareerApplicationsMeta = {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+};
+
+export type CareerApplicationsResponse = {
+  success: true;
+  data: CareerApplication[];
+  meta: CareerApplicationsMeta;
 };

@@ -1,4 +1,5 @@
 import { ContactInformationAdmin } from "@/components/admin/contact-information-admin";
+import { ContactSubmissionsAdmin } from "@/components/admin/contact-submissions-admin";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
@@ -9,5 +10,10 @@ export const metadata = createPageMetadata({
 });
 
 export default function Page() {
-  return <ContactInformationAdmin />;
+  return (
+    <div className="flex flex-col gap-10">
+      <ContactInformationAdmin />
+      <ContactSubmissionsAdmin />
+    </div>
+  );
 }

@@ -1,18 +1,17 @@
 import { Transform } from 'class-transformer';
 
-/** Parse query string / body → boolean | undefined. */
-export function toOptionalBoolean(value: unknown): boolean | undefined {
+/** Parse recognized query/body values and preserve invalid input for validation. */
+export function toOptionalBoolean(value: unknown): unknown {
   if (value === undefined || value === null || value === '') return undefined;
   if (value === true || value === 'true' || value === '1') return true;
   if (value === false || value === 'false' || value === '0') return false;
-  return undefined;
+  return value;
 }
 
 /** Decorator shorthand cho publishedOnly / featured flags. */
 export function TransformOptionalBoolean(defaultWhenEmpty?: boolean) {
   return Transform(({ value }) => {
     const parsed = toOptionalBoolean(value);
-    if (parsed !== undefined) return parsed;
-    return defaultWhenEmpty;
+    return parsed === undefined ? defaultWhenEmpty : parsed;
   });
 }

@@ -14,9 +14,11 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { TrimJobText, TrimJobTextItems } from './job-input.transform';
 
 export class UpdateJobDto {
   @IsOptional()
+  @TrimJobText()
   @IsString()
   @Matches(/\S/, { message: 'title không được chỉ chứa khoảng trắng' })
   @MinLength(2)
@@ -24,6 +26,7 @@ export class UpdateJobDto {
   title?: string;
 
   @IsOptional()
+  @TrimJobText()
   @IsString()
   @Matches(/\S/, { message: 'type không được chỉ chứa khoảng trắng' })
   @MinLength(2)
@@ -31,6 +34,7 @@ export class UpdateJobDto {
   type?: string;
 
   @IsOptional()
+  @TrimJobText()
   @IsString()
   @Matches(/\S/, { message: 'location không được chỉ chứa khoảng trắng' })
   @MinLength(2)
@@ -38,6 +42,7 @@ export class UpdateJobDto {
   location?: string;
 
   @IsOptional()
+  @TrimJobText()
   @IsString()
   @Matches(/\S/, { message: 'salary không được chỉ chứa khoảng trắng' })
   @MinLength(2)
@@ -45,6 +50,7 @@ export class UpdateJobDto {
   salary?: string;
 
   @IsOptional()
+  @TrimJobTextItems()
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(30)
@@ -59,6 +65,7 @@ export class UpdateJobDto {
   duties?: string[];
 
   @IsOptional()
+  @TrimJobTextItems()
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(30)
@@ -73,6 +80,7 @@ export class UpdateJobDto {
   benefits?: string[];
 
   @IsOptional()
+  @TrimJobText()
   @IsString()
   @Matches(/\S/, { message: 'req không được chỉ chứa khoảng trắng' })
   @MinLength(2)

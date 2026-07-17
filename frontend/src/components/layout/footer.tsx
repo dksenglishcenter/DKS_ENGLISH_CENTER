@@ -5,10 +5,7 @@ import { DKSLogo } from "@/components/brand/dks-logo";
 import { SocialIcon } from "@/components/brand/social-icon";
 import { Container } from "@/components/layout/container";
 import { getPublicContactInformation } from "@/lib/contact/server";
-import {
-  getGoogleMapsSearchUrl,
-  getPhoneHref,
-} from "@/lib/contact/validation";
+import { getPhoneHref } from "@/lib/contact/validation";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 import type { SocialNetwork } from "@/lib/social-links";
@@ -86,7 +83,7 @@ export async function Footer() {
                 <ul className="space-y-3 text-sm text-orange-100 font-[family-name:var(--font-body)]">
                   <li>
                     <a
-                      href={getGoogleMapsSearchUrl(contactInfo.address)}
+                      href={contactInfo.mapUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-start gap-2 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"

@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -8,9 +7,8 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { TransformOptionalBoolean } from '../../common/dto/to-optional-boolean';
 
-export class ListJobsQueryDto {
+export class ListContactSubmissionsQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -22,12 +20,7 @@ export class ListJobsQueryDto {
   @IsInt()
   @Min(1)
   @Max(100)
-  pageSize = 20;
-
-  @IsOptional()
-  @TransformOptionalBoolean()
-  @IsBoolean()
-  isPublished?: boolean;
+  pageSize = 10;
 
   @IsOptional()
   @IsString()

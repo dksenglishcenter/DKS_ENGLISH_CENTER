@@ -1,6 +1,4 @@
-import { JsonLd } from "@/components/seo/json-ld";
 import { createPageMetadata } from "@/lib/seo/metadata";
-import { careersPageSchema } from "@/lib/seo/schemas";
 
 export const metadata = createPageMetadata({
   title: "Tuyển Dụng",
@@ -21,10 +19,5 @@ export default function CareersLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <JsonLd data={careersPageSchema()} />
-      {children}
-    </>
-  );
+  return children;
 }

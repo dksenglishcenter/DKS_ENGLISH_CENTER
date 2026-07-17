@@ -24,7 +24,7 @@ const EMPTY_FORM: ContactInformationPayload = {
   email: "",
   address: "",
   hours: "",
-  mapEmbed: "",
+  mapUrl: "",
 };
 
 type FieldConfig = {
@@ -62,8 +62,8 @@ const FIELDS: FieldConfig[] = [
     icon: Clock,
   },
   {
-    name: "mapEmbed",
-    label: "Google Maps URL / Embed",
+    name: "mapUrl",
+    label: "Google Maps URL",
     type: "url",
     icon: MapPin,
   },
@@ -103,7 +103,7 @@ function ContactField({
         disabled={disabled}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
-        className={error ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200" : undefined}
+        className={`bg-white ${error ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200" : ""}`}
         onChange={(event) => onChange(field.name, event.target.value)}
       />
       {error ? (
@@ -132,8 +132,8 @@ export function ContactInformationAdmin() {
 
     try {
       const response = await getContactInformation();
-      const { phone, email, address, hours, mapEmbed } = response.contactInfo;
-      setForm({ phone, email, address, hours, mapEmbed });
+      const { phone, email, address, hours, mapUrl } = response.contactInfo;
+      setForm({ phone, email, address, hours, mapUrl });
       setHasExistingData(true);
     } catch (error) {
       if (error instanceof ApiError && error.status === 404) {
@@ -153,8 +153,8 @@ export function ContactInformationAdmin() {
     getContactInformation()
       .then((response) => {
         if (cancelled) return;
-        const { phone, email, address, hours, mapEmbed } = response.contactInfo;
-        setForm({ phone, email, address, hours, mapEmbed });
+        const { phone, email, address, hours, mapUrl } = response.contactInfo;
+        setForm({ phone, email, address, hours, mapUrl });
         setHasExistingData(true);
       })
       .catch((error: unknown) => {
@@ -201,15 +201,15 @@ export function ContactInformationAdmin() {
       email: form.email.trim(),
       address: form.address.trim(),
       hours: form.hours.trim(),
-      mapEmbed: form.mapEmbed.trim(),
+      mapUrl: form.mapUrl.trim(),
     };
 
     setSaving(true);
     try {
       const response = await replaceContactInformation(payload);
       await invalidateContactInformationCache();
-      const { phone, email, address, hours, mapEmbed } = response.contactInfo;
-      setForm({ phone, email, address, hours, mapEmbed });
+      const { phone, email, address, hours, mapUrl } = response.contactInfo;
+      setForm({ phone, email, address, hours, mapUrl });
       setHasExistingData(true);
       setMessage(response.message);
     } catch (error) {

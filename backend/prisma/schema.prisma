@@ -60,7 +60,7 @@ model ContactInformation {
   email     String
   address   String
   hours     String
-  mapEmbed  String   @map("map_embed")
+  mapUrl    String   @map("map_url")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("contact_information")
@@ -68,6 +68,7 @@ model ContactInformation {
 
 model CareerApplication {
   id           String   @id @default(cuid())
+  jobId        String?  @map("job_id")
   fullName     String   @map("full_name")
   email        String
   phone        String
@@ -75,22 +76,28 @@ model CareerApplication {
   introduction String?
   createdAt    DateTime @default(now()) @map("created_at")
 
+  job Job? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([jobId])
   @@map("career_applications")
 }
 
 model Job {
-  id          String   @id @default(cuid())
-  title       String
-  type        String
-  location    String
-  salary      String
-  duties      String[]
-  benefits    String[]
-  req         String
-  sortOrder   Int      @default(0) @map("sort_order")
-  isPublished Boolean  @default(true) @map("is_published")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(cuid())
+  title           String
+  normalizedTitle String   @unique @map("normalized_title")
+  type            String
+  location        String
+  salary          String
+  duties          String[]
+  benefits        String[]
+  req             String
+  sortOrder       Int      @default(0) @map("sort_order")
+  isPublished     Boolean  @default(true) @map("is_published")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  careerApplications CareerApplication[]
 
   @@index([isPublished, sortOrder])
   @@map("jobs")

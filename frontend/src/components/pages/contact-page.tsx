@@ -8,10 +8,7 @@ import { ContactForm } from "@/components/forms/contact-form";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import type { ContactInformation } from "@/lib/contact/types";
-import {
-  getGoogleMapsSearchUrl,
-  getPhoneHref,
-} from "@/lib/contact/validation";
+import { getPhoneHref } from "@/lib/contact/validation";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const SOCIAL_CHANNELS = [
@@ -46,9 +43,7 @@ export function ContactPage({
 }: {
   contactInfo: ContactInformation | null;
 }) {
-  const mapHref = contactInfo
-    ? getGoogleMapsSearchUrl(contactInfo.address)
-    : undefined;
+  const mapHref = contactInfo?.mapUrl;
   const contactDetails = contactInfo
     ? [
         {

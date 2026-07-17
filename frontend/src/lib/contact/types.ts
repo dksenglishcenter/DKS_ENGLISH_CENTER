@@ -21,19 +21,42 @@ export type ContactFormResponse = {
   createdAt: string;
 };
 
+export type ContactSubmission = {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string | null;
+  courseInterest: string;
+  learningNeeds: string | null;
+  createdAt: string;
+};
+
+export type ContactSubmissionsMeta = {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+};
+
+export type ContactSubmissionsResponse = {
+  success: true;
+  data: ContactSubmission[];
+  meta: ContactSubmissionsMeta;
+};
+
 export type ContactInformation = {
   id: string;
   phone: string;
   email: string;
   address: string;
   hours: string;
-  mapEmbed: string;
+  mapUrl: string;
   updatedAt: string;
 };
 
 export type ContactInformationPayload = Pick<
   ContactInformation,
-  "phone" | "email" | "address" | "hours" | "mapEmbed"
+  "phone" | "email" | "address" | "hours" | "mapUrl"
 >;
 
 export type ContactInformationResponse = {

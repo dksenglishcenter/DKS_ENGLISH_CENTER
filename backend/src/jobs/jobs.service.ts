@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -40,10 +41,21 @@ export class JobsService {
     return normalizedItems;
   }
 
+  private normalizeTitle(title: string) {
+    return title.trim().replace(/\s+/g, ' ').toLocaleLowerCase('vi-VN');
+  }
+
   private isRecordNotFoundError(error: unknown) {
     return (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
+    );
+  }
+
+  private isUniqueConstraintError(error: unknown) {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
     );
   }
 
@@ -57,7 +69,8 @@ export class JobsService {
   }
 
   //lấy tất cả các vị trí tuyển dụng (cả published và unpublished) trong cơ sở dữ liệu, có thể lọc theo isPublished và search
-  listForAdmin(query: ListJobsQueryDto) {
+  async listForAdmin(query: ListJobsQueryDto) {
+    const { page, pageSize } = query;
     const search = query.search?.trim();
     const where: Prisma.JobWhereInput = {
       ...(query.isPublished !== undefined
@@ -74,10 +87,42 @@ export class JobsService {
         : {}),
     };
 
-    return this.prisma.job.findMany({
-      where,
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      select: JOB_SELECT,
+    return this.prisma.$transaction(async (transaction) => {
+      const totalItems = await transaction.job.count({ where });
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      if (page > Math.max(totalPages, 1)) {
+        throw new BadRequestException(
+          `Trang ${page} vượt quá tổng số ${totalPages} trang.`,
+        );
+      }
+
+      const jobs = await transaction.job.findMany({
+        where,
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: JOB_SELECT,
+      });
+      const maximumSortOrder = await transaction.job.aggregate({
+        _max: { sortOrder: true },
+      });
+
+      return {
+        jobs,
+        pagination: {
+          page,
+          pageSize,
+          totalItems,
+          totalPages,
+          hasPreviousPage: page > 1,
+          hasNextPage: page < totalPages,
+          nextSortOrder: Math.min(
+            10000,
+            (maximumSortOrder._max.sortOrder ?? -1) + 1,
+          ),
+        },
+      };
     });
   }
 
@@ -95,21 +140,31 @@ export class JobsService {
     return job;
   }
 
-  create(dto: CreateJobDto) {
-    return this.prisma.job.create({
-      data: {
-        title: dto.title.trim(),
-        type: dto.type.trim(),
-        location: dto.location.trim(),
-        salary: dto.salary.trim(),
-        duties: this.normalizeItems(dto.duties, 'duties'),
-        benefits: this.normalizeItems(dto.benefits, 'benefits'),
-        req: dto.req.trim(),
-        sortOrder: dto.sortOrder ?? 0,
-        isPublished: dto.isPublished ?? true,
-      },
-      select: JOB_SELECT,
-    });
+  async create(dto: CreateJobDto) {
+    const title = dto.title.trim().replace(/\s+/g, ' ');
+
+    try {
+      return await this.prisma.job.create({
+        data: {
+          title,
+          normalizedTitle: this.normalizeTitle(title),
+          type: dto.type.trim(),
+          location: dto.location.trim(),
+          salary: dto.salary.trim(),
+          duties: this.normalizeItems(dto.duties, 'duties'),
+          benefits: this.normalizeItems(dto.benefits, 'benefits'),
+          req: dto.req.trim(),
+          sortOrder: dto.sortOrder ?? 0,
+          isPublished: dto.isPublished ?? true,
+        },
+        select: JOB_SELECT,
+      });
+    } catch (error: unknown) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException('Tên vị trí tuyển dụng đã tồn tại');
+      }
+      throw error;
+    }
   }
 
   async update(id: string, dto: UpdateJobDto) {
@@ -119,11 +174,15 @@ export class JobsService {
       );
     }
 
+    const title = dto.title?.trim().replace(/\s+/g, ' ');
+
     try {
       return await this.prisma.job.update({
         where: { id },
         data: {
-          ...(dto.title !== undefined ? { title: dto.title.trim() } : {}),
+          ...(title !== undefined
+            ? { title, normalizedTitle: this.normalizeTitle(title) }
+            : {}),
           ...(dto.type !== undefined ? { type: dto.type.trim() } : {}),
           ...(dto.location !== undefined
             ? { location: dto.location.trim() }
@@ -148,6 +207,10 @@ export class JobsService {
         throw new NotFoundException(
           'Không tìm thấy vị trí tuyển dụng để cập nhật',
         );
+      }
+
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException('Tên vị trí tuyển dụng đã tồn tại');
       }
 
       throw error;

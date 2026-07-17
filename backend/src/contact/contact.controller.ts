@@ -1,10 +1,41 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { Role } from '../../generated/prisma/client';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { ContactService } from './contact.service';
+import { ContactSubmissionParamsDto } from './dto/contact-submission-params.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
+import { ListContactSubmissionsQueryDto } from './dto/list-contact-submissions-query.dto';
 
 @Controller('contact')
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
+
+  @Get('submissions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  listSubmissions(@Query() query: ListContactSubmissionsQueryDto) {
+    return this.contactService.listSubmissions(query);
+  }
+
+  @Delete('submissions/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  removeSubmission(@Param() params: ContactSubmissionParamsDto) {
+    return this.contactService.removeSubmission(params.id);
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

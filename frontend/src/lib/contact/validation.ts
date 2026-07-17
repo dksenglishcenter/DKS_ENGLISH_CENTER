@@ -6,7 +6,9 @@ import type {
 
 const PHONE_PATTERN = /^(?=(?:\D*\d){7,15}\D*$)[+\d][\d\s().-]*$/;
 const GOOGLE_MAPS_URL_PATTERN =
-  /^https:\/\/(?:www\.)?google\.com\/maps(?:[/?]|$)/i;
+  /^https:\/\/(?:(?:www\.)?google\.com\/maps(?!\/embed(?:[/?#]|$))(?:[/?#].*)?|maps\.google\.com(?!\/embed(?:[/?#]|$))(?:[/?#].*)?|maps\.app\.goo\.gl\/[A-Za-z0-9_-]+(?:[/?#].*)?|goo\.gl\/maps\/[A-Za-z0-9_-]+(?:[/?#].*)?)$/i;
+const GOOGLE_MAPS_EMBED_URL_PATTERN =
+  /^https:\/\/(?:(?:www\.)?google\.com\/maps\/embed(?:[/?#]|$)|maps\.google\.com\/embed(?:[/?#]|$))/i;
 
 export type ContactInformationField = keyof ContactInformationPayload;
 export type ContactInformationErrors = Partial<
@@ -31,6 +33,10 @@ export function isGoogleMapsUrl(value: string) {
   }
 }
 
+function isGoogleMapsEmbedUrl(value: string) {
+  return GOOGLE_MAPS_EMBED_URL_PATTERN.test(value);
+}
+
 export function validateContactInformation(
   values: ContactInformationPayload,
 ): ContactInformationErrors {
@@ -39,7 +45,7 @@ export function validateContactInformation(
   const email = values.email.trim();
   const address = values.address.trim();
   const hours = values.hours.trim();
-  const mapEmbed = values.mapEmbed.trim();
+  const mapUrl = values.mapUrl.trim();
 
   if (!PHONE_PATTERN.test(phone) || phone.length > 20) {
     errors.phone = "Số điện thoại cần có 7–15 chữ số và đúng định dạng.";
@@ -56,8 +62,13 @@ export function validateContactInformation(
   if (!hours || hours.length > 255) {
     errors.hours = "Giờ làm việc là bắt buộc và tối đa 255 ký tự.";
   }
-  if (!isGoogleMapsUrl(mapEmbed) || mapEmbed.length > 5000) {
-    errors.mapEmbed = "Chỉ chấp nhận URL HTTPS của Google Maps.";
+  if (!mapUrl) {
+    errors.mapUrl = "Google Maps URL là bắt buộc.";
+  } else if (isGoogleMapsEmbedUrl(mapUrl)) {
+    errors.mapUrl =
+      "Không sử dụng link Nhúng. Hãy sao chép link từ mục Chia sẻ.";
+  } else if (!isGoogleMapsUrl(mapUrl) || mapUrl.length > 2048) {
+    errors.mapUrl = "Chỉ chấp nhận URL HTTPS của Google Maps.";
   }
 
   return errors;
@@ -77,7 +88,7 @@ export function parseContactInformationResponse(
     "email",
     "address",
     "hours",
-    "mapEmbed",
+    "mapUrl",
     "updatedAt",
   ];
 
@@ -91,7 +102,7 @@ export function parseContactInformationResponse(
     email: raw.email as string,
     address: raw.address as string,
     hours: raw.hours as string,
-    mapEmbed: raw.mapEmbed as string,
+    mapUrl: raw.mapUrl as string,
     updatedAt: raw.updatedAt as string,
   };
   const validationErrors = validateContactInformation(contactInfo);
@@ -105,8 +116,4 @@ export function parseContactInformationResponse(
 
 export function getPhoneHref(phone: string) {
   return `tel:${phone.replace(/[^+\d]/g, "")}`;
-}
-
-export function getGoogleMapsSearchUrl(address: string) {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
