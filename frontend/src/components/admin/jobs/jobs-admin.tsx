@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   BriefcaseBusiness,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   EyeOff,
   MapPin,
@@ -14,10 +12,12 @@ import {
   Search,
 } from "lucide-react";
 
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { JobForm } from "./job-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { formatAdminDateTime } from "@/lib/admin/format";
 import { deleteJob, listAdminJobs, updateJob } from "@/lib/jobs/api";
 import { formatJobSalary } from "@/lib/jobs/salary";
 import type { Job, JobsPagination, JobStatusFilter } from "@/lib/jobs/types";
@@ -30,23 +30,6 @@ const STATUS_OPTIONS: Array<{ value: JobStatusFilter; label: string }> = [
   { value: "published", label: "Đang công khai" },
   { value: "draft", label: "Đang ẩn" },
 ];
-
-function getVisiblePages(page: number, totalPages: number) {
-  const pages = new Set([1, totalPages, page - 1, page, page + 1]);
-  return [...pages]
-    .filter((item) => item >= 1 && item <= totalPages)
-    .sort((a, b) => a - b);
-}
-
-function formatUpdatedAt(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Không rõ"
-    : new Intl.DateTimeFormat("vi-VN", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }).format(date);
-}
 
 export function JobsAdmin() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -199,7 +182,6 @@ export function JobsAdmin() {
   }
 
   const hasActiveFilters = Boolean(search || status !== "all");
-  const visiblePages = getVisiblePages(page, pagination?.totalPages ?? 0);
 
   return (
     <section aria-labelledby="jobs-admin-title" className="min-w-0 space-y-6">
@@ -422,73 +404,16 @@ export function JobsAdmin() {
           </>
         ) : null}
 
-        {pagination && pagination.totalPages > 1 ? (
-          <nav
-            aria-label="Phân trang vị trí tuyển dụng"
-            className="flex justify-center border-t border-border px-4 py-4 sm:px-5"
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="size-10 p-0"
-                aria-label="Trang trước"
-                disabled={loading || !pagination.hasPreviousPage}
-                onClick={() => {
-                  setLoading(true);
-                  setPage((current) => current - 1);
-                }}
-              >
-                <ChevronLeft aria-hidden="true" />
-              </Button>
-              {visiblePages.map((pageNumber, index) => {
-                const previousPage = visiblePages[index - 1];
-                return (
-                  <span key={pageNumber} className="contents">
-                    {previousPage && pageNumber - previousPage > 1 ? (
-                      <span
-                        aria-hidden="true"
-                        className="px-1 text-muted-foreground"
-                      >
-                        …
-                      </span>
-                    ) : null}
-                    <Button
-                      type="button"
-                      variant={pageNumber === page ? "primary" : "outline"}
-                      size="sm"
-                      className="size-10 p-0"
-                      aria-current={pageNumber === page ? "page" : undefined}
-                      aria-label={`Trang ${pageNumber}`}
-                      disabled={loading}
-                      onClick={() => {
-                        setLoading(true);
-                        setPage(pageNumber);
-                      }}
-                    >
-                      {pageNumber}
-                    </Button>
-                  </span>
-                );
-              })}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="size-10 p-0"
-                aria-label="Trang sau"
-                disabled={loading || !pagination.hasNextPage}
-                onClick={() => {
-                  setLoading(true);
-                  setPage((current) => current + 1);
-                }}
-              >
-                <ChevronRight aria-hidden="true" />
-              </Button>
-            </div>
-          </nav>
-        ) : null}
+        <AdminPagination
+          page={page}
+          totalPages={pagination?.totalPages ?? 0}
+          loading={loading}
+          ariaLabel="Phân trang vị trí tuyển dụng"
+          onPageChange={(nextPage) => {
+            setLoading(true);
+            setPage(nextPage);
+          }}
+        />
       </div>
 
       {formJob !== undefined ? (
@@ -650,7 +575,7 @@ function JobCard(props: JobItemProps) {
             Cập nhật
           </dt>
           <dd className="mt-1 text-[#6B3E26]">
-            {formatUpdatedAt(job.updatedAt)}
+            {formatAdminDateTime(job.updatedAt)}
           </dd>
         </div>
       </dl>
