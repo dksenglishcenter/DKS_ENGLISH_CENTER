@@ -26,6 +26,9 @@ export class DashboardService {
       facilitiesPublished,
       teachersTotal,
       teachersPublished,
+      blogTotal,
+      blogPublished,
+      blogFeatured,
       contactsTotal,
       contactsLast7Days,
       careersTotal,
@@ -45,6 +48,9 @@ export class DashboardService {
       this.prisma.facilityImage.count({ where: { isPublished: true } }),
       this.prisma.teacher.count(),
       this.prisma.teacher.count({ where: { isPublished: true } }),
+      this.prisma.blogPost.count(),
+      this.prisma.blogPost.count({ where: { isPublished: true } }),
+      this.prisma.blogPost.count({ where: { featured: true } }),
       this.prisma.contactSubmission.count(),
       this.prisma.contactSubmission.count({
         where: { createdAt: { gte: weekAgo } },
@@ -88,6 +94,12 @@ export class DashboardService {
       teachers: {
         total: teachersTotal,
         published: teachersPublished,
+      },
+      blog: {
+        total: blogTotal,
+        published: blogPublished,
+        featured: blogFeatured,
+        draft: blogTotal - blogPublished,
       },
       contacts: {
         total: contactsTotal,

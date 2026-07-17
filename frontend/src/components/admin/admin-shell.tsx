@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -55,6 +55,17 @@ const NAV_ITEMS = [
   },
   { href: `${PAGE_PATHS.admin}/users`, label: "Người dùng", icon: Users },
 ] as const;
+
+const AdminUserContext = createContext<AuthUser | null>(null);
+
+/** User ADMIN đã được AdminShell xác thực — tránh gọi /auth/me lần nữa. */
+export function useAdminUser() {
+  const user = useContext(AdminUserContext);
+  if (!user) {
+    throw new Error("useAdminUser must be used within AdminShell");
+  }
+  return user;
+}
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -147,124 +158,71 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     });
 
   return (
-    <div className="flex min-h-screen bg-[#FFF9F5] font-[family-name:var(--font-body)]">
-      <aside className="hidden w-64 flex-shrink-0 flex-col border-r border-border bg-[#4A2306] text-white md:flex">
-        <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
-          <DKSLogo size="sm" />
-          <div>
-            <div className="text-sm font-black font-[family-name:var(--font-nunito)]">
-              DKS Admin
+    <AdminUserContext.Provider value={user}>
+      <div className="flex min-h-screen bg-[#FFF9F5] font-[family-name:var(--font-body)]">
+        <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 flex-col border-r border-border bg-[#4A2306] text-white md:flex">
+          <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
+            <DKSLogo size="sm" />
+            <div>
+              <div className="text-sm font-black font-[family-name:var(--font-nunito)]">DKS Admin</div>
+              <div className="text-xs text-white/60">Quản trị hệ thống</div>
             </div>
-            <div className="text-xs text-white/60">Quản trị hệ thống</div>
           </div>
-        </div>
 
-        <nav className="flex-1 space-y-1 p-3">{renderNavigation()}</nav>
+          <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+            {NAV_ITEMS.map((item) => {
+              const Icon = item.icon;
+              const active =
+                item.href === PAGE_PATHS.admin
+                  ? pathname === PAGE_PATHS.admin
+                  : pathname.startsWith(item.href);
 
-        <div className="border-t border-white/10 p-4">
-          <div className="mb-3 text-xs text-white/70">
-            <div className="font-semibold text-white">{user.fullName}</div>
-            <div>{user.email}</div>
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
-          >
-            <LogOut className="h-4 w-4" />
-            Đăng xuất
-          </button>
-        </div>
-      </aside>
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors",
+                    active ? "bg-primary text-white" : "text-white/75 hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-      {mobileSidebarOpen ? (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            aria-label="Đóng menu quản trị"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
-          <aside
-            id="admin-mobile-sidebar"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu quản trị"
-            className="relative flex h-full w-[min(20rem,calc(100vw-3rem))] flex-col border-r border-white/10 bg-[#4A2306] text-white shadow-2xl"
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-5">
-              <div className="flex min-w-0 items-center gap-3">
-                <DKSLogo size="sm" />
-                <div className="min-w-0">
-                  <div className="text-sm font-black font-[family-name:var(--font-nunito)]">
-                    DKS Admin
-                  </div>
-                  <div className="truncate text-xs text-white/60">
-                    Quản trị hệ thống
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="rounded-lg p-2 text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                aria-label="Đóng menu quản trị"
-                onClick={() => setMobileSidebarOpen(false)}
-              >
-                <X className="h-5 w-5" />
-              </button>
+          <div className="border-t border-white/10 p-4">
+            <div className="mb-3 text-xs text-white/70">
+              <div className="font-semibold text-white">{user.fullName}</div>
+              <div>{user.email}</div>
             </div>
-
-            <nav
-              className="flex-1 space-y-1 overflow-y-auto p-3"
-              aria-label="Điều hướng quản trị"
-            >
-              {renderNavigation(() => setMobileSidebarOpen(false))}
-            </nav>
-
-            <div className="border-t border-white/10 p-4">
-              <div className="mb-3 text-xs text-white/70">
-                <div className="font-semibold text-white">{user.fullName}</div>
-                <div className="truncate">{user.email}</div>
-              </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
-              >
-                <LogOut className="h-4 w-4" />
-                Đăng xuất
-              </button>
-            </div>
-          </aside>
-        </div>
-      ) : null}
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border bg-white px-4 py-3 md:px-8">
-          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              className="rounded-lg p-2 text-[#4A2306] transition-colors hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
-              aria-controls="admin-mobile-sidebar"
-              aria-expanded={mobileSidebarOpen}
-              aria-label="Mở menu quản trị"
-              onClick={() => setMobileSidebarOpen(true)}
+              onClick={handleLogout}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
             >
-              <Menu className="h-5 w-5" />
+              <LogOut className="h-4 w-4" />
+              Đăng xuất
             </button>
-            <h1 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
-              Bảng điều khiển
-            </h1>
           </div>
-          <Link
-            href={PAGE_PATHS.home}
-            className="text-sm font-semibold text-primary hover:underline"
-          >
-            Về website
-          </Link>
-        </header>
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex items-center justify-between border-b border-border bg-white px-4 py-3 md:px-8">
+            <div>
+              <h1 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                Bảng điều khiển
+              </h1>
+            </div>
+            <Link href={PAGE_PATHS.home} className="text-sm font-semibold text-primary hover:underline">
+              Về website
+            </Link>
+          </header>
+          <main className="flex-1 p-4 md:p-8">{children}</main>
+        </div>
       </div>
-    </div>
+    </AdminUserContext.Provider>
   );
 }

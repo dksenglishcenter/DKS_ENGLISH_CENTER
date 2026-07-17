@@ -1,7 +1,7 @@
 import { BlogIndex } from "@/components/blog/blog-index";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
-import type { BlogPostSummary } from "@/data/blog-posts";
+import type { BlogPostSummary } from "@/lib/blog/types";
 
 export function BlogPage({ posts }: { posts: BlogPostSummary[] }) {
   return (

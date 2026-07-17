@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { BlogPostCard } from "@/components/blog/blog-post-card";
-import type { BlogPostSummary } from "@/data/blog-posts";
+import type { BlogPostSummary } from "@/lib/blog/types";
 
 const ALL_CATEGORIES = "Tất cả";
 
@@ -19,7 +19,8 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
     selectedCategory === ALL_CATEGORIES
       ? posts
       : posts.filter((post) => post.category === selectedCategory);
-  const featuredPosts = posts.filter((post) => post.featured);
+  /** Bài tick Featured trong admin, giữ thứ tự API (sortOrder → ngày đăng), tối đa 5. */
+  const featuredPosts = posts.filter((post) => post.featured).slice(0, 5);
 
   return (
     <div className="flex flex-col gap-10 lg:flex-row">
