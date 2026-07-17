@@ -8,25 +8,70 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createJob, updateJob } from "@/lib/jobs/api";
-import type { Job, JobFormValues } from "@/lib/jobs/types";
+import type { Job, JobFormValues, SalaryType } from "@/lib/jobs/types";
 import {
   hasJobFormErrors,
   normalizeJobPayload,
   type JobFormErrors,
   validateJobForm,
 } from "@/lib/jobs/validation";
-import { formatError } from "@/lib/errors/format-error";
+import { ApiError, formatError } from "@/lib/errors/format-error";
 
 const ERROR_INPUT_CLASS =
   "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200";
+
+const EMPLOYMENT_TYPES = [
+  { value: "FULL_TIME", label: "Full-time" },
+  { value: "PART_TIME", label: "Part-time" },
+  { value: "INTERNSHIP", label: "Thực tập" },
+  { value: "FREELANCE", label: "Freelance" },
+  { value: "CONTRACT", label: "Hợp đồng" },
+] as const;
+
+const EMPLOYMENT_TYPE_ALIASES: Record<string, string> = {
+  fulltime: "FULL_TIME",
+  "full-time": "FULL_TIME",
+  "full time": "FULL_TIME",
+  "toàn thời gian": "FULL_TIME",
+  parttime: "PART_TIME",
+  "part-time": "PART_TIME",
+  "part time": "PART_TIME",
+  "bán thời gian": "PART_TIME",
+  internship: "INTERNSHIP",
+  "thực tập": "INTERNSHIP",
+  freelance: "FREELANCE",
+  contract: "CONTRACT",
+  "hợp đồng": "CONTRACT",
+};
+
+function getEmploymentTypeValue(type: string) {
+  const normalizedType = type.trim().toLocaleLowerCase("vi-VN");
+  return (
+    EMPLOYMENT_TYPES.find(
+      (employmentType) =>
+        employmentType.value.toLocaleLowerCase("vi-VN") === normalizedType ||
+        employmentType.label.toLocaleLowerCase("vi-VN") === normalizedType,
+    )?.value ?? EMPLOYMENT_TYPE_ALIASES[normalizedType] ?? ""
+  );
+}
+
+function getEmploymentTypeLabel(value: string) {
+  return (
+    EMPLOYMENT_TYPES.find((employmentType) => employmentType.value === value)
+      ?.label ?? value
+  );
+}
 
 function createInitialValues(job: Job | null, sortOrder: number): JobFormValues {
   if (job) {
     return {
       title: job.title,
-      type: job.type,
+      type: getEmploymentTypeValue(job.type),
       location: job.location,
-      salary: job.salary,
+      salaryType: job.salaryType ?? "NEGOTIABLE",
+      salaryMin: job.salaryMin === null ? "" : String(job.salaryMin),
+      salaryMax: job.salaryMax === null ? "" : String(job.salaryMax),
+      currency: job.currency ?? "VND",
       duties: [...job.duties],
       benefits: [...job.benefits],
       req: job.req,
@@ -39,7 +84,10 @@ function createInitialValues(job: Job | null, sortOrder: number): JobFormValues 
     title: "",
     type: "",
     location: "",
-    salary: "",
+    salaryType: "",
+    salaryMin: "",
+    salaryMax: "",
+    currency: "VND",
     duties: [""],
     benefits: [""],
     req: "",
@@ -77,11 +125,35 @@ export function JobForm({
   }
 
   function updateText(
-    field: "title" | "type" | "location" | "salary" | "req" | "sortOrder",
+    field:
+      | "title"
+      | "type"
+      | "location"
+      | "salaryMin"
+      | "salaryMax"
+      | "req"
+      | "sortOrder",
     value: string,
   ) {
     setValues((current) => ({ ...current, [field]: value }));
     clearError(field);
+  }
+
+  function updateSalaryType(salaryType: SalaryType) {
+    setValues((current) => ({
+      ...current,
+      salaryType,
+      salaryMin: salaryType === "NEGOTIABLE" ? "" : current.salaryMin,
+      salaryMax: salaryType === "RANGE" ? current.salaryMax : "",
+    }));
+    setErrors((current) => ({
+      ...current,
+      salaryType: undefined,
+      salaryMin: undefined,
+      salaryMax: undefined,
+      currency: undefined,
+    }));
+    setFormError(null);
   }
 
   function updateItem(field: ItemField, index: number, value: string) {
@@ -144,12 +216,25 @@ export function JobForm({
 
     setSaving(true);
     try {
-      const payload = normalizeJobPayload(values);
+      const payload = {
+        ...normalizeJobPayload(values),
+        type: getEmploymentTypeLabel(values.type),
+      };
       const response = job
         ? await updateJob(job.id, payload)
         : await createJob(payload);
       onSaved(response.message);
     } catch (error) {
+      if (
+        error instanceof ApiError &&
+        error.status === 409 &&
+        error.message.includes("Thứ tự hiển thị")
+      ) {
+        setErrors((current) => ({
+          ...current,
+          sortOrder: error.message,
+        }));
+      }
       setFormError(formatError(error));
       focusFirstInvalidField();
     } finally {
@@ -294,16 +379,39 @@ export function JobForm({
           placeholder="Ví dụ: Giáo viên IELTS"
           onChange={(value) => updateText("title", value)}
         />
-        <TextField
-          id="job-type"
-          label="Loại hình làm việc *"
-          value={values.type}
-          maxLength={80}
-          error={errors.type}
-          disabled={saving}
-          placeholder="Ví dụ: Full-time"
-          onChange={(value) => updateText("type", value)}
-        />
+        <div>
+          <Label htmlFor="job-type" className="font-bold text-[#4A2306]">
+            Loại hình làm việc *
+          </Label>
+          <select
+            id="job-type"
+            value={values.type}
+            disabled={saving}
+            required
+            aria-invalid={Boolean(errors.type)}
+            aria-describedby={errors.type ? "job-type-error" : undefined}
+            className={`mt-2 h-12 w-full rounded-lg border border-border bg-white px-4 text-[#4A2306] outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.type ? ERROR_INPUT_CLASS : ""}`}
+            onChange={(event) => updateText("type", event.target.value)}
+          >
+            <option value="" disabled>
+              Chọn loại hình làm việc
+            </option>
+            {EMPLOYMENT_TYPES.map((employmentType) => (
+              <option key={employmentType.value} value={employmentType.value}>
+                {employmentType.label}
+              </option>
+            ))}
+          </select>
+          {errors.type ? (
+            <p
+              id="job-type-error"
+              role="alert"
+              className="mt-1 text-xs font-medium text-red-600"
+            >
+              {errors.type}
+            </p>
+          ) : null}
+        </div>
         <TextField
           id="job-location"
           label="Địa điểm *"
@@ -314,17 +422,108 @@ export function JobForm({
           placeholder="Ví dụ: Hà Nội"
           onChange={(value) => updateText("location", value)}
         />
-        <TextField
-          id="job-salary"
-          label="Mức lương *"
-          value={values.salary}
-          maxLength={120}
-          error={errors.salary}
-          disabled={saving}
-          placeholder="Ví dụ: Thỏa thuận"
-          onChange={(value) => updateText("salary", value)}
-        />
+        <div>
+          <Label htmlFor="job-salary-type" className="font-bold text-[#4A2306]">
+            Hình thức trả lương *
+          </Label>
+          <select
+            id="job-salary-type"
+            value={values.salaryType}
+            disabled={saving}
+            required
+            aria-invalid={Boolean(errors.salaryType)}
+            aria-describedby={
+              errors.salaryType ? "job-salary-type-error" : undefined
+            }
+            className={`mt-2 h-12 w-full rounded-lg border border-border bg-white px-4 text-[#4A2306] outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.salaryType ? ERROR_INPUT_CLASS : ""}`}
+            onChange={(event) =>
+              updateSalaryType(event.target.value as SalaryType)
+            }
+          >
+            <option value="" disabled>
+              Chọn hình thức trả lương
+            </option>
+            <option value="RANGE">Theo khoảng lương</option>
+            <option value="FIXED">Mức lương cố định</option>
+            <option value="NEGOTIABLE">Thỏa thuận</option>
+          </select>
+          {errors.salaryType ? (
+            <p
+              id="job-salary-type-error"
+              role="alert"
+              className="mt-1 text-xs font-medium text-red-600"
+            >
+              {errors.salaryType}
+            </p>
+          ) : null}
+        </div>
       </div>
+
+      {values.salaryType === "RANGE" || values.salaryType === "FIXED" ? (
+        <fieldset className="rounded-xl border border-border bg-[#FFF9F5]/60 p-4">
+          <legend className="px-1 font-bold text-[#4A2306]">
+            Chi tiết mức lương
+          </legend>
+          <div
+            className={`grid gap-5 ${
+              values.salaryType === "RANGE"
+                ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_10rem]"
+                : "md:grid-cols-[minmax(0,1fr)_10rem]"
+            }`}
+          >
+            <TextField
+              id="job-salary-min"
+              label={
+                values.salaryType === "RANGE"
+                  ? "Lương tối thiểu *"
+                  : "Mức lương cố định *"
+              }
+              value={values.salaryMin}
+              type="number"
+              min={1}
+              max={1000000000}
+              error={errors.salaryMin}
+              disabled={saving}
+              placeholder="Ví dụ: 15000000"
+              onChange={(value) => updateText("salaryMin", value)}
+            />
+            {values.salaryType === "RANGE" ? (
+              <TextField
+                id="job-salary-max"
+                label="Lương tối đa *"
+                value={values.salaryMax}
+                type="number"
+                min={1}
+                max={1000000000}
+                error={errors.salaryMax}
+                disabled={saving}
+                placeholder="Ví dụ: 30000000"
+                onChange={(value) => updateText("salaryMax", value)}
+              />
+            ) : null}
+            <div>
+              <Label htmlFor="job-salary-currency" className="font-bold text-[#4A2306]">
+                Đơn vị *
+              </Label>
+              <select
+                id="job-salary-currency"
+                value={values.currency}
+                disabled={saving}
+                aria-invalid={Boolean(errors.currency)}
+                className={`mt-2 h-12 w-full rounded-lg border border-border bg-white px-4 text-[#4A2306] outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.currency ? ERROR_INPUT_CLASS : ""}`}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    currency: event.target.value as "VND",
+                  }))
+                }
+              >
+                <option value="VND">VND</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      ) : null}
 
       <div>
         <Label htmlFor="job-requirements" className="font-bold text-[#4A2306]">
@@ -359,33 +558,55 @@ export function JobForm({
           label="Thứ tự hiển thị"
           value={values.sortOrder}
           type="number"
-          min={0}
+          min={1}
           max={10000}
           error={errors.sortOrder}
           disabled={saving}
-          helper="Số nhỏ hơn sẽ được hiển thị trước."
+          helper="Bắt đầu từ 1; số nhỏ hơn sẽ được hiển thị trước."
           onChange={(value) => updateText("sortOrder", value)}
         />
 
-        <label className="flex min-h-12 cursor-pointer items-center justify-between gap-4 self-start rounded-xl border border-border bg-white px-4 py-2 transition-colors hover:border-primary/50 has-[:focus-visible]:border-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 md:mt-[34px]">
-          <span className="font-bold text-[#4A2306]">Công khai vị trí</span>
-          <input
-            type="checkbox"
-            checked={values.isPublished}
-            disabled={saving}
-            className="peer sr-only"
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                isPublished: event.target.checked,
-              }))
-            }
-          />
-          <span
-            aria-hidden="true"
-            className="relative h-7 w-12 shrink-0 rounded-full bg-[#D8C4B8] transition-colors after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:bg-primary peer-checked:after:translate-x-5"
-          />
-        </label>
+        <fieldset className="min-w-0 self-start">
+          <legend className="font-bold text-[#4A2306]">
+            Trạng thái vị trí
+          </legend>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <label className="flex h-12 cursor-pointer items-center gap-3 rounded-lg border border-border bg-white px-4 transition-colors hover:bg-[#FFF9F5] has-[:checked]:border-primary has-[:checked]:bg-secondary/60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/30 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+              <input
+                type="radio"
+                name="job-published-status"
+                value="published"
+                checked={values.isPublished}
+                disabled={saving}
+                className="size-4 shrink-0 accent-primary"
+                onChange={() =>
+                  setValues((current) => ({
+                    ...current,
+                    isPublished: true,
+                  }))
+                }
+              />
+              <span className="font-bold text-[#4A2306]">Công khai</span>
+            </label>
+            <label className="flex h-12 cursor-pointer items-center gap-3 rounded-lg border border-border bg-white px-4 transition-colors hover:bg-[#FFF9F5] has-[:checked]:border-primary has-[:checked]:bg-secondary/60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/30 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+              <input
+                type="radio"
+                name="job-published-status"
+                value="draft"
+                checked={!values.isPublished}
+                disabled={saving}
+                className="size-4 shrink-0 accent-primary"
+                onChange={() =>
+                  setValues((current) => ({
+                    ...current,
+                    isPublished: false,
+                  }))
+                }
+              />
+              <span className="font-bold text-[#4A2306]">Ẩn</span>
+            </label>
+          </div>
+        </fieldset>
       </div>
 
       <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:justify-end">

@@ -183,7 +183,7 @@ export function ContactSubmissionsAdmin() {
       aria-labelledby="contact-submissions-title"
       className="flex flex-col gap-5"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2
             id="contact-submissions-title"
@@ -199,7 +199,7 @@ export function ContactSubmissionsAdmin() {
         <form
           onSubmit={handleSearch}
           role="search"
-          className="flex w-full gap-2 lg:max-w-xl"
+          className="flex w-full gap-2 lg:w-[28rem] lg:shrink-0"
         >
           <label htmlFor="contact-submission-search" className="sr-only">
             Tìm yêu cầu tư vấn
@@ -209,7 +209,7 @@ export function ContactSubmissionsAdmin() {
             type="search"
             value={searchInput}
             maxLength={100}
-            className="bg-white"
+            className="h-10 min-w-0 px-3 py-2 text-sm bg-white"
             placeholder="Tìm tên, điện thoại, email, khóa học..."
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -218,14 +218,24 @@ export function ContactSubmissionsAdmin() {
               type="button"
               variant="ghost"
               size="sm"
+              className="size-10 min-h-10 shrink-0 p-0"
               aria-label="Xóa nội dung tìm kiếm"
               onClick={clearSearch}
             >
               <X aria-hidden="true" />
             </Button>
           ) : null}
-          <Button type="submit" size="sm" disabled={loading}>
-            <SearchIcon data-icon="inline-start" aria-hidden="true" />
+          <Button
+            type="submit"
+            size="sm"
+            className="shrink-0 px-3"
+            disabled={loading}
+          >
+            <SearchIcon
+              data-icon="inline-start"
+              className="size-4"
+              aria-hidden="true"
+            />
             Tìm
           </Button>
         </form>
@@ -285,24 +295,27 @@ export function ContactSubmissionsAdmin() {
               <table className="w-full table-fixed text-left text-sm">
                 <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
                   <tr>
-                    <th scope="col" className="w-[17%] px-4 py-3 font-semibold">
+                    <th scope="col" className="w-[16%] px-4 py-3 font-semibold">
                       Khách hàng
                     </th>
-                    <th scope="col" className="w-[19%] px-4 py-3 font-semibold">
-                      Liên hệ
+                    <th scope="col" className="w-[14%] px-4 py-3 font-semibold">
+                      Số điện thoại
+                    </th>
+                    <th scope="col" className="w-[18%] px-4 py-3 font-semibold">
+                      Email
                     </th>
                     <th scope="col" className="w-[17%] px-4 py-3 font-semibold">
                       Khóa quan tâm
                     </th>
-                    <th scope="col" className="w-[27%] px-4 py-3 font-semibold">
+                    <th scope="col" className="w-[18%] px-4 py-3 font-semibold">
                       Nhu cầu học tập
                     </th>
-                    <th scope="col" className="w-[12%] px-4 py-3 font-semibold">
+                    <th scope="col" className="w-[11%] px-4 py-3 font-semibold">
                       Ngày gửi
                     </th>
                     <th
                       scope="col"
-                      className="w-[8%] px-4 py-3 text-center font-semibold"
+                      className="w-[6%] px-4 py-3 text-center font-semibold"
                     >
                       Thao tác
                     </th>
@@ -318,34 +331,28 @@ export function ContactSubmissionsAdmin() {
                         {submission.fullName}
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex flex-col gap-2">
+                        <a
+                          href={`tel:${submission.phone}`}
+                          className="flex items-center gap-2 break-all text-[#6B3E26] hover:text-primary"
+                        >
+                          <Phone className="size-4 shrink-0" aria-hidden="true" />
+                          {submission.phone}
+                        </a>
+                      </td>
+                      <td className="px-4 py-4">
+                        {submission.email ? (
                           <a
-                            href={`tel:${submission.phone}`}
+                            href={`mailto:${submission.email}`}
                             className="flex items-center gap-2 break-all text-[#6B3E26] hover:text-primary"
                           >
-                            <Phone
-                              className="size-4 shrink-0"
-                              aria-hidden="true"
-                            />
-                            {submission.phone}
+                            <Mail className="size-4 shrink-0" aria-hidden="true" />
+                            {submission.email}
                           </a>
-                          {submission.email ? (
-                            <a
-                              href={`mailto:${submission.email}`}
-                              className="flex items-center gap-2 break-all text-[#6B3E26] hover:text-primary"
-                            >
-                              <Mail
-                                className="size-4 shrink-0"
-                                aria-hidden="true"
-                              />
-                              {submission.email}
-                            </a>
-                          ) : (
-                            <span className="text-muted-foreground">
-                              Không có email
-                            </span>
-                          )}
-                        </div>
+                        ) : (
+                          <span className="text-muted-foreground">
+                            Không có email
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-[#6B3E26]">
                         {submission.courseInterest}
@@ -357,7 +364,7 @@ export function ContactSubmissionsAdmin() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-xs leading-relaxed text-muted-foreground">
+                      <td className="px-4 py-4 leading-relaxed text-muted-foreground">
                         {formatSubmittedAt(submission.createdAt)}
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -394,25 +401,39 @@ export function ContactSubmissionsAdmin() {
                       onDelete={openDeleteDialog}
                     />
                   </div>
-                  <div className="min-w-0 flex flex-col gap-2 text-sm">
-                    <a
-                      href={`tel:${submission.phone}`}
-                      className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
-                    >
-                      <Phone className="size-4 shrink-0" aria-hidden="true" />
-                      <span className="break-all">{submission.phone}</span>
-                    </a>
-                    {submission.email ? (
-                      <a
-                        href={`mailto:${submission.email}`}
-                        className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
-                      >
-                        <Mail className="size-4 shrink-0" aria-hidden="true" />
-                        <span className="break-all">{submission.email}</span>
-                      </a>
-                    ) : null}
-                  </div>
-                  <dl className="grid gap-3 text-sm">
+                  <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                    <div className="min-w-0">
+                      <dt className="font-semibold text-[#4A2306]">
+                        Số điện thoại
+                      </dt>
+                      <dd className="mt-1">
+                        <a
+                          href={`tel:${submission.phone}`}
+                          className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
+                        >
+                          <Phone className="size-4 shrink-0" aria-hidden="true" />
+                          <span className="break-all">{submission.phone}</span>
+                        </a>
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="font-semibold text-[#4A2306]">Email</dt>
+                      <dd className="mt-1">
+                        {submission.email ? (
+                          <a
+                            href={`mailto:${submission.email}`}
+                            className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
+                          >
+                            <Mail className="size-4 shrink-0" aria-hidden="true" />
+                            <span className="break-all">{submission.email}</span>
+                          </a>
+                        ) : (
+                          <span className="text-muted-foreground">
+                            Không có email
+                          </span>
+                        )}
+                      </dd>
+                    </div>
                     <div>
                       <dt className="font-semibold text-[#4A2306]">
                         Khóa quan tâm

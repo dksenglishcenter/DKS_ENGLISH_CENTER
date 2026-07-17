@@ -44,9 +44,12 @@ export class CareersController {
     const application = await this.careersService.create(dto);
 
     return {
+      success: true,
+      data: {
+        id: application.id,
+        createdAt: application.createdAt,
+      },
       message: 'Đã ghi nhận đơn ứng tuyển. DKS sẽ liên hệ bạn trong 24 giờ.',
-      id: application.id,
-      createdAt: application.createdAt,
     };
   }
 }

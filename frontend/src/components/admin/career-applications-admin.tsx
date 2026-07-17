@@ -186,7 +186,7 @@ export function CareerApplicationsAdmin() {
       aria-labelledby="career-applications-title"
       className="flex flex-col gap-5"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1
             id="career-applications-title"
@@ -202,7 +202,7 @@ export function CareerApplicationsAdmin() {
         <form
           onSubmit={handleSearch}
           role="search"
-          className="flex w-full gap-2 lg:max-w-xl"
+          className="flex w-full gap-2 lg:w-[28rem] lg:shrink-0"
         >
           <label htmlFor="career-application-search" className="sr-only">
             Tìm đơn ứng tuyển
@@ -212,7 +212,7 @@ export function CareerApplicationsAdmin() {
             type="search"
             value={searchInput}
             maxLength={100}
-            className="bg-white"
+            className="h-10 min-w-0 px-3 py-2 text-sm bg-white"
             placeholder="Tìm tên, điện thoại, email, vị trí..."
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -221,14 +221,24 @@ export function CareerApplicationsAdmin() {
               type="button"
               variant="ghost"
               size="sm"
+              className="size-10 min-h-10 shrink-0 p-0"
               aria-label="Xóa nội dung tìm kiếm"
               onClick={clearSearch}
             >
               <X aria-hidden="true" />
             </Button>
           ) : null}
-          <Button type="submit" size="sm" disabled={loading}>
-            <Search data-icon="inline-start" aria-hidden="true" />
+          <Button
+            type="submit"
+            size="sm"
+            className="shrink-0 px-3"
+            disabled={loading}
+          >
+            <Search
+              data-icon="inline-start"
+              className="size-4"
+              aria-hidden="true"
+            />
             Tìm
           </Button>
         </form>
@@ -288,16 +298,19 @@ export function CareerApplicationsAdmin() {
               <table className="w-full table-fixed text-left text-sm">
                 <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
                   <tr>
-                    <th scope="col" className="w-[16%] px-4 py-3 font-semibold">
+                    <th scope="col" className="w-[15%] px-4 py-3 font-semibold">
                       Ứng viên
                     </th>
-                    <th scope="col" className="w-[20%] px-4 py-3 font-semibold">
-                      Liên hệ
+                    <th scope="col" className="w-[14%] px-4 py-3 font-semibold">
+                      Số điện thoại
                     </th>
-                    <th scope="col" className="w-[19%] px-4 py-3 font-semibold">
+                    <th scope="col" className="w-[18%] px-4 py-3 font-semibold">
+                      Email
+                    </th>
+                    <th scope="col" className="w-[18%] px-4 py-3 font-semibold">
                       Vị trí ứng tuyển
                     </th>
-                    <th scope="col" className="w-[27%] px-4 py-3 font-semibold">
+                    <th scope="col" className="w-[18%] px-4 py-3 font-semibold">
                       Giới thiệu
                     </th>
                     <th scope="col" className="w-[11%] px-4 py-3 font-semibold">
@@ -305,7 +318,7 @@ export function CareerApplicationsAdmin() {
                     </th>
                     <th
                       scope="col"
-                      className="w-[7%] px-4 py-3 text-center font-semibold"
+                      className="w-[6%] px-4 py-3 text-center font-semibold"
                     >
                       Thao tác
                     </th>
@@ -321,28 +334,22 @@ export function CareerApplicationsAdmin() {
                         {application.fullName}
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex flex-col gap-2">
-                          <a
-                            href={`tel:${application.phone}`}
-                            className="flex items-center gap-2 break-all text-[#6B3E26] hover:text-primary"
-                          >
-                            <Phone
-                              className="size-4 shrink-0"
-                              aria-hidden="true"
-                            />
-                            {application.phone}
-                          </a>
-                          <a
-                            href={`mailto:${application.email}`}
-                            className="flex items-center gap-2 break-all text-[#6B3E26] hover:text-primary"
-                          >
-                            <Mail
-                              className="size-4 shrink-0"
-                              aria-hidden="true"
-                            />
-                            {application.email}
-                          </a>
-                        </div>
+                        <a
+                          href={`tel:${application.phone}`}
+                          className="flex items-center gap-2 break-all text-[#6B3E26] hover:text-primary"
+                        >
+                          <Phone className="size-4 shrink-0" aria-hidden="true" />
+                          {application.phone}
+                        </a>
+                      </td>
+                      <td className="px-4 py-4">
+                        <a
+                          href={`mailto:${application.email}`}
+                          className="flex items-center gap-2 break-all text-[#6B3E26] hover:text-primary"
+                        >
+                          <Mail className="size-4 shrink-0" aria-hidden="true" />
+                          {application.email}
+                        </a>
                       </td>
                       <td className="px-4 py-4 text-[#6B3E26]">
                         <span className="flex items-start gap-2">
@@ -358,7 +365,7 @@ export function CareerApplicationsAdmin() {
                       <td className="px-4 py-4 whitespace-pre-wrap [overflow-wrap:anywhere] text-[#6B3E26]">
                         {application.introduction || "Không cung cấp"}
                       </td>
-                      <td className="px-4 py-4 text-xs leading-relaxed text-muted-foreground">
+                      <td className="px-4 py-4 leading-relaxed text-muted-foreground">
                         {formatSubmittedAt(application.createdAt)}
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -395,23 +402,33 @@ export function CareerApplicationsAdmin() {
                       onDelete={openDeleteDialog}
                     />
                   </div>
-                  <div className="flex min-w-0 flex-col gap-2 text-sm">
-                    <a
-                      href={`tel:${application.phone}`}
-                      className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
-                    >
-                      <Phone className="size-4 shrink-0" aria-hidden="true" />
-                      <span className="break-all">{application.phone}</span>
-                    </a>
-                    <a
-                      href={`mailto:${application.email}`}
-                      className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
-                    >
-                      <Mail className="size-4 shrink-0" aria-hidden="true" />
-                      <span className="break-all">{application.email}</span>
-                    </a>
-                  </div>
-                  <dl className="grid gap-3 text-sm">
+                  <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                    <div className="min-w-0">
+                      <dt className="font-semibold text-[#4A2306]">
+                        Số điện thoại
+                      </dt>
+                      <dd className="mt-1">
+                        <a
+                          href={`tel:${application.phone}`}
+                          className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
+                        >
+                          <Phone className="size-4 shrink-0" aria-hidden="true" />
+                          <span className="break-all">{application.phone}</span>
+                        </a>
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="font-semibold text-[#4A2306]">Email</dt>
+                      <dd className="mt-1">
+                        <a
+                          href={`mailto:${application.email}`}
+                          className="flex min-w-0 items-center gap-2 text-[#6B3E26] hover:text-primary"
+                        >
+                          <Mail className="size-4 shrink-0" aria-hidden="true" />
+                          <span className="break-all">{application.email}</span>
+                        </a>
+                      </dd>
+                    </div>
                     <div>
                       <dt className="font-semibold text-[#4A2306]">
                         Vị trí ứng tuyển

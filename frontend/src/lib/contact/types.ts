@@ -1,3 +1,5 @@
+import type { ApiResponse } from "@/lib/api/client";
+
 export const CONTACT_COURSE_OPTIONS = [
   "IELTS Preparation",
   "9-to-10 Prep",
@@ -15,11 +17,12 @@ export type ContactFormPayload = {
   learningNeeds?: string;
 };
 
-export type ContactFormResponse = {
-  message: string;
+export type ContactFormReceipt = {
   id: string;
   createdAt: string;
 };
+
+export type ContactFormResponse = ApiResponse<ContactFormReceipt, never, true>;
 
 export type ContactSubmission = {
   id: string;
@@ -38,11 +41,10 @@ export type ContactSubmissionsMeta = {
   pageSize: number;
 };
 
-export type ContactSubmissionsResponse = {
-  success: true;
-  data: ContactSubmission[];
-  meta: ContactSubmissionsMeta;
-};
+export type ContactSubmissionsResponse = ApiResponse<
+  ContactSubmission[],
+  ContactSubmissionsMeta
+>;
 
 export type ContactInformation = {
   id: string;
@@ -59,6 +61,4 @@ export type ContactInformationPayload = Pick<
   "phone" | "email" | "address" | "hours" | "mapUrl"
 >;
 
-export type ContactInformationResponse = {
-  contactInfo: ContactInformation;
-};
+export type ContactInformationResponse = ApiResponse<ContactInformation>;

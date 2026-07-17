@@ -29,7 +29,7 @@ export class JobsController {
   @Get()
   async listPublished() {
     const jobs = await this.jobsService.listPublished();
-    return { jobs };
+    return { success: true, data: jobs };
   }
 
   //Lấy tất cả các vị trí tuyển dụng (cả published và unpublished) cho admin
@@ -37,14 +37,15 @@ export class JobsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async listForAdmin(@Query() query: ListJobsQueryDto) {
-    return this.jobsService.listForAdmin(query);
+    const { data, meta } = await this.jobsService.listForAdmin(query);
+    return { success: true, data, meta };
   }
 
   //Lấy vị trí tuyển dụng đã được published theo id
   @Get(':id')
   async findPublishedById(@Param() params: JobParamsDto) {
     const job = await this.jobsService.findPublishedById(params.id);
-    return { job };
+    return { success: true, data: job };
   }
 
   //Tạo vị trí tuyển dụng mới (chỉ dành cho admin)
@@ -54,7 +55,11 @@ export class JobsController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateJobDto) {
     const job = await this.jobsService.create(dto);
-    return { message: 'Đã tạo vị trí tuyển dụng', job };
+    return {
+      success: true,
+      data: job,
+      message: 'Đã tạo vị trí tuyển dụng',
+    };
   }
 
   //Cập nhật vị trí tuyển dụng (chỉ dành cho admin)
@@ -63,7 +68,11 @@ export class JobsController {
   @Roles(Role.ADMIN)
   async update(@Param() params: JobParamsDto, @Body() dto: UpdateJobDto) {
     const job = await this.jobsService.update(params.id, dto);
-    return { message: 'Đã cập nhật vị trí tuyển dụng', job };
+    return {
+      success: true,
+      data: job,
+      message: 'Đã cập nhật vị trí tuyển dụng',
+    };
   }
 
   //Xóa vị trí tuyển dụng (chỉ dành cho admin)
@@ -71,6 +80,11 @@ export class JobsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async remove(@Param() params: JobParamsDto) {
-    return this.jobsService.remove(params.id);
+    await this.jobsService.remove(params.id);
+    return {
+      success: true,
+      data: null,
+      message: 'Đã xóa vị trí tuyển dụng',
+    };
   }
 }

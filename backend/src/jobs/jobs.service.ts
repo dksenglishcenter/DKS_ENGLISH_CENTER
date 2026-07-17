@@ -9,13 +9,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ListJobsQueryDto } from './dto/list-jobs-query.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { type SalaryCurrency, type SalaryType } from './job-salary';
 
 const JOB_SELECT = {
   id: true,
   title: true,
   type: true,
   location: true,
-  salary: true,
+  salaryType: true,
+  salaryMin: true,
+  salaryMax: true,
+  currency: true,
   duties: true,
   benefits: true,
   req: true,
@@ -45,6 +49,41 @@ export class JobsService {
     return title.trim().replace(/\s+/g, ' ').toLocaleLowerCase('vi-VN');
   }
 
+  private validateSalary(
+    salaryType: SalaryType,
+    salaryMin: number | null,
+    salaryMax: number | null,
+  ) {
+    if (salaryType === 'NEGOTIABLE') {
+      if (salaryMin !== null || salaryMax !== null) {
+        throw new BadRequestException(
+          'Lương thỏa thuận không được có mức tối thiểu hoặc tối đa',
+        );
+      }
+      return;
+    }
+
+    if (!Number.isInteger(salaryMin) || (salaryMin ?? 0) <= 0) {
+      throw new BadRequestException('Lương tối thiểu phải là số nguyên dương');
+    }
+
+    if (salaryType === 'FIXED') {
+      if (salaryMax !== null) {
+        throw new BadRequestException('Lương cố định không được có mức tối đa');
+      }
+      return;
+    }
+
+    if (!Number.isInteger(salaryMax) || (salaryMax ?? 0) <= 0) {
+      throw new BadRequestException('Lương tối đa phải là số nguyên dương');
+    }
+    if ((salaryMax as number) < (salaryMin as number)) {
+      throw new BadRequestException(
+        'Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu',
+      );
+    }
+  }
+
   private isRecordNotFoundError(error: unknown) {
     return (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -57,6 +96,64 @@ export class JobsService {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2002'
     );
+  }
+
+  private isUniqueConstraintOn(error: unknown, field: string) {
+    if (
+      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+      error.code !== 'P2002'
+    ) {
+      return false;
+    }
+
+    const target = error.meta?.target;
+    const normalizedField = field.toLocaleLowerCase('en-US');
+    const targetMatches = Array.isArray(target)
+      ? target.some(
+          (item) =>
+            typeof item === 'string' &&
+            item.toLocaleLowerCase('en-US').includes(normalizedField),
+        )
+      : typeof target === 'string' &&
+        target.toLocaleLowerCase('en-US').includes(normalizedField);
+
+    return (
+      targetMatches ||
+      error.message.toLocaleLowerCase('en-US').includes(normalizedField)
+    );
+  }
+
+  private async ensureSortOrderAvailable(sortOrder: number, excludeId?: string) {
+    const existing = await this.prisma.job.findFirst({
+      where: {
+        sortOrder,
+        ...(excludeId ? { id: { not: excludeId } } : {}),
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      throw new ConflictException(
+        'Thứ tự hiển thị đã được sử dụng. Vui lòng chọn một số khác.',
+      );
+    }
+  }
+
+  private throwIfJobConflict(error: unknown): never {
+    if (
+      this.isUniqueConstraintOn(error, 'sortOrder') ||
+      this.isUniqueConstraintOn(error, 'sort_order')
+    ) {
+      throw new ConflictException(
+        'Thứ tự hiển thị đã được sử dụng. Vui lòng chọn một số khác.',
+      );
+    }
+
+    if (this.isUniqueConstraintError(error)) {
+      throw new ConflictException('Tên vị trí tuyển dụng đã tồn tại');
+    }
+
+    throw error;
   }
 
   //Lấy các vị trí tuyển dụng đã được published trong cơ sở dữ liệu
@@ -109,9 +206,9 @@ export class JobsService {
       });
 
       return {
-        jobs,
-        pagination: {
-          page,
+        data: jobs,
+        meta: {
+          currentPage: page,
           pageSize,
           totalItems,
           totalPages,
@@ -119,7 +216,7 @@ export class JobsService {
           hasNextPage: page < totalPages,
           nextSortOrder: Math.min(
             10000,
-            (maximumSortOrder._max.sortOrder ?? -1) + 1,
+            (maximumSortOrder._max.sortOrder ?? 0) + 1,
           ),
         },
       };
@@ -142,7 +239,17 @@ export class JobsService {
 
   async create(dto: CreateJobDto) {
     const title = dto.title.trim().replace(/\s+/g, ' ');
-
+    const salaryMin = dto.salaryMin ?? null;
+    const salaryMax = dto.salaryMax ?? null;
+    this.validateSalary(dto.salaryType, salaryMin, salaryMax);
+    const maximumSortOrder =
+      dto.sortOrder === undefined
+        ? await this.prisma.job.aggregate({ _max: { sortOrder: true } })
+        : null;
+    const sortOrder =
+      dto.sortOrder ??
+      Math.min(10000, (maximumSortOrder?._max.sortOrder ?? 0) + 1);
+    await this.ensureSortOrderAvailable(sortOrder);
     try {
       return await this.prisma.job.create({
         data: {
@@ -150,20 +257,20 @@ export class JobsService {
           normalizedTitle: this.normalizeTitle(title),
           type: dto.type.trim(),
           location: dto.location.trim(),
-          salary: dto.salary.trim(),
+          salaryType: dto.salaryType,
+          salaryMin,
+          salaryMax,
+          currency: dto.currency,
           duties: this.normalizeItems(dto.duties, 'duties'),
           benefits: this.normalizeItems(dto.benefits, 'benefits'),
           req: dto.req.trim(),
-          sortOrder: dto.sortOrder ?? 0,
+          sortOrder,
           isPublished: dto.isPublished ?? true,
         },
         select: JOB_SELECT,
       });
     } catch (error: unknown) {
-      if (this.isUniqueConstraintError(error)) {
-        throw new ConflictException('Tên vị trí tuyển dụng đã tồn tại');
-      }
-      throw error;
+      this.throwIfJobConflict(error);
     }
   }
 
@@ -174,7 +281,55 @@ export class JobsService {
       );
     }
 
+    if (dto.sortOrder !== undefined) {
+      await this.ensureSortOrderAvailable(dto.sortOrder, id);
+    }
+
     const title = dto.title?.trim().replace(/\s+/g, ' ');
+    const hasSalaryUpdate =
+      dto.salaryType !== undefined ||
+      dto.salaryMin !== undefined ||
+      dto.salaryMax !== undefined ||
+      dto.currency !== undefined;
+    let salaryData:
+      | {
+          salaryType: SalaryType;
+          salaryMin: number | null;
+          salaryMax: number | null;
+          currency: SalaryCurrency;
+        }
+      | undefined;
+
+    if (hasSalaryUpdate) {
+      const currentJob = await this.prisma.job.findUnique({
+        where: { id },
+        select: {
+          salaryType: true,
+          salaryMin: true,
+          salaryMax: true,
+          currency: true,
+        },
+      });
+      if (!currentJob) {
+        throw new NotFoundException(
+          'Không tìm thấy vị trí tuyển dụng để cập nhật',
+        );
+      }
+
+      const salaryType = dto.salaryType ?? currentJob.salaryType;
+      const salaryMin =
+        dto.salaryMin !== undefined ? dto.salaryMin : currentJob.salaryMin;
+      const salaryMax =
+        dto.salaryMax !== undefined ? dto.salaryMax : currentJob.salaryMax;
+      const currency = (dto.currency ?? currentJob.currency) as SalaryCurrency;
+      this.validateSalary(salaryType, salaryMin, salaryMax);
+      salaryData = {
+        salaryType,
+        salaryMin,
+        salaryMax,
+        currency,
+      };
+    }
 
     try {
       return await this.prisma.job.update({
@@ -187,7 +342,7 @@ export class JobsService {
           ...(dto.location !== undefined
             ? { location: dto.location.trim() }
             : {}),
-          ...(dto.salary !== undefined ? { salary: dto.salary.trim() } : {}),
+          ...(salaryData ?? {}),
           ...(dto.duties !== undefined
             ? { duties: this.normalizeItems(dto.duties, 'duties') }
             : {}),
@@ -209,18 +364,13 @@ export class JobsService {
         );
       }
 
-      if (this.isUniqueConstraintError(error)) {
-        throw new ConflictException('Tên vị trí tuyển dụng đã tồn tại');
-      }
-
-      throw error;
+      this.throwIfJobConflict(error);
     }
   }
 
   async remove(id: string) {
     try {
       await this.prisma.job.delete({ where: { id } });
-      return { message: 'Đã xóa vị trí tuyển dụng' };
     } catch (error: unknown) {
       if (this.isRecordNotFoundError(error)) {
         throw new NotFoundException(

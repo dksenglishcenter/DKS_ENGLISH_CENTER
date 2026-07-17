@@ -19,6 +19,7 @@ import { JobForm } from "./job-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { deleteJob, listAdminJobs, updateJob } from "@/lib/jobs/api";
+import { formatJobSalary } from "@/lib/jobs/salary";
 import type { Job, JobsPagination, JobStatusFilter } from "@/lib/jobs/types";
 import { ApiError, formatError } from "@/lib/errors/format-error";
 
@@ -77,8 +78,8 @@ export function JobsAdmin() {
       signal: controller.signal,
     })
       .then((response) => {
-        setJobs(response.jobs);
-        setPagination(response.pagination);
+        setJobs(response.data);
+        setPagination(response.meta);
         setListError(null);
       })
       .catch((error: unknown) => {
@@ -97,7 +98,7 @@ export function JobsAdmin() {
     return () => controller.abort();
   }, [page, reloadKey, search, status]);
 
-  const nextSortOrder = pagination?.nextSortOrder ?? 0;
+  const nextSortOrder = pagination?.nextSortOrder ?? 1;
 
   function reloadList(successMessage?: string) {
     setLoading(true);
@@ -201,9 +202,9 @@ export function JobsAdmin() {
   const visiblePages = getVisiblePages(page, pagination?.totalPages ?? 0);
 
   return (
-    <section aria-labelledby="jobs-admin-title" className="space-y-6">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
+    <section aria-labelledby="jobs-admin-title" className="min-w-0 space-y-6">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="shrink-0">
           <h1
             id="jobs-admin-title"
             className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
@@ -214,72 +215,83 @@ export function JobsAdmin() {
             Tạo, sắp xếp và kiểm soát trạng thái các vị trí tuyển dụng.
           </p>
         </div>
-        <Button type="button" onClick={() => openForm(null)}>
-          <Plus className="size-4" aria-hidden="true" />
-          Thêm vị trí
-        </Button>
-      </div>
-
-      <div className="rounded-2xl border border-border bg-white p-4 shadow-[0_4px_24px_rgba(74,35,6,0.04)] sm:p-5">
-        <form
-          role="search"
-          onSubmit={handleSearch}
-          className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto]"
-        >
-          <div>
-            <label htmlFor="jobs-search" className="sr-only">
-              Tìm vị trí tuyển dụng
-            </label>
-            <Input
-              id="jobs-search"
-              type="search"
-              value={searchInput}
-              maxLength={100}
-              className="bg-white"
-              placeholder="Tìm theo vị trí, loại hình, địa điểm..."
-              onChange={(event) => setSearchInput(event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="jobs-status" className="sr-only">
-              Lọc trạng thái
-            </label>
-            <select
-              id="jobs-status"
-              value={status}
-              className="h-12 w-full rounded-lg border border-border bg-white px-4 text-[#4A2306] outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
-              onChange={(event) => {
-                setLoading(true);
-                setListError(null);
-                setMessage(null);
-                setPage(1);
-                setStatus(event.target.value as JobStatusFilter);
-              }}
-            >
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <Button type="submit" className="flex-1" disabled={loading}>
-              <Search className="size-4" aria-hidden="true" />
-              Tìm
-            </Button>
-            {hasActiveFilters || searchInput ? (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={loading}
-                onClick={clearFilters}
+        <div className="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-white p-3 shadow-[0_4px_16px_rgba(74,35,6,0.04)] xl:w-auto xl:flex-row xl:items-center xl:border-0 xl:bg-transparent xl:p-0 xl:shadow-none">
+          <form
+            role="search"
+            onSubmit={handleSearch}
+            className="grid min-w-0 gap-2 lg:grid-cols-[minmax(16rem,24rem)_11rem_auto] lg:items-center"
+          >
+            <div>
+              <label htmlFor="jobs-search" className="sr-only">
+                Tìm vị trí tuyển dụng
+              </label>
+              <Input
+                id="jobs-search"
+                type="search"
+                value={searchInput}
+                maxLength={100}
+                className="h-10 min-w-0 bg-white px-3 py-2 text-sm"
+                placeholder="Tìm theo vị trí, loại hình, địa điểm..."
+                onChange={(event) => setSearchInput(event.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="jobs-status" className="sr-only">
+                Lọc trạng thái
+              </label>
+              <select
+                id="jobs-status"
+                value={status}
+                className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-[#4A2306] outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
+                onChange={(event) => {
+                  setLoading(true);
+                  setListError(null);
+                  setMessage(null);
+                  setPage(1);
+                  setStatus(event.target.value as JobStatusFilter);
+                }}
               >
-                Xóa lọc
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                size="sm"
+                className="flex-1 px-3"
+                disabled={loading}
+              >
+                <Search className="size-4" aria-hidden="true" />
+                Tìm
               </Button>
-            ) : null}
-          </div>
-        </form>
+              {hasActiveFilters || searchInput ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="px-3"
+                  disabled={loading}
+                  onClick={clearFilters}
+                >
+                  Xóa lọc
+                </Button>
+              ) : null}
+            </div>
+          </form>
+          <Button
+            type="button"
+            size="sm"
+            className="w-full shrink-0 px-3 xl:w-auto"
+            onClick={() => openForm(null)}
+          >
+            <Plus className="size-4" aria-hidden="true" />
+            Thêm vị trí
+          </Button>
+        </div>
       </div>
 
       {message ? (
@@ -311,7 +323,7 @@ export function JobsAdmin() {
       ) : null}
 
       <div
-        className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_4px_24px_rgba(74,35,6,0.04)]"
+        className="min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-[0_4px_24px_rgba(74,35,6,0.04)]"
         aria-busy={loading}
       >
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-[#FFF9F5] px-4 py-3 text-sm text-[#6B3E26] sm:px-5">
@@ -395,7 +407,7 @@ export function JobsAdmin() {
               </table>
             </div>
 
-            <div className="divide-y divide-border xl:hidden">
+            <div className="space-y-3 bg-[#FFF9F5]/50 p-3 xl:hidden">
               {jobs.map((job) => (
                 <JobCard
                   key={job.id}
@@ -545,9 +557,9 @@ function JobActions({ job, busy, onEdit, onToggle, onDelete }: JobItemProps) {
         variant="outline"
         size="sm"
         className="xl:shrink-0"
-      disabled={busy}
-      onClick={onEdit}
-    >
+        disabled={busy}
+        onClick={onEdit}
+      >
         Sửa
       </Button>
       <Button
@@ -555,9 +567,9 @@ function JobActions({ job, busy, onEdit, onToggle, onDelete }: JobItemProps) {
         variant="outline"
         size="sm"
         className="xl:shrink-0"
-      disabled={busy}
-      onClick={onToggle}
-    >
+        disabled={busy}
+        onClick={onToggle}
+      >
         {job.isPublished ? "Ẩn" : "Công khai"}
       </Button>
       <Button
@@ -566,9 +578,9 @@ function JobActions({ job, busy, onEdit, onToggle, onDelete }: JobItemProps) {
         size="sm"
         className="xl:shrink-0"
         disabled={busy}
-      aria-label={`Xóa vị trí ${job.title}`}
-      onClick={(event) => onDelete(event.currentTarget)}
-    >
+        aria-label={`Xóa vị trí ${job.title}`}
+        onClick={(event) => onDelete(event.currentTarget)}
+      >
         Xóa
       </Button>
     </div>
@@ -581,7 +593,9 @@ function JobTableRow(props: JobItemProps) {
     <tr className="align-top transition-colors hover:bg-[#FFF9F5]/70">
       <td className="px-4 py-4">
         <p className="font-bold text-[#4A2306]">{job.title}</p>
-        <p className="mt-1 line-clamp-1 text-xs text-[#9B6B50]">{job.salary}</p>
+        <p className="mt-1 line-clamp-1 text-xs text-[#9B6B50]">
+          {formatJobSalary(job)}
+        </p>
       </td>
       <td className="px-4 py-4 text-[#6B3E26]">{job.type}</td>
       <td className="px-4 py-4 text-[#6B3E26]">{job.location}</td>
@@ -604,7 +618,7 @@ function JobCard(props: JobItemProps) {
         <div className="min-w-0">
           <h2 className="break-words font-black text-[#4A2306]">{job.title}</h2>
           <p className="mt-1 text-sm font-semibold text-primary">
-            {job.salary}
+            {formatJobSalary(job)}
           </p>
         </div>
         <JobStatus published={job.isPublished} />

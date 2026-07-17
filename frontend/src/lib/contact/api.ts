@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiFetchResponse } from "@/lib/api/client";
 import { CONTACT_INFORMATION_CACHE_TAG } from "./constants";
 import { parseContactInformationResponse } from "./validation";
 import type {
@@ -23,10 +23,13 @@ type ListContactSubmissionsOptions = {
 };
 
 export async function submitContactForm(payload: ContactFormPayload) {
-  return apiFetch<ContactFormResponse>("/contact", {
-    method: "POST",
-    json: payload,
-  });
+  return apiFetchResponse<ContactFormResponse["data"], never, true>(
+    "/contact",
+    {
+      method: "POST",
+      json: payload,
+    },
+  );
 }
 
 export function listContactSubmissions({
@@ -41,29 +44,26 @@ export function listContactSubmissions({
   });
   if (search) query.set("search", search);
 
-  return apiFetch<ContactSubmissionsResponse>(
-    `/contact/submissions?${query.toString()}`,
-    {
-      method: "GET",
-      cache: "no-store",
-      signal,
-    },
-  );
+  return apiFetchResponse<
+    ContactSubmissionsResponse["data"],
+    ContactSubmissionsResponse["meta"]
+  >(`/contact/submissions?${query.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+    signal,
+  });
 }
 
 export function deleteContactSubmission(id: string) {
-  return apiFetch<{ success: true; message: string }>(
-    `/contact/submissions/${id}`,
-    {
-      method: "DELETE",
-    },
-  );
+  return apiFetchResponse<null, never, true>(`/contact/submissions/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export async function getContactInformation(
   options: GetContactInformationOptions = {},
 ) {
-  const response = await apiFetch<unknown>("/contact/info", {
+  const response = await apiFetchResponse<unknown>("/contact/info", {
     method: "GET",
     ...(options.revalidate === undefined
       ? { cache: "no-store" as const }
@@ -76,13 +76,16 @@ export async function getContactInformation(
     signal: AbortSignal.timeout(CONTACT_REQUEST_TIMEOUT_MS),
   });
 
-  return parseContactInformationResponse(response);
+  return {
+    ...response,
+    data: parseContactInformationResponse(response.data),
+  };
 }
 
 export async function replaceContactInformation(
   payload: ContactInformationPayload,
 ) {
-  return apiFetch<ContactInformationResponse & { message: string }>(
+  return apiFetchResponse<ContactInformationResponse["data"], never, true>(
     "/contact/info",
     {
       method: "PUT",
@@ -94,7 +97,7 @@ export async function replaceContactInformation(
 export async function updateContactInformation(
   payload: Partial<ContactInformationPayload>,
 ) {
-  return apiFetch<ContactInformationResponse & { message: string }>(
+  return apiFetchResponse<ContactInformationResponse["data"], never, true>(
     "/contact/info",
     {
       method: "PATCH",

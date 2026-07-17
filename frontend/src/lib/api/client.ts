@@ -13,6 +13,16 @@ type ApiFetchOptions = RequestInit & {
   skipAuthRefresh?: boolean;
 };
 
+export type ApiResponse<
+  TData,
+  TMeta = never,
+  TMessage extends boolean = false,
+> = {
+  success: true;
+  data: TData;
+} & ([TMeta] extends [never] ? { meta?: never } : { meta: TMeta }) &
+  (TMessage extends true ? { message: string } : { message?: string });
+
 let refreshInFlight: Promise<boolean> | null = null;
 
 async function tryRefreshSession(): Promise<boolean> {
@@ -46,7 +56,9 @@ export async function apiFetch<T = unknown>(
   options: ApiFetchOptions = {},
 ): Promise<T> {
   const { json, headers, skipAuthRefresh, ...init } = options;
-  const url = path.startsWith("http") ? path : `${getApiUrl()}${path.startsWith("/") ? path : `/${path}`}`;
+  const url = path.startsWith("http")
+    ? path
+    : `${getApiUrl()}${path.startsWith("/") ? path : `/${path}`}`;
   const isBrowser = typeof window !== "undefined";
 
   const doFetch = () =>
@@ -91,4 +103,28 @@ export async function apiFetch<T = unknown>(
   }
 
   return response.json() as Promise<T>;
+}
+
+/** Đọc response envelope chuẩn tại một nơi thay vì viết adapter theo endpoint. */
+export async function apiFetchResponse<
+  TData,
+  TMeta = never,
+  TMessage extends boolean = false,
+>(
+  path: string,
+  options: ApiFetchOptions = {},
+): Promise<ApiResponse<TData, TMeta, TMessage>> {
+  const response = await apiFetch<unknown>(path, options);
+
+  if (
+    typeof response !== "object" ||
+    response === null ||
+    !("success" in response) ||
+    response.success !== true ||
+    !("data" in response)
+  ) {
+    throw new Error("Phản hồi API không đúng cấu trúc chuẩn.");
+  }
+
+  return response as ApiResponse<TData, TMeta, TMessage>;
 }

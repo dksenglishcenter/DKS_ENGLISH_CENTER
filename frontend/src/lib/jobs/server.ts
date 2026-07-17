@@ -18,13 +18,28 @@ function getErrorMessage(error: unknown) {
 export const getPublicJobs = cache(async () => {
   try {
     const response = await listPublishedJobs();
-    lastKnownJobs = response.jobs.map(
-      ({ id, title, type, location, salary, duties, benefits, req }) => ({
+    lastKnownJobs = response.data.map(
+      ({
         id,
         title,
         type,
         location,
-        salary,
+        salaryType,
+        salaryMin,
+        salaryMax,
+        currency,
+        duties,
+        benefits,
+        req,
+      }) => ({
+        id,
+        title,
+        type,
+        location,
+        salaryType,
+        salaryMin,
+        salaryMax,
+        currency,
         duties,
         benefits,
         req,
