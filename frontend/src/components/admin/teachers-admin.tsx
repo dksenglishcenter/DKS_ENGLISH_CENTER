@@ -6,6 +6,7 @@ import Image from "next/image";
 import { AdminImageField } from "@/components/admin/admin-image-field";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "./row-actions";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { scrollToElement, scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { nextSortOrder } from "@/lib/admin/sort-order";
@@ -267,7 +268,7 @@ export function TeachersAdmin() {
               <th className="px-4 py-3 font-semibold">Chức danh</th>
               <th className="px-4 py-3 font-semibold">Order</th>
               <th className="px-4 py-3 font-semibold">Published</th>
-              <th className="px-4 py-3 font-semibold">Actions</th>
+              <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -294,24 +295,10 @@ export function TeachersAdmin() {
                 <td className="px-4 py-3">{teacher.sortOrder}</td>
                 <td className="px-4 py-3">{teacher.isPublished ? "Có" : "Ẩn"}</td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => void openEdit(teacher)}
-                    >
-                      Sửa
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setDeleteTarget(teacher)}
-                    >
-                      Xóa
-                    </Button>
-                  </div>
+                  <RowActions
+                    onEdit={() => void openEdit(teacher)}
+                    onDelete={() => setDeleteTarget(teacher)}
+                  />
                 </td>
               </tr>
             ))}

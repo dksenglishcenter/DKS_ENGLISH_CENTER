@@ -6,6 +6,7 @@ import { CalendarDays, Plus, Trash2 } from "lucide-react";
 import { AdminImageField } from "@/components/admin/admin-image-field";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "./row-actions";
 import { Input } from "@/components/ui/input";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { formatAdminDate } from "@/lib/admin/format";
@@ -327,7 +328,7 @@ export function BlogAdmin() {
               <th className="px-4 py-3 font-semibold">Chuyên mục</th>
               <th className="px-4 py-3 font-semibold">Ngày</th>
               <th className="px-4 py-3 font-semibold">Published</th>
-              <th className="px-4 py-3 font-semibold">Actions</th>
+              <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -346,24 +347,10 @@ export function BlogAdmin() {
                   {post.featured ? " · Hot" : ""}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => void openEdit(post)}
-                    >
-                      Sửa
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setDeleteTarget(post)}
-                    >
-                      Xóa
-                    </Button>
-                  </div>
+                  <RowActions
+                    onEdit={() => void openEdit(post)}
+                    onDelete={() => setDeleteTarget(post)}
+                  />
                 </td>
               </tr>
             ))}

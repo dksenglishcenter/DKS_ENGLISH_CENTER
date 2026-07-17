@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "./row-actions";
 import { listCourses } from "@/lib/courses/api";
 import type { Course } from "@/lib/courses/types";
 import { scrollToElement, scrollToFirstInvalid } from "@/lib/admin/scroll";
@@ -220,7 +221,7 @@ export function SuccessStoriesAdmin() {
               <th className="px-4 py-3 font-semibold">Badge</th>
               <th className="px-4 py-3 font-semibold">Order</th>
               <th className="px-4 py-3 font-semibold">Published</th>
-              <th className="px-4 py-3 font-semibold">Actions</th>
+              <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -235,19 +236,10 @@ export function SuccessStoriesAdmin() {
                 <td className="px-4 py-3">{story.sortOrder}</td>
                 <td className="px-4 py-3">{story.isPublished ? "Có" : "Ẩn"}</td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => openEdit(story)}>
-                      Sửa
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setDeleteTarget(story)}
-                    >
-                      Xóa
-                    </Button>
-                  </div>
+                  <RowActions
+                    onEdit={() => openEdit(story)}
+                    onDelete={() => setDeleteTarget(story)}
+                  />
                 </td>
               </tr>
             ))}

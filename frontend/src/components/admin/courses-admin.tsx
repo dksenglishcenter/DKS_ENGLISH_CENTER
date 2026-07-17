@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminImageField } from "@/components/admin/admin-image-field";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "./row-actions";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { slugify } from "@/lib/admin/slugify";
@@ -495,7 +496,7 @@ export function CoursesAdmin() {
               <th className="px-4 py-3 font-semibold">Featured</th>
               <th className="px-4 py-3 font-semibold">Published</th>
               <th className="px-4 py-3 font-semibold">Order</th>
-              <th className="px-4 py-3 font-semibold">Actions</th>
+              <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -510,24 +511,10 @@ export function CoursesAdmin() {
                 <td className="px-4 py-3">{course.isPublished ? "Có" : "Ẩn"}</td>
                 <td className="px-4 py-3">{course.sortOrder}</td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => void openEdit(course)}
-                    >
-                      Sửa
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setDeleteTarget(course)}
-                    >
-                      Xóa
-                    </Button>
-                  </div>
+                  <RowActions
+                    onEdit={() => void openEdit(course)}
+                    onDelete={() => setDeleteTarget(course)}
+                  />
                 </td>
               </tr>
             ))}

@@ -499,7 +499,7 @@ function JobActions({ job, busy, onEdit, onToggle, onDelete }: JobItemProps) {
       </Button>
       <Button
         type="button"
-        variant="outline"
+        variant="destructive"
         size="sm"
         className="xl:shrink-0"
         disabled={busy}

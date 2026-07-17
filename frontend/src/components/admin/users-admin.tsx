@@ -428,7 +428,7 @@ export function UsersAdmin() {
                   <th className="px-4 py-3 font-semibold">Điện thoại</th>
                   <th className="px-4 py-3 font-semibold">Quyền</th>
                   <th className="px-4 py-3 font-semibold">Ngày tạo</th>
-                  <th className="px-4 py-3 font-semibold">Actions</th>
+                  <th className="px-4 py-3 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -453,11 +453,12 @@ export function UsersAdmin() {
                         {formatAdminDateTime(user.createdAt)}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-2">
+                        <div className="flex items-center justify-end gap-2">
                           <Button
                             type="button"
                             size="sm"
                             variant="outline"
+                            className="min-w-[76px]"
                             onClick={() => openEdit(user)}
                           >
                             <Pencil className="size-4" aria-hidden="true" />
@@ -466,7 +467,8 @@ export function UsersAdmin() {
                           <Button
                             type="button"
                             size="sm"
-                            variant="outline"
+                            variant="destructive"
+                            className="min-w-[76px]"
                             disabled={isSelf}
                             title={isSelf ? "Không thể tự xóa tài khoản" : undefined}
                             onClick={() => setDeleteTarget(user)}

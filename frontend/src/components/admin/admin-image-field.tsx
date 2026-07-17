@@ -13,7 +13,7 @@ type AdminImageFieldProps = {
   onFile: (file: File | null) => void;
 };
 
-/** Ô URL + upload ảnh + preview — dùng chung mọi admin có ảnh. */
+/** Shared URL + upload + preview field for every admin image input. */
 export function AdminImageField({
   label = "Ảnh",
   url,
@@ -25,23 +25,32 @@ export function AdminImageField({
   onFile,
 }: AdminImageFieldProps) {
   return (
-    <div className="space-y-3" data-invalid={invalid ? "true" : undefined}>
-      {hint ? <p className="text-xs text-[#9B6B50]">{hint}</p> : null}
+    <div className="space-y-4" data-invalid={invalid ? "true" : undefined}>
+      {hint ? (
+        <p className="rounded-lg bg-[#FFF9F5] px-3 py-2 text-xs leading-relaxed text-[#9B6B50]">
+          {hint}
+        </p>
+      ) : null}
 
-      <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+      <div className="grid gap-4 md:grid-cols-2 md:items-start">
         <label className="block text-sm">
-          <span className="mb-1 block font-semibold text-[#4A2306]">{label} URL</span>
+          <span className="mb-1.5 block font-semibold text-[#4A2306]">
+            {label} URL
+          </span>
           <input
-            className={`w-full rounded-lg border px-3 py-2 ${
+            className={`w-full truncate rounded-lg border bg-[#FFF9F5] px-3 py-2.5 text-[#9B6B50] ${
               invalid ? "border-red-500" : "border-border"
             }`}
             value={url}
             readOnly
-            placeholder="URL sau khi upload"
+            placeholder="Tự điền sau khi tải ảnh lên"
           />
         </label>
+
         <label className="block text-sm">
-          <span className="mb-1 block font-semibold text-[#4A2306]">Chọn ảnh</span>
+          <span className="mb-1.5 block font-semibold text-[#4A2306]">
+            Chọn ảnh
+          </span>
           <input
             type="file"
             accept="image/*"
@@ -51,25 +60,41 @@ export function AdminImageField({
               onFile(file);
               event.target.value = "";
             }}
-            className="block w-full text-sm text-[#4A2306] file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary"
+            className="block w-full cursor-pointer text-sm text-[#9B6B50] file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-secondary file:px-4 file:py-2 file:font-semibold file:text-primary hover:file:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
           />
+          {uploading ? (
+            <span className="mt-1.5 block text-xs font-medium text-primary">
+              Đang tải ảnh lên…
+            </span>
+          ) : null}
         </label>
       </div>
 
-      {error ? <p className="text-xs text-red-600">{error}</p> : null}
-
-      {url ? (
-        <div className="relative h-40 w-full max-w-sm overflow-hidden rounded-xl border border-border">
-          <Image
-            src={url}
-            alt="Preview"
-            fill
-            className="object-cover"
-            unoptimized
-            style={{ objectPosition }}
-          />
-        </div>
+      {error ? (
+        <p className="text-xs font-medium text-red-600">{error}</p>
       ) : null}
+
+      <div>
+        <span className="mb-1.5 block text-sm font-semibold text-[#4A2306]">
+          Xem trước
+        </span>
+        {url ? (
+          <div className="relative h-44 w-full max-w-sm overflow-hidden rounded-xl border border-border bg-[#FFF9F5]">
+            <Image
+              src={url}
+              alt="Preview"
+              fill
+              className="object-cover"
+              unoptimized
+              style={{ objectPosition }}
+            />
+          </div>
+        ) : (
+          <div className="flex h-44 w-full max-w-sm items-center justify-center rounded-xl border border-dashed border-border bg-[#FFF9F5] text-sm text-[#9B6B50]">
+            Chưa có ảnh
+          </div>
+        )}
+      </div>
     </div>
   );
 }
