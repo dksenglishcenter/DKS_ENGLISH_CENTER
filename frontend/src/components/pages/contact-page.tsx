@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Clock, FileText, Mail, MapPin, Phone } from "lucide-react";
 
 import {
@@ -8,34 +7,9 @@ import {
 import { ContactForm } from "@/components/forms/contact-form";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
+import type { ContactInformation } from "@/lib/contact/types";
+import { getPhoneHref } from "@/lib/contact/validation";
 import { SOCIAL_LINKS } from "@/lib/social-links";
-
-const CONTACT_DETAILS = [
-  {
-    label: "Địa chỉ",
-    value: "63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hai Bà Trưng, Hà Nội",
-    icon: MapPin,
-    href: "https://www.google.com/maps/search/?api=1&query=63%20Ng%C3%B5%20120%20D%C6%B0%C6%A1ng%20V%C4%83n%20B%C3%A9%2C%20V%C4%A9nh%20Tuy%2C%20Hai%20B%C3%A0%20Tr%C6%B0ng%2C%20H%C3%A0%20N%E1%BB%99i",
-  },
-  {
-    label: "Hotline",
-    value: "083 451 3456",
-    icon: Phone,
-    href: "tel:0834513456",
-  },
-  {
-    label: "Email",
-    value: "dksenglishcenter@gmail.com",
-    icon: Mail,
-    href: "mailto:dksenglishcenter@gmail.com",
-  },
-  {
-    label: "Giờ mở cửa",
-    value: "Thứ 2 – Chủ Nhật: 7:00 – 21:00",
-    icon: Clock,
-    href: undefined,
-  },
-] as const;
 
 const SOCIAL_CHANNELS = [
   { name: "Zalo", network: "zalo", href: SOCIAL_LINKS.zalo, className: "bg-[#0068FF]" },
@@ -64,7 +38,41 @@ const SOCIAL_CHANNELS = [
   className: string;
 }>;
 
-export function ContactPage() {
+export function ContactPage({
+  contactInfo,
+}: {
+  contactInfo: ContactInformation | null;
+}) {
+  const mapHref = contactInfo?.mapUrl;
+  const contactDetails = contactInfo
+    ? [
+        {
+          label: "Địa chỉ",
+          value: contactInfo.address,
+          icon: MapPin,
+          href: mapHref,
+        },
+        {
+          label: "Hotline",
+          value: contactInfo.phone,
+          icon: Phone,
+          href: getPhoneHref(contactInfo.phone),
+        },
+        {
+          label: "Email",
+          value: contactInfo.email,
+          icon: Mail,
+          href: `mailto:${contactInfo.email}`,
+        },
+        {
+          label: "Giờ mở cửa",
+          value: contactInfo.hours,
+          icon: Clock,
+          href: undefined,
+        },
+      ]
+    : [];
+
   return (
     <div className="bg-background">
       <PageHero
@@ -90,7 +98,7 @@ export function ContactPage() {
                 Thông Tin Liên Hệ
               </h2>
               <address className="space-y-4 not-italic">
-                {CONTACT_DETAILS.map((detail) => {
+                {contactDetails.map((detail) => {
                   const Icon = detail.icon;
                   const content = (
                     <>
@@ -126,6 +134,11 @@ export function ContactPage() {
                     </div>
                   );
                 })}
+                {!contactInfo ? (
+                  <p className="rounded-xl border border-border bg-secondary p-4 text-sm text-muted-foreground">
+                    Thông tin liên hệ đang được cập nhật. Vui lòng thử lại sau.
+                  </p>
+                ) : null}
               </address>
             </div>
 
@@ -155,7 +168,7 @@ export function ContactPage() {
 
             <div className="relative min-h-[280px] overflow-hidden rounded-2xl border border-border bg-[#F8F9FA]">
               <svg
-                className="absolute inset-0 h-full w-full opacity-[0.06]"
+                className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.06]"
                 viewBox="0 0 400 280"
                 aria-hidden="true"
               >
@@ -189,16 +202,18 @@ export function ContactPage() {
                     DKS English Center
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hà Nội
+                    {contactInfo?.address ?? "Thông tin bản đồ đang được cập nhật"}
                   </p>
-                  <Link
-                    href={CONTACT_DETAILS[0].href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-[#D95518] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    Mở Google Maps →
-                  </Link>
+                  {mapHref ? (
+                    <a
+                      href={mapHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="pointer-events-auto mt-3 inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-[#D95518] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      Mở Google Maps →
+                    </a>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -237,7 +252,8 @@ export function ContactPage() {
                 <p className="text-xs text-muted-foreground">Phản hồi ngay lập tức</p>
               </a>
               <a
-                href="tel:0834513456"
+                href={contactInfo ? getPhoneHref(contactInfo.phone) : undefined}
+                aria-disabled={!contactInfo}
                 className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
@@ -246,7 +262,9 @@ export function ContactPage() {
                 <span className="mb-1 block text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]">
                   Gọi ngay
                 </span>
-                <span className="block text-xs text-muted-foreground">083 451 3456</span>
+                <span className="block text-xs text-muted-foreground">
+                  {contactInfo?.phone ?? "Đang cập nhật"}
+                </span>
               </a>
             </div>
           </section>

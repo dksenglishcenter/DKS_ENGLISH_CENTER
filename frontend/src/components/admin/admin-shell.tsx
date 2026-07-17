@@ -7,14 +7,17 @@ import {
   BookOpen,
   Briefcase,
   Building2,
+  FileUser,
   GraduationCap,
   ImageIcon,
   LayoutDashboard,
   LogOut,
   Mail,
+  Menu,
   MessageSquareQuote,
   Newspaper,
   Users,
+  X,
 } from "lucide-react";
 
 import { DKSLogo } from "@/components/brand/dks-logo";
@@ -31,12 +34,25 @@ const NAV_ITEMS = [
     label: "Câu chuyện",
     icon: MessageSquareQuote,
   },
-  { href: `${PAGE_PATHS.admin}/gallery`, label: "Môi trường Học Tập", icon: ImageIcon },
+  {
+    href: `${PAGE_PATHS.admin}/gallery`,
+    label: "Môi trường Học Tập",
+    icon: ImageIcon,
+  },
   { href: `${PAGE_PATHS.admin}/about`, label: "Về chúng tôi", icon: Building2 },
-  { href: `${PAGE_PATHS.admin}/teachers`, label: "Giáo viên", icon: GraduationCap },
+  {
+    href: `${PAGE_PATHS.admin}/teachers`,
+    label: "Giáo viên",
+    icon: GraduationCap,
+  },
   { href: `${PAGE_PATHS.admin}/blog`, label: "Blog", icon: Newspaper },
   { href: `${PAGE_PATHS.admin}/contacts`, label: "Liên hệ", icon: Mail },
   { href: `${PAGE_PATHS.admin}/careers`, label: "Tuyển dụng", icon: Briefcase },
+  {
+    href: `${PAGE_PATHS.admin}/career-applications`,
+    label: "Đơn ứng tuyển",
+    icon: FileUser,
+  },
   { href: `${PAGE_PATHS.admin}/users`, label: "Người dùng", icon: Users },
 ] as const;
 
@@ -56,6 +72,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [checking, setChecking] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,6 +102,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (!mobileSidebarOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [mobileSidebarOpen]);
+
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -100,6 +130,32 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
+  const renderNavigation = (onNavigate?: () => void) =>
+    NAV_ITEMS.map((item) => {
+      const Icon = item.icon;
+      const active =
+        item.href === PAGE_PATHS.admin
+          ? pathname === PAGE_PATHS.admin
+          : pathname.startsWith(item.href);
+
+      return (
+        <Link
+          key={item.href}
+          href={item.href}
+          onClick={onNavigate}
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors",
+            active
+              ? "bg-primary text-white"
+              : "text-white/75 hover:bg-white/10 hover:text-white",
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          {item.label}
+        </Link>
+      );
+    });
 
   return (
     <AdminUserContext.Provider value={user}>

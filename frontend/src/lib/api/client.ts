@@ -2,6 +2,11 @@ import { getApiUrl } from "./config";
 import { parseApiErrorBody } from "@/lib/errors/format-error";
 
 type ApiFetchOptions = RequestInit & {
+  /** Cấu hình Data Cache khi fetch chạy trong Next.js server. */
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
   /** JSON body — tự stringify và set Content-Type. */
   json?: unknown;
   /** Bỏ qua retry refresh (tránh vòng lặp khi gọi /auth/refresh). */

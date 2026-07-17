@@ -1,18 +1,19 @@
-import AdminPlaceholderPage from "@/components/admin/admin-placeholder";
+import { ContactInformationAdmin } from "@/components/admin/contact-information-admin";
+import { ContactSubmissionsAdmin } from "@/components/admin/contact-submissions-admin";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
   title: "Admin · Liên hệ",
-  description: "Quản lý đơn liên hệ.",
+  description: "Quản lý thông tin liên hệ hiển thị trên website.",
   path: "/admin/contacts",
   noIndex: true,
 });
 
 export default function Page() {
   return (
-    <AdminPlaceholderPage
-      title="Liên hệ"
-      description="Module quản lý contact_submissions sẽ được nối API ở bước sau."
-    />
+    <div className="flex flex-col gap-10">
+      <ContactInformationAdmin />
+      <ContactSubmissionsAdmin />
+    </div>
   );
 }

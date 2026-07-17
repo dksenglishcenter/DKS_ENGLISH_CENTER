@@ -4,6 +4,8 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { DKSLogo } from "@/components/brand/dks-logo";
 import { SocialIcon } from "@/components/brand/social-icon";
 import { Container } from "@/components/layout/container";
+import { getPublicContactInformation } from "@/lib/contact/server";
+import { getPhoneHref } from "@/lib/contact/validation";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 import type { SocialNetwork } from "@/lib/social-links";
@@ -21,7 +23,9 @@ const FOOTER_SOCIALS: { network: SocialNetwork; href: string; label: string }[] 
   { network: "youtube", href: SOCIAL_LINKS.youtube, label: "YouTube" },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const contactInfo = await getPublicContactInformation();
+
   return (
     <footer className="bg-[#4A2306] text-white">
       <Container className="py-14">
@@ -74,24 +78,49 @@ export function Footer() {
 
           <div>
             <h4 className="mb-4 font-bold text-white font-[family-name:var(--font-nunito)]">Liên hệ</h4>
-            <ul className="space-y-3 text-sm text-orange-100 font-[family-name:var(--font-body)]">
-              <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
-                <span>63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy, Hai Bà Trưng, Hà Nội</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
-                <span>083 451 3456</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
-                <span>dksenglishcenter@gmail.com</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
-                <span>T2 – CN: 7:00 – 21:00</span>
-              </li>
-            </ul>
+            {contactInfo ? (
+              <address className="not-italic">
+                <ul className="space-y-3 text-sm text-orange-100 font-[family-name:var(--font-body)]">
+                  <li>
+                    <a
+                      href={contactInfo.mapUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-start gap-2 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                      <span>{contactInfo.address}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={getPhoneHref(contactInfo.phone)}
+                      className="flex items-center gap-2 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      <Phone className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                      <span>{contactInfo.phone}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={`mailto:${contactInfo.email}`}
+                      className="flex items-center gap-2 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      <Mail className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                      <span className="break-all">{contactInfo.email}</span>
+                    </a>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                    <span>{contactInfo.hours}</span>
+                  </li>
+                </ul>
+              </address>
+            ) : (
+              <p className="text-sm text-orange-100">
+                Thông tin liên hệ đang được cập nhật.
+              </p>
+            )}
           </div>
         </div>
 

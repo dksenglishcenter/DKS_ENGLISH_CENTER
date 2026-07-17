@@ -1,5 +1,5 @@
-import { JOBS } from "@/data/jobs";
 import type { Course } from "@/lib/courses/types";
+import type { PublicJob } from "@/lib/jobs/types";
 import { getSiteUrl, siteConfig } from "./config";
 
 export function organizationSchema() {
@@ -93,7 +93,18 @@ export function aboutPageSchema() {
   };
 }
 
-export function careersPageSchema() {
+function getEmploymentTypes(type: string) {
+  const normalizedType = type.toLocaleLowerCase("en-US");
+  const employmentTypes = [
+    normalizedType.includes("full-time") ? "FULL_TIME" : null,
+    normalizedType.includes("part-time") ? "PART_TIME" : null,
+    normalizedType.includes("freelance") ? "CONTRACTOR" : null,
+  ].filter((value): value is string => value !== null);
+
+  return employmentTypes.length > 0 ? employmentTypes : ["OTHER"];
+}
+
+export function careersPageSchema(jobs: readonly PublicJob[]) {
   const siteUrl = getSiteUrl();
 
   return {
@@ -109,17 +120,14 @@ export function careersPageSchema() {
         isPartOf: { "@id": `${siteUrl}/#organization` },
         inLanguage: siteConfig.language,
       },
-      ...JOBS.map((job) => ({
+      ...jobs.map((job) => ({
         "@type": "JobPosting",
         title: job.title,
-        description: `${job.req}. ${job.duties.join(". ")}.`,
-        employmentType: job.type.includes("Full-time")
-          ? "FULL_TIME"
-          : job.type.includes("Part-time")
-            ? "PART_TIME"
-            : "CONTRACTOR",
+        description: `${job.req}. Nhiệm vụ: ${job.duties.join(". ")}. Quyền lợi: ${job.benefits.join(". ")}. Mức lương: ${job.salary}.`,
+        employmentType: getEmploymentTypes(job.type),
         hiringOrganization: {
           "@type": "Organization",
+          "@id": `${siteUrl}/#organization`,
           name: siteConfig.name,
           sameAs: siteUrl,
         },
@@ -129,15 +137,6 @@ export function careersPageSchema() {
             "@type": "PostalAddress",
             addressLocality: job.location,
             addressCountry: "VN",
-          },
-        },
-        baseSalary: {
-          "@type": "MonetaryAmount",
-          currency: "VND",
-          value: {
-            "@type": "QuantitativeValue",
-            value: job.salary,
-            unitText: "MONTH",
           },
         },
         url: `${siteUrl}/careers#job-${job.id}`,
