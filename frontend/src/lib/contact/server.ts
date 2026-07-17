@@ -21,7 +21,7 @@ export const getPublicContactInformation = cache(async () => {
     const response = await getContactInformation({
       revalidate: PUBLIC_CONTACT_REVALIDATE_SECONDS,
     });
-    lastKnownContactInformation = response.contactInfo;
+    lastKnownContactInformation = response.data;
     return lastKnownContactInformation;
   } catch (error) {
     unstable_rethrow(error);

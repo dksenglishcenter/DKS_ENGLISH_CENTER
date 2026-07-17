@@ -71,7 +71,11 @@ export class ContactService {
   async removeSubmission(id: string) {
     try {
       await this.prisma.contactSubmission.delete({ where: { id } });
-      return { success: true, message: 'Đã xóa yêu cầu tư vấn.' };
+      return {
+        success: true,
+        data: null,
+        message: 'Đã xóa yêu cầu tư vấn.',
+      };
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

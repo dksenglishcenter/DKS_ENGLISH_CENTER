@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiFetchResponse } from "@/lib/api/client";
 import type {
   AdminJobsResponse,
   Job,
@@ -7,7 +7,7 @@ import type {
 } from "./types";
 
 export function listPublishedJobs() {
-  return apiFetch<{ jobs: Job[] }>("/jobs", {
+  return apiFetchResponse<Job[]>("/jobs", {
     method: "GET",
     cache: "no-store",
   });
@@ -29,29 +29,32 @@ export function listAdminJobs({
   }
   const suffix = query.size > 0 ? `?${query.toString()}` : "";
 
-  return apiFetch<AdminJobsResponse>(`/jobs/admin${suffix}`, {
-    method: "GET",
-    cache: "no-store",
-    signal,
-  });
+  return apiFetchResponse<Job[], AdminJobsResponse["meta"]>(
+    `/jobs/admin${suffix}`,
+    {
+      method: "GET",
+      cache: "no-store",
+      signal,
+    },
+  );
 }
 
 export function createJob(payload: JobPayload) {
-  return apiFetch<{ message: string; job: Job }>("/jobs", {
+  return apiFetchResponse<Job, never, true>("/jobs", {
     method: "POST",
     json: payload,
   });
 }
 
 export function updateJob(id: string, payload: Partial<JobPayload>) {
-  return apiFetch<{ message: string; job: Job }>(`/jobs/${id}`, {
+  return apiFetchResponse<Job, never, true>(`/jobs/${id}`, {
     method: "PATCH",
     json: payload,
   });
 }
 
 export function deleteJob(id: string) {
-  return apiFetch<{ message: string }>(`/jobs/${id}`, {
+  return apiFetchResponse<null, never, true>(`/jobs/${id}`, {
     method: "DELETE",
   });
 }

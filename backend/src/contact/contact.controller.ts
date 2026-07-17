@@ -43,9 +43,12 @@ export class ContactController {
     const submission = await this.contactService.create(dto);
 
     return {
+      success: true,
+      data: {
+        id: submission.id,
+        createdAt: submission.createdAt,
+      },
       message: 'Đã ghi nhận yêu cầu tư vấn. DKS sẽ liên hệ bạn sớm nhất.',
-      id: submission.id,
-      createdAt: submission.createdAt,
     };
   }
 }

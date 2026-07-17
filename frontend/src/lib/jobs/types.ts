@@ -1,9 +1,17 @@
+import type { ApiResponse } from "@/lib/api/client";
+
+export type SalaryType = "RANGE" | "FIXED" | "NEGOTIABLE";
+export type SalaryCurrency = "VND";
+
 export type Job = {
   id: string;
   title: string;
   type: string;
   location: string;
-  salary: string;
+  salaryType: SalaryType;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  currency: SalaryCurrency;
   duties: string[];
   benefits: string[];
   req: string;
@@ -19,7 +27,10 @@ export type PublicJob = Pick<
   | "title"
   | "type"
   | "location"
-  | "salary"
+  | "salaryType"
+  | "salaryMin"
+  | "salaryMax"
+  | "currency"
   | "duties"
   | "benefits"
   | "req"
@@ -30,7 +41,10 @@ export type JobPayload = Pick<
   | "title"
   | "type"
   | "location"
-  | "salary"
+  | "salaryType"
+  | "salaryMin"
+  | "salaryMax"
+  | "currency"
   | "duties"
   | "benefits"
   | "req"
@@ -38,14 +52,20 @@ export type JobPayload = Pick<
   | "isPublished"
 >;
 
-export type JobFormValues = Omit<JobPayload, "sortOrder"> & {
+export type JobFormValues = Omit<
+  JobPayload,
+  "sortOrder" | "salaryType" | "salaryMin" | "salaryMax"
+> & {
   sortOrder: string;
+  salaryType: SalaryType | "";
+  salaryMin: string;
+  salaryMax: string;
 };
 
 export type JobStatusFilter = "all" | "published" | "draft";
 
 export type JobsPagination = {
-  page: number;
+  currentPage: number;
   pageSize: number;
   totalItems: number;
   totalPages: number;
@@ -54,10 +74,7 @@ export type JobsPagination = {
   nextSortOrder: number;
 };
 
-export type AdminJobsResponse = {
-  jobs: Job[];
-  pagination: JobsPagination;
-};
+export type AdminJobsResponse = ApiResponse<Job[], JobsPagination>;
 
 export type ListAdminJobsOptions = {
   page?: number;

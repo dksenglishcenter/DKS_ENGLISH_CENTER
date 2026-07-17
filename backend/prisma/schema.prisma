@@ -88,11 +88,14 @@ model Job {
   normalizedTitle String   @unique @map("normalized_title")
   type            String
   location        String
-  salary          String
+  salaryType      SalaryType @default(NEGOTIABLE) @map("salary_type")
+  salaryMin       Int?       @map("salary_min")
+  salaryMax       Int?       @map("salary_max")
+  currency        String     @default("VND")
   duties          String[]
   benefits        String[]
   req             String
-  sortOrder       Int      @default(0) @map("sort_order")
+  sortOrder       Int      @unique @default(1) @map("sort_order")
   isPublished     Boolean  @default(true) @map("is_published")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -101,6 +104,12 @@ model Job {
 
   @@index([isPublished, sortOrder])
   @@map("jobs")
+}
+
+enum SalaryType {
+  RANGE
+  FIXED
+  NEGOTIABLE
 }
 
 model Course {

@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiFetchResponse } from "@/lib/api/client";
 import type {
   CareerApplicationPayload,
   CareerApplicationResponse,
@@ -16,10 +16,13 @@ type ListCareerApplicationsOptions = {
 export async function submitCareerApplication(
   payload: CareerApplicationPayload,
 ) {
-  return apiFetch<CareerApplicationResponse>("/careers", {
-    method: "POST",
-    json: payload,
-  });
+  return apiFetchResponse<CareerApplicationResponse["data"], never, true>(
+    "/careers",
+    {
+      method: "POST",
+      json: payload,
+    },
+  );
 }
 
 export function listCareerApplications({
@@ -36,19 +39,18 @@ export function listCareerApplications({
   if (search) query.set("search", search);
   if (jobId) query.set("jobId", jobId);
 
-  return apiFetch<CareerApplicationsResponse>(
-    `/careers/applications?${query.toString()}`,
-    {
-      method: "GET",
-      cache: "no-store",
-      signal,
-    },
-  );
+  return apiFetchResponse<
+    CareerApplicationsResponse["data"],
+    CareerApplicationsResponse["meta"]
+  >(`/careers/applications?${query.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+    signal,
+  });
 }
 
 export function deleteCareerApplication(id: string) {
-  return apiFetch<{ success: true; message: string }>(
-    `/careers/applications/${id}`,
-    { method: "DELETE" },
-  );
+  return apiFetchResponse<null, never, true>(`/careers/applications/${id}`, {
+    method: "DELETE",
+  });
 }

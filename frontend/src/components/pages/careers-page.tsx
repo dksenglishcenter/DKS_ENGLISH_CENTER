@@ -20,6 +20,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { formatJobSalary } from "@/lib/jobs/salary";
 import type { PublicJob } from "@/lib/jobs/types";
 
 export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
@@ -88,7 +89,7 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
                             {job.location}
                           </span>
                           <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
-                            {job.salary}
+                            {formatJobSalary(job)}
                           </span>
                         </div>
                       </div>

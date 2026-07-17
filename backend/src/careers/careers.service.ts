@@ -84,6 +84,7 @@ export class CareersService {
       await this.prisma.careerApplication.delete({ where: { id } });
       return {
         success: true,
+        data: null,
         message: 'Đã xóa đơn ứng tuyển.',
       };
     } catch (error: unknown) {

@@ -132,7 +132,7 @@ export function ContactInformationAdmin() {
 
     try {
       const response = await getContactInformation();
-      const { phone, email, address, hours, mapUrl } = response.contactInfo;
+      const { phone, email, address, hours, mapUrl } = response.data;
       setForm({ phone, email, address, hours, mapUrl });
       setHasExistingData(true);
     } catch (error) {
@@ -153,7 +153,7 @@ export function ContactInformationAdmin() {
     getContactInformation()
       .then((response) => {
         if (cancelled) return;
-        const { phone, email, address, hours, mapUrl } = response.contactInfo;
+        const { phone, email, address, hours, mapUrl } = response.data;
         setForm({ phone, email, address, hours, mapUrl });
         setHasExistingData(true);
       })
@@ -208,7 +208,7 @@ export function ContactInformationAdmin() {
     try {
       const response = await replaceContactInformation(payload);
       await invalidateContactInformationCache();
-      const { phone, email, address, hours, mapUrl } = response.contactInfo;
+      const { phone, email, address, hours, mapUrl } = response.data;
       setForm({ phone, email, address, hours, mapUrl });
       setHasExistingData(true);
       setMessage(response.message);
@@ -284,7 +284,10 @@ export function ContactInformationAdmin() {
         ))}
 
         {formError ? (
-          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">
+          <p
+            role="alert"
+            className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700"
+          >
             {formError}
           </p>
         ) : null}

@@ -18,7 +18,7 @@ export class ContactInformationController {
   @Get()
   async get() {
     const contactInfo = await this.contactInformationService.get();
-    return { contactInfo };
+    return { success: true, data: contactInfo };
   }
 
   @Patch()
@@ -27,8 +27,9 @@ export class ContactInformationController {
   async update(@Body() dto: UpdateContactInformationDto) {
     const contactInfo = await this.contactInformationService.update(dto);
     return {
+      success: true,
+      data: contactInfo,
       message: 'Thông tin liên hệ đã được cập nhật thành công.',
-      contactInfo,
     };
   }
 
@@ -38,8 +39,9 @@ export class ContactInformationController {
   async replace(@Body() dto: ContactInformationDto) {
     const contactInfo = await this.contactInformationService.replace(dto);
     return {
+      success: true,
+      data: contactInfo,
       message: 'Thông tin liên hệ đã được lưu thành công.',
-      contactInfo,
     };
   }
 }

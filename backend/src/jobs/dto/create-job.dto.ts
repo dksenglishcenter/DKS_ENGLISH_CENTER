@@ -5,6 +5,7 @@ import {
   ArrayUnique,
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -15,6 +16,12 @@ import {
   MinLength,
 } from 'class-validator';
 import { TrimJobText, TrimJobTextItems } from './job-input.transform';
+import {
+  SALARY_CURRENCIES,
+  SALARY_TYPES,
+  type SalaryCurrency,
+  type SalaryType,
+} from '../job-salary';
 
 export class CreateJobDto {
   @TrimJobText()
@@ -38,12 +45,25 @@ export class CreateJobDto {
   @MaxLength(120)
   location!: string;
 
-  @TrimJobText()
-  @IsString()
-  @Matches(/\S/, { message: 'salary không được chỉ chứa khoảng trắng' })
-  @MinLength(2)
-  @MaxLength(120)
-  salary!: string;
+  @IsIn(SALARY_TYPES)
+  salaryType!: SalaryType;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000000000)
+  salaryMin?: number | null;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000000000)
+  salaryMax?: number | null;
+
+  @IsIn(SALARY_CURRENCIES)
+  currency!: SalaryCurrency;
 
   @TrimJobTextItems()
   @IsArray()
@@ -83,7 +103,7 @@ export class CreateJobDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(0)
+  @Min(1)
   @Max(10000)
   sortOrder?: number;
 

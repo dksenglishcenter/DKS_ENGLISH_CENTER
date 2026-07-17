@@ -1,8 +1,4 @@
-import type {
-  ContactInformation,
-  ContactInformationPayload,
-  ContactInformationResponse,
-} from "./types";
+import type { ContactInformation, ContactInformationPayload } from "./types";
 
 const PHONE_PATTERN = /^(?=(?:\D*\d){7,15}\D*$)[+\d][\d\s().-]*$/;
 const GOOGLE_MAPS_URL_PATTERN =
@@ -50,10 +46,7 @@ export function validateContactInformation(
   if (!PHONE_PATTERN.test(phone) || phone.length > 20) {
     errors.phone = "Số điện thoại cần có 7–15 chữ số và đúng định dạng.";
   }
-  if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-    email.length > 255
-  ) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255) {
     errors.email = "Email chưa đúng định dạng.";
   }
   if (!address || address.length > 500) {
@@ -76,12 +69,12 @@ export function validateContactInformation(
 
 export function parseContactInformationResponse(
   value: unknown,
-): ContactInformationResponse {
-  if (!isRecord(value) || !isRecord(value.contactInfo)) {
+): ContactInformation {
+  if (!isRecord(value)) {
     throw new Error("Phản hồi thông tin liên hệ không đúng cấu trúc.");
   }
 
-  const raw = value.contactInfo;
+  const raw = value;
   const requiredFields: Array<keyof ContactInformation> = [
     "id",
     "phone",
@@ -111,7 +104,7 @@ export function parseContactInformationResponse(
     throw new Error("Phản hồi thông tin liên hệ chứa dữ liệu không hợp lệ.");
   }
 
-  return { contactInfo };
+  return contactInfo;
 }
 
 export function getPhoneHref(phone: string) {

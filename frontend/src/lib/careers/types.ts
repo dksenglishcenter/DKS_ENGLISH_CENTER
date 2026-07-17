@@ -1,3 +1,5 @@
+import type { ApiResponse } from "@/lib/api/client";
+
 export type CareerApplicationPayload = {
   jobId: string;
   fullName: string;
@@ -6,11 +8,16 @@ export type CareerApplicationPayload = {
   introduction?: string;
 };
 
-export type CareerApplicationResponse = {
-  message: string;
+export type CareerApplicationReceipt = {
   id: string;
   createdAt: string;
 };
+
+export type CareerApplicationResponse = ApiResponse<
+  CareerApplicationReceipt,
+  never,
+  true
+>;
 
 export type CareerApplication = {
   id: string;
@@ -35,8 +42,7 @@ export type CareerApplicationsMeta = {
   pageSize: number;
 };
 
-export type CareerApplicationsResponse = {
-  success: true;
-  data: CareerApplication[];
-  meta: CareerApplicationsMeta;
-};
+export type CareerApplicationsResponse = ApiResponse<
+  CareerApplication[],
+  CareerApplicationsMeta
+>;

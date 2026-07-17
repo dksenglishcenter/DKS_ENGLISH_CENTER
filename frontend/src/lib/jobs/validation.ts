@@ -4,11 +4,14 @@ export type JobTextField =
   | "title"
   | "type"
   | "location"
-  | "salary"
   | "req"
   | "sortOrder";
 
 export type JobFormErrors = Partial<Record<JobTextField, string>> & {
+  salaryType?: string;
+  salaryMin?: string;
+  salaryMax?: string;
+  currency?: string;
   duties?: string[];
   benefits?: string[];
   dutiesGeneral?: string;
@@ -22,7 +25,6 @@ const TEXT_RULES: Record<
   title: { label: "Tên vị trí", min: 2, max: 150 },
   type: { label: "Loại hình làm việc", min: 2, max: 80 },
   location: { label: "Địa điểm", min: 2, max: 120 },
-  salary: { label: "Mức lương", min: 2, max: 120 },
   req: { label: "Yêu cầu ứng viên", min: 2, max: 2000 },
 };
 
@@ -81,10 +83,48 @@ export function validateJobForm(values: JobFormValues): JobFormErrors {
   if (
     values.sortOrder.trim() === "" ||
     !Number.isInteger(sortOrder) ||
-    sortOrder < 0 ||
+    sortOrder < 1 ||
     sortOrder > 10000
   ) {
-    errors.sortOrder = "Thứ tự hiển thị phải là số nguyên từ 0 đến 10000.";
+    errors.sortOrder = "Thứ tự hiển thị phải là số nguyên từ 1 đến 10000.";
+  }
+
+  const salaryMin = Number(values.salaryMin);
+  const salaryMax = Number(values.salaryMax);
+  if (!values.salaryType) {
+    errors.salaryType = "Vui lòng chọn loại lương.";
+  } else if (values.salaryType === "RANGE") {
+    if (
+      values.salaryMin.trim() === "" ||
+      !Number.isInteger(salaryMin) ||
+      salaryMin <= 0 ||
+      salaryMin > 1000000000
+    ) {
+      errors.salaryMin = "Lương tối thiểu phải là số nguyên từ 1 đến 1 tỷ.";
+    }
+    if (
+      values.salaryMax.trim() === "" ||
+      !Number.isInteger(salaryMax) ||
+      salaryMax <= 0 ||
+      salaryMax > 1000000000
+    ) {
+      errors.salaryMax = "Lương tối đa phải là số nguyên từ 1 đến 1 tỷ.";
+    } else if (!errors.salaryMin && salaryMax < salaryMin) {
+      errors.salaryMax = "Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.";
+    }
+  } else if (values.salaryType === "FIXED") {
+    if (
+      values.salaryMin.trim() === "" ||
+      !Number.isInteger(salaryMin) ||
+      salaryMin <= 0 ||
+      salaryMin > 1000000000
+    ) {
+      errors.salaryMin = "Mức lương phải là số nguyên từ 1 đến 1 tỷ.";
+    }
+  }
+
+  if (values.currency !== "VND") {
+    errors.currency = "Đơn vị tiền tệ không hợp lệ.";
   }
 
   const dutiesResult = validateItems(values.duties, "Nhiệm vụ");
@@ -101,11 +141,20 @@ export function validateJobForm(values: JobFormValues): JobFormErrors {
 }
 
 export function normalizeJobPayload(values: JobFormValues): JobPayload {
+  if (!values.salaryType) {
+    throw new Error("Loại lương là bắt buộc trước khi chuẩn hóa dữ liệu.");
+  }
+
   return {
     title: values.title.trim(),
     type: values.type.trim(),
     location: values.location.trim(),
-    salary: values.salary.trim(),
+    salaryType: values.salaryType,
+    salaryMin:
+      values.salaryType === "NEGOTIABLE" ? null : Number(values.salaryMin),
+    salaryMax:
+      values.salaryType === "RANGE" ? Number(values.salaryMax) : null,
+    currency: values.currency,
     duties: values.duties.map((item) => item.trim()),
     benefits: values.benefits.map((item) => item.trim()),
     req: values.req.trim(),

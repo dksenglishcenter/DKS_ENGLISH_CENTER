@@ -1,4 +1,5 @@
 import type { Course } from "@/lib/courses/types";
+import { formatJobSalary } from "@/lib/jobs/salary";
 import type { PublicJob } from "@/lib/jobs/types";
 import { getSiteUrl, siteConfig } from "./config";
 
@@ -123,7 +124,7 @@ export function careersPageSchema(jobs: readonly PublicJob[]) {
       ...jobs.map((job) => ({
         "@type": "JobPosting",
         title: job.title,
-        description: `${job.req}. Nhiệm vụ: ${job.duties.join(". ")}. Quyền lợi: ${job.benefits.join(". ")}. Mức lương: ${job.salary}.`,
+        description: `${job.req}. Nhiệm vụ: ${job.duties.join(". ")}. Quyền lợi: ${job.benefits.join(". ")}. Mức lương: ${formatJobSalary(job)}.`,
         employmentType: getEmploymentTypes(job.type),
         hiringOrganization: {
           "@type": "Organization",
