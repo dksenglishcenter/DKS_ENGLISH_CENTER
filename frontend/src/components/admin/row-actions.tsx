@@ -14,13 +14,16 @@ export function RowActions({
   editLabel = "Sửa",
   deleteLabel = "Xóa",
 }: RowActionsProps) {
+  // Fixed equal width + tighter radius so both buttons line up perfectly.
+  const actionClass = "w-[72px] rounded-lg px-0";
+
   return (
     <div className="flex items-center justify-end gap-2">
       <Button
         type="button"
         size="sm"
         variant="outline"
-        className="min-w-[68px]"
+        className={actionClass}
         onClick={onEdit}
       >
         {editLabel}
@@ -29,7 +32,7 @@ export function RowActions({
         type="button"
         size="sm"
         variant="destructive"
-        className="min-w-[68px]"
+        className={actionClass}
         onClick={onDelete}
       >
         {deleteLabel}

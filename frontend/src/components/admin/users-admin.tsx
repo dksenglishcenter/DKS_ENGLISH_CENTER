@@ -458,7 +458,7 @@ export function UsersAdmin() {
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="min-w-[76px]"
+                            className="w-[92px] rounded-lg"
                             onClick={() => openEdit(user)}
                           >
                             <Pencil className="size-4" aria-hidden="true" />
@@ -468,7 +468,7 @@ export function UsersAdmin() {
                             type="button"
                             size="sm"
                             variant="destructive"
-                            className="min-w-[76px]"
+                            className="w-[92px] rounded-lg"
                             disabled={isSelf}
                             title={isSelf ? "Không thể tự xóa tài khoản" : undefined}
                             onClick={() => setDeleteTarget(user)}
