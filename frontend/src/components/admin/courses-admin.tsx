@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
+import { slugify } from "@/lib/admin/slugify";
 import {
   createCourse,
   deleteCourse,
@@ -105,16 +106,6 @@ const EMPTY_FORM: CoursePayload = {
   sortOrder: 0,
   isPublished: true,
 };
-
-function slugify(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/đ/g, "d")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;

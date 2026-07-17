@@ -16,8 +16,12 @@ type BlogPostRouteProps = {
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const posts = await getBlogPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  try {
+    const posts = await getBlogPosts();
+    return posts.map((post) => ({ slug: post.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: BlogPostRouteProps) {

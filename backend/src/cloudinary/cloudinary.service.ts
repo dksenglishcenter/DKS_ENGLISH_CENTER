@@ -77,6 +77,7 @@ export class CloudinaryService {
 
       const folders = [
         CLOUDINARY_FOLDERS.courses,
+        CLOUDINARY_FOLDERS.blog,
         CLOUDINARY_FOLDERS.homeGallery,
         CLOUDINARY_FOLDERS.aboutFacilities,
         CLOUDINARY_FOLDERS.aboutVision,
