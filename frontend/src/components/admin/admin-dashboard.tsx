@@ -14,6 +14,7 @@ import { getAdminDashboardStats } from "@/lib/dashboard/api";
 import type { AdminDashboardStats } from "@/lib/dashboard/types";
 import { formatError } from "@/lib/errors/format-error";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
+import { LeadsTrendChart } from "./leads-trend-chart";
 
 // ---- Small building blocks ----
 
@@ -254,6 +255,11 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
           <KpiTile key={kpi.title} kpi={kpi} />
         ))}
       </div>
+
+      {/* Trend over time */}
+      <section className="rounded-2xl border border-border bg-white p-5">
+        <LeadsTrendChart points={stats.leadsTrend} />
+      </section>
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">

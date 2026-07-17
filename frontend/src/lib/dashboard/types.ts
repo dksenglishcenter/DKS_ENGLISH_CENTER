@@ -36,4 +36,10 @@ export type AdminDashboardStats = {
     admins: number;
     members: number;
   };
+  leadsTrend: LeadsTrendPoint[];
+};
+
+export type LeadsTrendPoint = {
+  date: string; // YYYY-MM-DD
+  count: number;
 };

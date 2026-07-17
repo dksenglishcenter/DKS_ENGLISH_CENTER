@@ -6,6 +6,15 @@ import { PrismaService } from '../prisma/prisma.service';
 const MAX_GALLERY_IMAGES = 6;
 const MAX_FACILITY_IMAGES = 6;
 
+const TREND_DAYS = 30;
+// Vietnam is UTC+7. Bucket timestamps by local day so the chart matches VN dates.
+const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function vnDayKey(date: Date): string {
+  return new Date(date.getTime() + VN_OFFSET_MS).toISOString().slice(0, 10);
+}
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -114,6 +123,38 @@ export class DashboardService {
         admins: usersAdmin,
         members: usersTotal - usersAdmin,
       },
+      leadsTrend: await this.getLeadsTrend(),
     };
+  }
+
+  // Daily count of submissions (contacts + job applications) over the last 30 days.
+  private async getLeadsTrend(): Promise<{ date: string; count: number }[]> {
+    const since = new Date(Date.now() - (TREND_DAYS - 1) * DAY_MS);
+
+    const [contacts, careers] = await Promise.all([
+      this.prisma.contactSubmission.findMany({
+        where: { createdAt: { gte: since } },
+        select: { createdAt: true },
+      }),
+      this.prisma.careerApplication.findMany({
+        where: { createdAt: { gte: since } },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    const counts = new Map<string, number>();
+    for (const { createdAt } of [...contacts, ...careers]) {
+      const key = vnDayKey(createdAt);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+
+    // Fill every day in the window so the line has no gaps (0 on empty days).
+    const todayVnMs = Date.now() + VN_OFFSET_MS;
+    const trend: { date: string; count: number }[] = [];
+    for (let i = TREND_DAYS - 1; i >= 0; i--) {
+      const key = new Date(todayVnMs - i * DAY_MS).toISOString().slice(0, 10);
+      trend.push({ date: key, count: counts.get(key) ?? 0 });
+    }
+    return trend;
   }
 }
