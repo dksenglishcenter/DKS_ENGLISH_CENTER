@@ -9,8 +9,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { Role } from '../../generated/prisma/client';
+import {
+  THROTTLE_FORGOT_PASSWORD,
+  THROTTLE_LOGIN,
+  THROTTLE_REGISTER,
+} from '../common/throttle.constants';
 import { AuthService } from './auth.service';
 import { AUTH_COOKIE_NAMES } from './auth-cookie.config';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -28,12 +34,14 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Throttle(THROTTLE_REGISTER)
   @HttpCode(HttpStatus.CREATED)
   register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     return this.authService.register(dto, res);
   }
 
   @Post('login')
+  @Throttle(THROTTLE_LOGIN)
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(dto, res);
@@ -71,12 +79,14 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @Throttle(THROTTLE_FORGOT_PASSWORD)
   @HttpCode(HttpStatus.OK)
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
   }
 
   @Post('reset-password')
+  @Throttle(THROTTLE_FORGOT_PASSWORD)
   @HttpCode(HttpStatus.OK)
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);

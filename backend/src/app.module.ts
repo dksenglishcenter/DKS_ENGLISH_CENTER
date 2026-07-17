@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AboutContentModule } from './about-content/about-content.module';
@@ -36,8 +38,13 @@ import { UsersModule } from './users/users.module';
     JobsModule,
     DashboardModule,
     UsersModule,
+    // Global default: 200 requests/min/IP. Sensitive routes override via @Throttle.
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 200 }]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}

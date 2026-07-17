@@ -10,10 +10,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Role } from '../../generated/prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { THROTTLE_CONTACT } from '../common/throttle.constants';
 import { ContactService } from './contact.service';
 import { ContactSubmissionParamsDto } from './dto/contact-submission-params.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -38,6 +40,7 @@ export class ContactController {
   }
 
   @Post()
+  @Throttle(THROTTLE_CONTACT)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateContactDto) {
     const submission = await this.contactService.create(dto);
