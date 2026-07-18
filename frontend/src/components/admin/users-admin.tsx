@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, type ComponentProps, type FormEvent } from "react";
 import { Pencil, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
@@ -34,7 +34,7 @@ const EMPTY_FORM: UserPayload = {
 };
 
 const FILTER_CONTROL =
-  "h-11 rounded-lg border border-border bg-white px-4 text-sm font-semibold text-[#4A2306] outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary";
+  "h-11 rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary";
 
 type TextField = "fullName" | "email" | "phone" | "password" | "role";
 
@@ -248,9 +248,9 @@ export function UsersAdmin() {
     props: ComponentProps<typeof Input> = {},
   ) => (
     <label className="block text-sm" data-invalid={fieldErrors[key] ? "true" : undefined}>
-      <span className="mb-1 block font-semibold text-[#4A2306]">{label}</span>
+      <span className="mb-1 block font-semibold text-foreground">{label}</span>
       <Input
-        className={`bg-white ${fieldErrors[key] ? "border-red-500" : ""}`}
+        className={`bg-card ${fieldErrors[key] ? "border-red-500" : ""}`}
         value={String(form[key] ?? "")}
         onChange={(event) => setField(key, event.target.value)}
         {...props}
@@ -267,11 +267,11 @@ export function UsersAdmin() {
         <div>
           <h2
             id="users-title"
-            className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+            className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]"
           >
             Người dùng
           </h2>
-          <p className="mt-1 text-sm text-[#9B6B50]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Quản lý tài khoản USER và ADMIN của hệ thống.
           </p>
         </div>
@@ -296,9 +296,9 @@ export function UsersAdmin() {
         <form
           ref={formRef}
           onSubmit={handleSave}
-          className="scroll-mt-6 grid gap-4 rounded-2xl border border-border bg-white p-5 md:grid-cols-2"
+          className="scroll-mt-6 grid gap-4 rounded-2xl border border-border bg-card p-5 md:grid-cols-2"
         >
-          <h3 className="md:col-span-2 text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <h3 className="md:col-span-2 text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
             {editingId ? "Sửa tài khoản" : "Thêm tài khoản"}
           </h3>
 
@@ -313,7 +313,7 @@ export function UsersAdmin() {
           {textField("phone", "Số điện thoại", { maxLength: 20 })}
 
           <label className="block text-sm" data-invalid={fieldErrors.role ? "true" : undefined}>
-            <span className="mb-1 block font-semibold text-[#4A2306]">Quyền</span>
+            <span className="mb-1 block font-semibold text-foreground">Quyền</span>
             <select
               className={`h-12 w-full ${FILTER_CONTROL}`}
               value={form.role}
@@ -329,11 +329,11 @@ export function UsersAdmin() {
             className="block text-sm md:col-span-2"
             data-invalid={fieldErrors.password ? "true" : undefined}
           >
-            <span className="mb-1 block font-semibold text-[#4A2306]">
+            <span className="mb-1 block font-semibold text-foreground">
               {editingId ? "Mật khẩu mới (để trống nếu không đổi)" : "Mật khẩu"}
             </span>
             <PasswordInput
-              className={`bg-white ${fieldErrors.password ? "border-red-500" : ""}`}
+              className={`bg-card ${fieldErrors.password ? "border-red-500" : ""}`}
               value={form.password ?? ""}
               minLength={8}
               maxLength={72}
@@ -357,7 +357,7 @@ export function UsersAdmin() {
         </form>
       ) : null}
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center">
           <form className="flex flex-1 gap-2" role="search" onSubmit={submitSearch}>
             <Input
@@ -414,7 +414,7 @@ export function UsersAdmin() {
         </div>
 
         {loading ? (
-          <p className="p-8 text-center text-sm text-[#9B6B50]">Đang tải...</p>
+          <p className="p-8 text-center text-sm text-muted-foreground">Đang tải...</p>
         ) : users.length === 0 ? (
           <p className="p-8 text-center text-sm text-muted-foreground">
             Không tìm thấy tài khoản phù hợp.
@@ -422,7 +422,7 @@ export function UsersAdmin() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+              <thead className="border-b border-border bg-muted text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Người dùng</th>
                   <th className="px-4 py-3 font-semibold">Điện thoại</th>
@@ -437,13 +437,13 @@ export function UsersAdmin() {
                   return (
                     <tr key={user.id} className="border-b border-border last:border-0">
                       <td className="px-4 py-3">
-                        <div className="font-semibold text-[#4A2306]">
+                        <div className="font-semibold text-foreground">
                           {user.fullName}
                           {isSelf ? " (Bạn)" : ""}
                         </div>
-                        <div className="text-xs text-[#9B6B50]">{user.email}</div>
+                        <div className="text-xs text-muted-foreground">{user.email}</div>
                       </td>
-                      <td className="px-4 py-3 text-[#6B3E26]">{user.phone || "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{user.phone || "—"}</td>
                       <td className="px-4 py-3">
                         <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-primary">
                           {user.role}

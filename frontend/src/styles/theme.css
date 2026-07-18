@@ -35,6 +35,9 @@
   --chart-4: #C0470F;
   --chart-5: #FFD580;
   --radius: 0.75rem;
+  --hero-gradient: linear-gradient(135deg, #FFF4EC 0%, #FFFBF0 50%, #FFF0E8 100%);
+  --hero-glow-1: radial-gradient(circle, #FFA200 0%, transparent 70%);
+  --hero-glow-2: radial-gradient(circle, #F16522 0%, transparent 70%);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: #030213;
@@ -46,40 +49,45 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Cool charcoal — tránh nâu bẩn + cam neon */
+  --background: #0C0C0E;
+  --foreground: #F3F1EE;
+  --card: #161618;
+  --card-foreground: #F3F1EE;
+  --popover: #161618;
+  --popover-foreground: #F3F1EE;
+  --primary: #E8A07A;
+  --primary-hover: #F0B396;
+  --primary-foreground: #1A1210;
+  --secondary: #222226;
+  --secondary-foreground: #F3F1EE;
+  --muted: #1C1C1F;
+  --muted-foreground: #C4BFB8;
+  --accent: #E8A07A;
+  --accent-foreground: #1A1210;
+  --destructive: #E57373;
+  --destructive-foreground: #F3F1EE;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: transparent;
+  --input-background: #141416;
+  --switch-background: #2A2A2E;
+  --ring: #E8A07A;
+  --chart-1: #E8A07A;
+  --chart-2: #F0B396;
+  --chart-3: #D4896A;
+  --chart-4: #C4785C;
+  --chart-5: #F5D0B8;
+  --hero-gradient: linear-gradient(160deg, #0C0C0E 0%, #121214 45%, #0E0E10 100%);
+  --hero-glow-1: radial-gradient(circle, rgba(232, 160, 122, 0.22) 0%, transparent 68%);
+  --hero-glow-2: radial-gradient(circle, rgba(232, 160, 122, 0.12) 0%, transparent 70%);
+  --sidebar: #141416;
+  --sidebar-foreground: #F3F1EE;
+  --sidebar-primary: #E8A07A;
+  --sidebar-primary-foreground: #1A1210;
+  --sidebar-accent: #222226;
+  --sidebar-accent-foreground: #F3F1EE;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #E8A07A;
 }
 
 @theme inline {
@@ -194,6 +202,170 @@
     background: rgba(241, 101, 34, 0.2);
     color: #4A2306;
   }
+
+  .dark ::selection {
+    background: rgba(232, 160, 122, 0.28);
+    color: #F3F1EE;
+  }
+}
+
+@keyframes fox-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-22px) rotate(1.5deg);
+  }
+}
+
+@keyframes fox-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes fox-blink {
+  0%,
+  88%,
+  100% {
+    transform: scaleY(1);
+  }
+  90%,
+  93% {
+    transform: scaleY(0.06);
+  }
+}
+
+@keyframes fox-tassel {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(14deg);
+  }
+  75% {
+    transform: rotate(-12deg);
+  }
+}
+
+@keyframes fox-sparkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes fox-ear-twitch {
+  0%,
+  70%,
+  100% {
+    transform: rotate(0deg);
+  }
+  78% {
+    transform: rotate(-10deg);
+  }
+  86% {
+    transform: rotate(8deg);
+  }
+  92% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fox-float {
+  animation: fox-float 2.8s ease-in-out infinite;
+}
+
+.fox-mascot__body {
+  transform-origin: 160px 280px;
+  animation: fox-breathe 2.4s ease-in-out infinite;
+}
+
+.fox-mascot__eye {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: fox-blink 3.6s ease-in-out infinite;
+}
+
+.fox-mascot__eye--right {
+  animation-delay: 0.06s;
+}
+
+.fox-mascot__tassel {
+  transform-origin: 218px 57px;
+  animation: fox-tassel 2.2s ease-in-out infinite;
+}
+
+.fox-mascot__sparkle {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: fox-sparkle 1.6s ease-in-out infinite;
+}
+
+.fox-mascot__sparkle--2 {
+  animation-delay: 0.35s;
+}
+
+.fox-mascot__sparkle--3 {
+  animation-delay: 0.7s;
+}
+
+.fox-mascot__ear-left {
+  transform-origin: 115px 100px;
+  animation: fox-ear-twitch 3.8s ease-in-out infinite;
+}
+
+.fox-mascot__ear-right {
+  transform-origin: 205px 100px;
+  animation: fox-ear-twitch 3.8s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+.animate-hero-enter {
+  opacity: 0;
+  animation: hero-enter 0.6s ease-out forwards;
+}
+
+.reveal-pending {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.reveal-visible {
+  animation: reveal-up 0.55s ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -204,5 +376,20 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .animate-fox-float,
+  .fox-mascot__body,
+  .fox-mascot__eye,
+  .fox-mascot__tassel,
+  .fox-mascot__sparkle,
+  .fox-mascot__ear-left,
+  .fox-mascot__ear-right,
+  .animate-hero-enter,
+  .reveal-pending,
+  .reveal-visible {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

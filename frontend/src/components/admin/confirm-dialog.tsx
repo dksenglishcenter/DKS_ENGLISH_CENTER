@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useId, useRef, type RefObject } from "react";
 
@@ -133,7 +133,7 @@ export function ConfirmDialog({
         type="button"
         aria-hidden="true"
         tabIndex={-1}
-        className="absolute inset-0 bg-[#4A2306]/45"
+        className="absolute inset-0 bg-foreground/45"
         disabled={busy}
         onClick={handleCancel}
       />
@@ -144,15 +144,15 @@ export function ConfirmDialog({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-white p-6 shadow-xl"
+        className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl"
       >
         <h3
           id={titleId}
-          className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+          className="text-lg font-black text-foreground font-[family-name:var(--font-nunito)]"
         >
           {title}
         </h3>
-        <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-[#6B3E26]">
+        <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-muted-foreground">
           {description}
         </p>
         <div className="mt-6 flex justify-end gap-2">

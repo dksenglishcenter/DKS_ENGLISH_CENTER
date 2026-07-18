@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -189,15 +189,15 @@ export function JobsAdmin() {
         <div className="shrink-0">
           <h1
             id="jobs-admin-title"
-            className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+            className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]"
           >
             Quản lý tuyển dụng
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-[#9B6B50]">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Tạo, sắp xếp và kiểm soát trạng thái các vị trí tuyển dụng.
           </p>
         </div>
-        <div className="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-white p-3 shadow-[0_4px_16px_rgba(74,35,6,0.04)] xl:w-auto xl:flex-row xl:items-center xl:border-0 xl:bg-transparent xl:p-0 xl:shadow-none">
+        <div className="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-card p-3 shadow-[0_4px_16px_rgba(74,35,6,0.04)] xl:w-auto xl:flex-row xl:items-center xl:border-0 xl:bg-transparent xl:p-0 xl:shadow-none">
           <form
             role="search"
             onSubmit={handleSearch}
@@ -212,7 +212,7 @@ export function JobsAdmin() {
                 type="search"
                 value={searchInput}
                 maxLength={100}
-                className="h-10 min-w-0 bg-white px-3 py-2 text-sm"
+                className="h-10 min-w-0 bg-card px-3 py-2 text-sm"
                 placeholder="Tìm theo vị trí, loại hình, địa điểm..."
                 onChange={(event) => setSearchInput(event.target.value)}
               />
@@ -224,7 +224,7 @@ export function JobsAdmin() {
               <select
                 id="jobs-status"
                 value={status}
-                className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-[#4A2306] outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
+                className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                 onChange={(event) => {
                   setLoading(true);
                   setListError(null);
@@ -305,17 +305,17 @@ export function JobsAdmin() {
       ) : null}
 
       <div
-        className="min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-[0_4px_24px_rgba(74,35,6,0.04)]"
+        className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_4px_24px_rgba(74,35,6,0.04)]"
         aria-busy={loading}
       >
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-[#FFF9F5] px-4 py-3 text-sm text-[#6B3E26] sm:px-5">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted px-4 py-3 text-sm text-muted-foreground sm:px-5">
           <span>
             {loading
               ? "Đang tải vị trí tuyển dụng..."
               : `${(pagination?.totalItems ?? jobs.length).toLocaleString("vi-VN")} vị trí`}
           </span>
           {!loading && hasActiveFilters ? (
-            <span className="text-xs text-[#9B6B50]">Đang áp dụng bộ lọc</span>
+            <span className="text-xs text-muted-foreground">Đang áp dụng bộ lọc</span>
           ) : null}
         </div>
 
@@ -325,12 +325,12 @@ export function JobsAdmin() {
               <BriefcaseBusiness className="size-6" aria-hidden="true" />
             </span>
             <div>
-              <p className="font-bold text-[#4A2306]">
+              <p className="font-bold text-foreground">
                 {hasActiveFilters
                   ? "Không tìm thấy vị trí phù hợp"
                   : "Chưa có vị trí tuyển dụng"}
               </p>
-              <p className="mt-1 text-sm text-[#9B6B50]">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {hasActiveFilters
                   ? "Thử thay đổi từ khóa hoặc trạng thái lọc."
                   : "Tạo vị trí đầu tiên để bắt đầu tuyển dụng."}
@@ -349,7 +349,7 @@ export function JobsAdmin() {
           <>
             <div className="hidden overflow-x-auto xl:block">
               <table className="w-full table-fixed text-left text-sm">
-                <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+                <thead className="border-b border-border bg-muted text-muted-foreground">
                   <tr>
                     <th scope="col" className="w-[25%] px-4 py-3 font-semibold">
                       Vị trí
@@ -389,7 +389,7 @@ export function JobsAdmin() {
               </table>
             </div>
 
-            <div className="space-y-3 bg-[#FFF9F5]/50 p-3 xl:hidden">
+            <div className="space-y-3 bg-muted/50 p-3 xl:hidden">
               {jobs.map((job) => (
                 <JobCard
                   key={job.id}
@@ -515,16 +515,16 @@ function JobActions({ job, busy, onEdit, onToggle, onDelete }: JobItemProps) {
 function JobTableRow(props: JobItemProps) {
   const { job } = props;
   return (
-    <tr className="align-top transition-colors hover:bg-[#FFF9F5]/70">
+    <tr className="align-top transition-colors hover:bg-muted/70">
       <td className="px-4 py-4">
-        <p className="font-bold text-[#4A2306]">{job.title}</p>
-        <p className="mt-1 line-clamp-1 text-xs text-[#9B6B50]">
+        <p className="font-bold text-foreground">{job.title}</p>
+        <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
           {formatJobSalary(job)}
         </p>
       </td>
-      <td className="px-4 py-4 text-[#6B3E26]">{job.type}</td>
-      <td className="px-4 py-4 text-[#6B3E26]">{job.location}</td>
-      <td className="px-4 py-4 text-[#6B3E26]">{job.sortOrder}</td>
+      <td className="px-4 py-4 text-muted-foreground">{job.type}</td>
+      <td className="px-4 py-4 text-muted-foreground">{job.location}</td>
+      <td className="px-4 py-4 text-muted-foreground">{job.sortOrder}</td>
       <td className="px-4 py-4">
         <JobStatus published={job.isPublished} />
       </td>
@@ -541,7 +541,7 @@ function JobCard(props: JobItemProps) {
     <article className="space-y-4 p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="break-words font-black text-[#4A2306]">{job.title}</h2>
+          <h2 className="break-words font-black text-foreground">{job.title}</h2>
           <p className="mt-1 text-sm font-semibold text-primary">
             {formatJobSalary(job)}
           </p>
@@ -550,31 +550,31 @@ function JobCard(props: JobItemProps) {
       </div>
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-xs font-semibold uppercase tracking-wide text-[#9B6B50]">
+          <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Loại hình
           </dt>
-          <dd className="mt-1 text-[#6B3E26]">{job.type}</dd>
+          <dd className="mt-1 text-muted-foreground">{job.type}</dd>
         </div>
         <div>
-          <dt className="text-xs font-semibold uppercase tracking-wide text-[#9B6B50]">
+          <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Địa điểm
           </dt>
-          <dd className="mt-1 flex items-center gap-1 text-[#6B3E26]">
+          <dd className="mt-1 flex items-center gap-1 text-muted-foreground">
             <MapPin className="size-4 shrink-0" aria-hidden="true" />
             {job.location}
           </dd>
         </div>
         <div>
-          <dt className="text-xs font-semibold uppercase tracking-wide text-[#9B6B50]">
+          <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Thứ tự
           </dt>
-          <dd className="mt-1 text-[#6B3E26]">{job.sortOrder}</dd>
+          <dd className="mt-1 text-muted-foreground">{job.sortOrder}</dd>
         </div>
         <div>
-          <dt className="text-xs font-semibold uppercase tracking-wide text-[#9B6B50]">
+          <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Cập nhật
           </dt>
-          <dd className="mt-1 text-[#6B3E26]">
+          <dd className="mt-1 text-muted-foreground">
             {formatAdminDateTime(job.updatedAt)}
           </dd>
         </div>

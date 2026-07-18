@@ -13,6 +13,7 @@ import {
 import { CareerApplicationForm } from "@/components/forms/career-application-form";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
+import { Reveal } from "@/components/motion/reveal";
 import {
   Accordion,
   AccordionContent,
@@ -30,6 +31,7 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
   return (
     <div className="bg-background">
       <PageHero
+        icon={Briefcase}
         label="Tuyển dụng"
         title={
           <>
@@ -43,20 +45,21 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
 
       <Container className="py-16">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-14">
-          <div className="lg:col-span-3">
-            <h2 className="text-2xl font-black text-[#4A2306] mb-6 font-[family-name:var(--font-nunito)]">
+          <Reveal className="lg:col-span-3">
+          <div>
+            <h2 className="text-2xl font-black text-foreground mb-6 font-[family-name:var(--font-nunito)]">
               Vị Trí Đang Tuyển ({jobs.length})
             </h2>
             {jobs.length === 0 ? (
               <div
                 role="status"
-                className="rounded-2xl border border-border bg-white px-6 py-10 text-center"
+                className="rounded-2xl border border-border bg-card px-6 py-10 text-center"
               >
                 <Briefcase
                   className="mx-auto size-10 text-primary"
                   aria-hidden="true"
                 />
-                <h3 className="mt-4 font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                <h3 className="mt-4 font-black text-foreground font-[family-name:var(--font-nunito)]">
                   Hiện chưa có vị trí đang tuyển
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -70,14 +73,14 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
                     key={job.id}
                     id={`job-${job.id}`}
                     value={String(job.id)}
-                    className="bg-white rounded-2xl border border-border overflow-hidden transition-shadow hover:shadow-md border-b-0"
+                    className="bg-card rounded-2xl border border-border overflow-hidden transition-shadow hover:shadow-md border-b-0"
                   >
                     <AccordionTrigger className="w-full flex items-start gap-4 p-6 text-left hover:no-underline [&>svg]:text-primary [&>svg]:mt-1">
                       <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Briefcase className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-black text-[#4A2306] mb-1 font-[family-name:var(--font-nunito)]">
+                        <h3 className="font-black text-foreground mb-1 font-[family-name:var(--font-nunito)]">
                           {job.title}
                         </h3>
                         <div className="flex flex-wrap gap-2 text-xs font-[family-name:var(--font-body)]">
@@ -97,14 +100,14 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
 
                     <AccordionContent className="px-6 pb-6 space-y-5">
                       <div className="text-xs text-muted-foreground bg-secondary rounded-lg px-4 py-2.5 font-[family-name:var(--font-body)]">
-                        <span className="font-semibold text-[#4A2306]">
+                        <span className="font-semibold text-foreground">
                           Yêu cầu:{" "}
                         </span>
                         {job.req}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                          <h4 className="text-sm font-black text-[#4A2306] mb-3 flex items-center gap-1.5 font-[family-name:var(--font-nunito)]">
+                          <h4 className="text-sm font-black text-foreground mb-3 flex items-center gap-1.5 font-[family-name:var(--font-nunito)]">
                             <BookOpen className="w-4 h-4 text-primary" /> Nhiệm
                             vụ
                           </h4>
@@ -121,7 +124,7 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
                           </ul>
                         </div>
                         <div>
-                          <h4 className="text-sm font-black text-[#4A2306] mb-3 flex items-center gap-1.5 font-[family-name:var(--font-nunito)]">
+                          <h4 className="text-sm font-black text-foreground mb-3 flex items-center gap-1.5 font-[family-name:var(--font-nunito)]">
                             <Heart className="w-4 h-4 text-primary" /> Quyền lợi
                           </h4>
                           <ul className="space-y-2">
@@ -155,12 +158,14 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
               </Accordion>
             )}
           </div>
+          </Reveal>
 
           {jobs.length > 0 ? (
-            <div className="lg:col-span-2" id="career-application">
-              <div className="bg-white rounded-2xl border border-border p-8 sticky top-24">
+            <Reveal className="lg:col-span-2" delayMs={80}>
+            <div id="career-application">
+              <div className="bg-card rounded-2xl border border-border p-8 sticky top-24">
                 <div className="text-3xl mb-3">✉️</div>
-                <h2 className="text-xl font-black text-[#4A2306] mb-1 font-[family-name:var(--font-nunito)]">
+                <h2 className="text-xl font-black text-foreground mb-1 font-[family-name:var(--font-nunito)]">
                   Gửi Đơn Ứng Tuyển
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6 font-[family-name:var(--font-body)]">
@@ -170,7 +175,7 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
                 {successMessage ? (
                   <div className="bg-secondary rounded-xl p-6 text-center">
                     <div className="text-4xl mb-3">🎉</div>
-                    <h3 className="font-black text-[#4A2306] mb-2 font-[family-name:var(--font-nunito)]">
+                    <h3 className="font-black text-foreground mb-2 font-[family-name:var(--font-nunito)]">
                       Đã gửi thành công!
                     </h3>
                     <p className="text-sm text-muted-foreground font-[family-name:var(--font-body)]">
@@ -187,6 +192,7 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
                 )}
               </div>
             </div>
+            </Reveal>
           ) : null}
         </div>
       </Container>

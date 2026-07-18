@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquareQuote, Trophy } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/layout/section-heading";
 import { StarRow } from "@/components/media/star-row";
+import { Reveal } from "@/components/motion/reveal";
 import type { SuccessStory } from "@/lib/success-stories/types";
 
 type HomeTestimonialsProps = {
@@ -33,15 +34,19 @@ export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
   };
 
   return (
-    <section className="bg-white py-20 md:py-28" aria-labelledby="testimonials-title">
+    <section className="bg-card py-20 md:py-28" aria-labelledby="testimonials-title">
       <Container>
-        <SectionHeading
-          label="Học viên nói gì?"
-          title="Câu Chuyện Thành Công"
-          sub="Hàng nghìn học viên đã thay đổi cuộc đời với DKS. Đây là một vài câu chuyện truyền cảm hứng."
-          titleId="testimonials-title"
-        />
+        <Reveal>
+          <SectionHeading
+            icon={MessageSquareQuote}
+            label="Học viên nói gì?"
+            title="Câu Chuyện Thành Công"
+            sub="Hàng nghìn học viên đã thay đổi cuộc đời với DKS. Đây là một vài câu chuyện truyền cảm hứng."
+            titleId="testimonials-title"
+          />
+        </Reveal>
 
+        <Reveal delayMs={80}>
         <div className="mx-auto max-w-3xl">
           <article
             className="relative rounded-2xl bg-secondary p-8 md:p-12"
@@ -54,7 +59,7 @@ export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
               &ldquo;
             </span>
             <StarRow count={testimonial.stars} />
-            <p className="relative z-10 my-6 text-lg leading-relaxed text-[#4A2306] md:text-xl">
+            <p className="relative z-10 my-6 text-lg leading-relaxed text-foreground md:text-xl">
               {testimonial.text}
             </p>
             <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-row sm:gap-4">
@@ -62,14 +67,15 @@ export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
                 {testimonial.avatar}
               </span>
               <div className="min-w-0">
-                <h3 className="text-sm font-black text-[#4A2306] font-[family-name:var(--font-nunito)] sm:text-base">
+                <h3 className="text-sm font-black text-foreground font-[family-name:var(--font-nunito)] sm:text-base">
                   {testimonial.name}
                 </h3>
                 <p className="text-xs text-muted-foreground sm:text-sm">{testimonial.course}</p>
               </div>
               <div className="sm:ml-auto">
-                <span className="inline-flex max-w-32 items-center justify-center gap-1 rounded-full bg-primary px-3 py-1.5 text-center text-[10px] font-bold leading-tight text-white font-[family-name:var(--font-nunito)] sm:max-w-none sm:gap-1.5 sm:px-4 sm:text-xs sm:leading-normal">
-                  <span aria-hidden="true">🏆</span> {testimonial.badge}
+                <span className="inline-flex max-w-32 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-center text-[10px] font-bold leading-tight text-primary-foreground font-[family-name:var(--font-nunito)] sm:max-w-none sm:px-4 sm:text-xs sm:leading-normal">
+                  <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  {testimonial.badge}
                 </span>
               </div>
             </div>
@@ -80,7 +86,7 @@ export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
               <button
                 type="button"
                 onClick={showPrevious}
-                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="Xem cảm nhận trước"
               >
                 <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -102,7 +108,7 @@ export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
               <button
                 type="button"
                 onClick={showNext}
-                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="Xem cảm nhận tiếp theo"
               >
                 <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -110,6 +116,7 @@ export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
             </div>
           ) : null}
         </div>
+        </Reveal>
       </Container>
     </section>
   );

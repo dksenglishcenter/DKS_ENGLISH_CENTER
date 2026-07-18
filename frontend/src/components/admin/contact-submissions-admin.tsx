@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Inbox } from "lucide-react";
 
@@ -50,7 +50,7 @@ const CONFIG: SubmissionsListConfig<ContactSubmission> = {
       header: "Khóa quan tâm",
       widthClass: "w-[17%]",
       render: (submission) => (
-        <span className="break-words text-[#6B3E26]">
+        <span className="break-words text-muted-foreground">
           {submission.courseInterest}
         </span>
       ),
@@ -61,7 +61,7 @@ const CONFIG: SubmissionsListConfig<ContactSubmission> = {
       widthClass: "w-[19%]",
       render: (submission) =>
         submission.learningNeeds ? (
-          <span className="whitespace-pre-wrap [overflow-wrap:anywhere] text-[#6B3E26]">
+          <span className="whitespace-pre-wrap [overflow-wrap:anywhere] text-muted-foreground">
             {submission.learningNeeds}
           </span>
         ) : (

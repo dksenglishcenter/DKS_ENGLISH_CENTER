@@ -89,7 +89,7 @@ export function ForgotPasswordPage() {
           {loading ? "Đang gửi..." : "Gửi hướng dẫn"}
         </button>
 
-        <p className="text-center text-sm text-[#9B6B50]">
+        <p className="text-center text-sm text-muted-foreground">
           <Link href={PAGE_PATHS.login} className="font-bold text-primary hover:underline">
             Quay lại đăng nhập
           </Link>

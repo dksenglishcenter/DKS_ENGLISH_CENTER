@@ -29,7 +29,8 @@ export type MediaCategory =
   | 'about-vision'
   | 'about-teacher'
   | 'course-cover'
-  | 'blog-cover';
+  | 'blog-cover'
+  | 'blog-section';
 
 export const MEDIA_CATEGORIES: MediaCategory[] = [
   'brand-logo',
@@ -40,6 +41,7 @@ export const MEDIA_CATEGORIES: MediaCategory[] = [
   'about-teacher',
   'course-cover',
   'blog-cover',
+  'blog-section',
 ];
 
 export type FolderContext = {
@@ -72,6 +74,8 @@ const FOLDER_RESOLVERS: Record<MediaCategory, FolderResolver> = {
   'course-cover': () => CLOUDINARY_FOLDERS.courses,
 
   'blog-cover': () => CLOUDINARY_FOLDERS.blog,
+
+  'blog-section': () => CLOUDINARY_FOLDERS.blog,
 };
 
 export function resolveCloudinaryFolder(

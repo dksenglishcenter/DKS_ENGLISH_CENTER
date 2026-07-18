@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { BriefcaseBusiness, FileUser } from "lucide-react";
 
@@ -50,7 +50,7 @@ const CONFIG: SubmissionsListConfig<CareerApplication> = {
       header: "Vị trí ứng tuyển",
       widthClass: "w-[17%]",
       render: (application) => (
-        <span className="flex items-start gap-2 text-[#6B3E26]">
+        <span className="flex items-start gap-2 text-muted-foreground">
           <BriefcaseBusiness
             className="mt-0.5 size-4 shrink-0 text-primary"
             aria-hidden="true"
@@ -65,7 +65,7 @@ const CONFIG: SubmissionsListConfig<CareerApplication> = {
       widthClass: "w-[19%]",
       render: (application) =>
         application.introduction ? (
-          <span className="whitespace-pre-wrap [overflow-wrap:anywhere] text-[#6B3E26]">
+          <span className="whitespace-pre-wrap [overflow-wrap:anywhere] text-muted-foreground">
             {application.introduction}
           </span>
         ) : (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { BlogPostCard } from "@/components/blog/blog-post-card";
+import { Reveal } from "@/components/motion/reveal";
 import type { BlogPostSummary } from "@/lib/blog/types";
 
 const ALL_CATEGORIES = "Tất cả";
@@ -39,8 +40,8 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
                 onClick={() => setSelectedCategory(category)}
                 className={`min-h-10 rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 font-[family-name:var(--font-heading)] ${
                   isSelected
-                    ? "bg-primary text-white"
-                    : "bg-secondary text-[#4A2306] hover:bg-primary/10"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-foreground hover:bg-primary/10"
                 }`}
               >
                 {category}
@@ -50,15 +51,18 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {visiblePosts.map((post) => (
-            <BlogPostCard key={post.slug} post={post} />
+          {visiblePosts.map((post, index) => (
+            <Reveal key={post.slug} delayMs={Math.min(index, 5) * 50}>
+              <BlogPostCard post={post} />
+            </Reveal>
           ))}
         </div>
       </section>
 
       <aside className="space-y-6 lg:w-72 lg:flex-none" aria-label="Thông tin Blog">
-        <section className="rounded-2xl border border-border bg-white p-6">
-          <h2 className="mb-4 flex items-center gap-2 text-base font-black text-[#4A2306] font-[family-name:var(--font-heading)]">
+        <Reveal>
+        <section className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="mb-4 flex items-center gap-2 text-base font-black text-foreground font-[family-name:var(--font-heading)]">
             <Tag aria-hidden="true" className="size-4 text-primary" /> Chuyên mục
           </h2>
           <div className="space-y-2">
@@ -72,7 +76,7 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
                   onClick={() => setSelectedCategory(category)}
                   className="group flex min-h-10 w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <span className="text-sm font-medium text-[#4A2306] transition-colors group-hover:text-primary">
+                  <span className="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
                     {category}
                   </span>
                   <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
@@ -83,9 +87,11 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
             })}
           </div>
         </section>
+        </Reveal>
 
-        <section className="rounded-2xl border border-border bg-white p-6">
-          <h2 className="mb-4 flex items-center gap-2 text-base font-black text-[#4A2306] font-[family-name:var(--font-heading)]">
+        <Reveal delayMs={60}>
+        <section className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="mb-4 flex items-center gap-2 text-base font-black text-foreground font-[family-name:var(--font-heading)]">
             <TrendingUp aria-hidden="true" className="size-4 text-primary" /> Bài viết nổi bật
           </h2>
           <ol className="space-y-4">
@@ -95,11 +101,11 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
                   href={`/blog/${post.slug}`}
                   className="group flex gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <span className="flex size-8 flex-none items-center justify-center rounded-lg bg-primary text-sm font-black text-white font-[family-name:var(--font-heading)]">
+                  <span className="flex size-8 flex-none items-center justify-center rounded-lg bg-primary text-sm font-black text-primary-foreground font-[family-name:var(--font-heading)]">
                     {index + 1}
                   </span>
                   <span>
-                    <span className="line-clamp-2 text-sm font-semibold leading-snug text-[#4A2306] transition-colors group-hover:text-primary">
+                    <span className="line-clamp-2 text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
                       {post.title}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -111,22 +117,25 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
             ))}
           </ol>
         </section>
+        </Reveal>
 
-        <section className="rounded-2xl bg-gradient-to-br from-primary to-accent p-6 text-white">
+        <Reveal delayMs={100}>
+        <section className="rounded-2xl bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground">
           <div aria-hidden="true" className="mb-3 text-3xl">📥</div>
           <h2 className="mb-2 text-lg font-black font-[family-name:var(--font-heading)]">
             Tài liệu miễn phí
           </h2>
-          <p className="mb-4 text-sm text-orange-50">
+          <p className="mb-4 text-sm opacity-90">
             Nhận tài liệu luyện IELTS, từ vựng theo chủ đề và hướng dẫn ôn thi.
           </p>
           <Link
             href="/contact"
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
           >
             <FileText aria-hidden="true" className="size-4" /> Nhận tài liệu miễn phí
           </Link>
         </section>
+        </Reveal>
       </aside>
     </div>
   );

@@ -30,8 +30,8 @@ export function SelectField({
           onChange={(e) => onChange(e.target.value)}
           required={required}
           className={cn(
-            "h-12 w-full appearance-none cursor-pointer rounded-lg border border-border bg-[#FFF9F5] px-4 py-3 pr-10 font-[family-name:var(--font-body)] transition-all outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary",
-            value ? "text-[#4A2306]" : "text-[#C9A090]",
+            "h-12 w-full appearance-none cursor-pointer rounded-lg border border-border bg-input-background px-4 py-3 pr-10 font-[family-name:var(--font-body)] transition-all outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary",
+            value ? "text-foreground" : "text-muted-foreground/70",
           )}
         >
           <option value="" disabled>

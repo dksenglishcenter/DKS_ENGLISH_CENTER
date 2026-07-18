@@ -78,7 +78,7 @@ export function AnimatedHeroStats() {
   return (
     <dl
       ref={containerRef}
-      className="mt-12 grid grid-cols-4 gap-2 border-t border-border pt-8 md:mt-0 lg:mt-12 lg:flex lg:flex-wrap lg:gap-8"
+      className="mt-12 grid grid-cols-4 gap-2 pt-8 md:mt-0 lg:mt-12 lg:flex lg:flex-wrap lg:gap-8"
     >
       {HERO_STATS.map((stat) => {
         const precision = 10 ** stat.decimals;

@@ -20,7 +20,8 @@ export type MediaCategory =
   | "about-vision"
   | "about-teacher"
   | "course-cover"
-  | "blog-cover";
+  | "blog-cover"
+  | "blog-section";
 
 export type UploadMediaResponse = {
   message: string;

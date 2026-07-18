@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 import { BriefcaseBusiness, Plus, Save, Trash2, X } from "lucide-react";
@@ -250,11 +250,11 @@ export function JobForm({
     const generalError = errors[`${field}General`];
 
     return (
-      <fieldset className="space-y-3 rounded-xl border border-border bg-white p-4">
+      <fieldset className="space-y-3 rounded-xl border border-border bg-card p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <legend className="font-bold text-[#4A2306]">{legend}</legend>
-            <p className="mt-1 text-xs text-[#9B6B50]">
+            <legend className="font-bold text-foreground">{legend}</legend>
+            <p className="mt-1 text-xs text-muted-foreground">
               Từ 1 đến 30 mục, mỗi mục tối đa 500 ký tự.
             </p>
           </div>
@@ -294,7 +294,7 @@ export function JobForm({
                     disabled={saving}
                     aria-invalid={Boolean(error)}
                     aria-describedby={error ? errorId : undefined}
-                    className={`bg-white ${error ? ERROR_INPUT_CLASS : ""}`}
+                    className={`bg-card ${error ? ERROR_INPUT_CLASS : ""}`}
                     placeholder={`${legend} ${index + 1}`}
                     onChange={(event) =>
                       updateItem(field, index, event.target.value)
@@ -330,19 +330,19 @@ export function JobForm({
       ref={formRef}
       noValidate
       onSubmit={handleSubmit}
-      className="scroll-mt-6 space-y-6 rounded-2xl border border-border bg-white p-5 shadow-[0_4px_24px_rgba(74,35,6,0.04)] sm:p-6"
+      className="scroll-mt-6 space-y-6 rounded-2xl border border-border bg-card p-5 shadow-[0_4px_24px_rgba(74,35,6,0.04)] sm:p-6"
       aria-labelledby="job-form-title"
     >
       <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
         <div>
           <h3
             id="job-form-title"
-            className="flex items-center gap-2 text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+            className="flex items-center gap-2 text-lg font-black text-foreground font-[family-name:var(--font-nunito)]"
           >
             <BriefcaseBusiness className="size-5 text-primary" aria-hidden="true" />
             {job ? "Chỉnh sửa vị trí tuyển dụng" : "Thêm vị trí tuyển dụng"}
           </h3>
-          <p className="mt-1 text-sm text-[#9B6B50]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Các trường có dấu * là bắt buộc.
           </p>
         </div>
@@ -380,7 +380,7 @@ export function JobForm({
           onChange={(value) => updateText("title", value)}
         />
         <div>
-          <Label htmlFor="job-type" className="font-bold text-[#4A2306]">
+          <Label htmlFor="job-type" className="font-bold text-foreground">
             Loại hình làm việc *
           </Label>
           <select
@@ -390,7 +390,7 @@ export function JobForm({
             required
             aria-invalid={Boolean(errors.type)}
             aria-describedby={errors.type ? "job-type-error" : undefined}
-            className={`mt-2 h-12 w-full rounded-lg border border-border bg-white px-4 text-[#4A2306] outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.type ? ERROR_INPUT_CLASS : ""}`}
+            className={`mt-2 h-12 w-full rounded-lg border border-border bg-card px-4 text-foreground outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.type ? ERROR_INPUT_CLASS : ""}`}
             onChange={(event) => updateText("type", event.target.value)}
           >
             <option value="" disabled>
@@ -423,7 +423,7 @@ export function JobForm({
           onChange={(value) => updateText("location", value)}
         />
         <div>
-          <Label htmlFor="job-salary-type" className="font-bold text-[#4A2306]">
+          <Label htmlFor="job-salary-type" className="font-bold text-foreground">
             Hình thức trả lương *
           </Label>
           <select
@@ -435,7 +435,7 @@ export function JobForm({
             aria-describedby={
               errors.salaryType ? "job-salary-type-error" : undefined
             }
-            className={`mt-2 h-12 w-full rounded-lg border border-border bg-white px-4 text-[#4A2306] outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.salaryType ? ERROR_INPUT_CLASS : ""}`}
+            className={`mt-2 h-12 w-full rounded-lg border border-border bg-card px-4 text-foreground outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.salaryType ? ERROR_INPUT_CLASS : ""}`}
             onChange={(event) =>
               updateSalaryType(event.target.value as SalaryType)
             }
@@ -460,8 +460,8 @@ export function JobForm({
       </div>
 
       {values.salaryType === "RANGE" || values.salaryType === "FIXED" ? (
-        <fieldset className="rounded-xl border border-border bg-[#FFF9F5]/60 p-4">
-          <legend className="px-1 font-bold text-[#4A2306]">
+        <fieldset className="rounded-xl border border-border bg-muted/60 p-4">
+          <legend className="px-1 font-bold text-foreground">
             Chi tiết mức lương
           </legend>
           <div
@@ -502,7 +502,7 @@ export function JobForm({
               />
             ) : null}
             <div>
-              <Label htmlFor="job-salary-currency" className="font-bold text-[#4A2306]">
+              <Label htmlFor="job-salary-currency" className="font-bold text-foreground">
                 Đơn vị *
               </Label>
               <select
@@ -510,7 +510,7 @@ export function JobForm({
                 value={values.currency}
                 disabled={saving}
                 aria-invalid={Boolean(errors.currency)}
-                className={`mt-2 h-12 w-full rounded-lg border border-border bg-white px-4 text-[#4A2306] outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.currency ? ERROR_INPUT_CLASS : ""}`}
+                className={`mt-2 h-12 w-full rounded-lg border border-border bg-card px-4 text-foreground outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 ${errors.currency ? ERROR_INPUT_CLASS : ""}`}
                 onChange={(event) =>
                   setValues((current) => ({
                     ...current,
@@ -526,7 +526,7 @@ export function JobForm({
       ) : null}
 
       <div>
-        <Label htmlFor="job-requirements" className="font-bold text-[#4A2306]">
+        <Label htmlFor="job-requirements" className="font-bold text-foreground">
           Yêu cầu ứng viên *
         </Label>
         <Textarea
@@ -536,7 +536,7 @@ export function JobForm({
           disabled={saving}
           aria-invalid={Boolean(errors.req)}
           aria-describedby={errors.req ? "job-requirements-error" : undefined}
-          className={`mt-2 min-h-32 resize-y bg-white ${errors.req ? ERROR_INPUT_CLASS : ""}`}
+          className={`mt-2 min-h-32 resize-y bg-card ${errors.req ? ERROR_INPUT_CLASS : ""}`}
           placeholder="Mô tả kinh nghiệm, chuyên môn và kỹ năng cần có..."
           onChange={(event) => updateText("req", event.target.value)}
         />
@@ -567,11 +567,11 @@ export function JobForm({
         />
 
         <fieldset className="min-w-0 self-start">
-          <legend className="font-bold text-[#4A2306]">
+          <legend className="font-bold text-foreground">
             Trạng thái vị trí
           </legend>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <label className="flex h-12 cursor-pointer items-center gap-3 rounded-lg border border-border bg-white px-4 transition-colors hover:bg-[#FFF9F5] has-[:checked]:border-primary has-[:checked]:bg-secondary/60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/30 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+            <label className="flex h-12 cursor-pointer items-center gap-3 rounded-lg border border-border bg-card px-4 transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-secondary/60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/30 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
               <input
                 type="radio"
                 name="job-published-status"
@@ -586,9 +586,9 @@ export function JobForm({
                   }))
                 }
               />
-              <span className="font-bold text-[#4A2306]">Công khai</span>
+              <span className="font-bold text-foreground">Công khai</span>
             </label>
-            <label className="flex h-12 cursor-pointer items-center gap-3 rounded-lg border border-border bg-white px-4 transition-colors hover:bg-[#FFF9F5] has-[:checked]:border-primary has-[:checked]:bg-secondary/60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/30 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+            <label className="flex h-12 cursor-pointer items-center gap-3 rounded-lg border border-border bg-card px-4 transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-secondary/60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/30 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
               <input
                 type="radio"
                 name="job-published-status"
@@ -603,7 +603,7 @@ export function JobForm({
                   }))
                 }
               />
-              <span className="font-bold text-[#4A2306]">Ẩn</span>
+              <span className="font-bold text-foreground">Ẩn</span>
             </label>
           </div>
         </fieldset>
@@ -660,7 +660,7 @@ function TextField({
   const helperId = `${id}-helper`;
   return (
     <div>
-      <Label htmlFor={id} className="font-bold text-[#4A2306]">
+      <Label htmlFor={id} className="font-bold text-foreground">
         {label}
       </Label>
       <Input
@@ -674,7 +674,7 @@ function TextField({
         placeholder={placeholder}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : helper ? helperId : undefined}
-        className={`mt-2 bg-white ${error ? ERROR_INPUT_CLASS : ""}`}
+        className={`mt-2 bg-card ${error ? ERROR_INPUT_CLASS : ""}`}
         onChange={(event) => onChange(event.target.value)}
       />
       {error ? (
@@ -682,7 +682,7 @@ function TextField({
           {error}
         </p>
       ) : helper ? (
-        <p id={helperId} className="mt-1 text-xs text-[#9B6B50]">
+        <p id={helperId} className="mt-1 text-xs text-muted-foreground">
           {helper}
         </p>
       ) : null}

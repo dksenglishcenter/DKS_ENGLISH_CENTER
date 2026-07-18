@@ -74,7 +74,7 @@ export function LoginForm() {
       <div className="flex items-center justify-between">
         <label className="flex cursor-pointer items-center gap-2">
           <input type="checkbox" className="h-3.5 w-3.5 rounded accent-primary" />
-          <span className="text-sm text-[#6B4226] font-[family-name:var(--font-body)]">
+          <span className="text-sm text-muted-foreground font-[family-name:var(--font-body)]">
             Ghi nhớ đăng nhập
           </span>
         </label>
@@ -111,19 +111,19 @@ export function LoginForm() {
 
       <div className="relative my-2 flex items-center gap-3">
         <div className="h-px flex-1 bg-[#F5EDE6]" />
-        <span className="text-xs text-[#9B6B50] font-[family-name:var(--font-body)]">hoặc</span>
+        <span className="text-xs text-muted-foreground font-[family-name:var(--font-body)]">hoặc</span>
         <div className="h-px flex-1 bg-[#F5EDE6]" />
       </div>
 
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-[12px] border-[1.5px] border-[#F5EDE6] bg-white py-3 font-semibold text-[#4A2306] transition-all font-[family-name:var(--font-body)]"
+        className="flex w-full items-center justify-center gap-2 rounded-[12px] border-[1.5px] border-[#F5EDE6] bg-card py-3 font-semibold text-foreground transition-all font-[family-name:var(--font-body)]"
       >
         <GoogleIcon />
         Tiếp tục với Google
       </button>
 
-      <p className="text-center text-sm text-[#9B6B50] font-[family-name:var(--font-body)]">
+      <p className="text-center text-sm text-muted-foreground font-[family-name:var(--font-body)]">
         Chưa có tài khoản?{" "}
         <Link href={PAGE_PATHS.register} className="font-bold text-primary hover:underline">
           Đăng ký ngay

@@ -67,7 +67,7 @@ export function HorizontalSnapSlider({
   const showArrows = itemCount > desktopVisible;
 
   const arrowClass =
-    "absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-primary shadow-md transition enabled:hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-30 lg:flex";
+    "absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-primary shadow-md transition enabled:hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-30 lg:flex";
 
   return (
     <div className={cn("relative", className)}>

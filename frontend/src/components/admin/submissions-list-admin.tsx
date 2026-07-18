@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -24,7 +24,7 @@ export function PhoneLink({ phone }: { phone: string }) {
   return (
     <a
       href={`tel:${phone}`}
-      className="flex min-w-0 items-start gap-2 text-[#6B3E26] hover:text-primary"
+      className="flex min-w-0 items-start gap-2 text-muted-foreground hover:text-primary"
     >
       <Phone className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
       <span className="break-all">{phone}</span>
@@ -40,7 +40,7 @@ export function EmailLink({ email }: { email: string | null }) {
   return (
     <a
       href={`mailto:${email}`}
-      className="flex min-w-0 items-start gap-2 text-[#6B3E26] hover:text-primary"
+      className="flex min-w-0 items-start gap-2 text-muted-foreground hover:text-primary"
     >
       <Mail className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
       <span className="break-all">{email}</span>
@@ -231,11 +231,11 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
         <div>
           <h1
             id={titleId}
-            className="text-xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+            className="text-xl font-black text-foreground font-[family-name:var(--font-nunito)]"
           >
             {config.title}
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-[#9B6B50]">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {config.description}
           </p>
         </div>
@@ -253,7 +253,7 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
             type="search"
             value={searchInput}
             maxLength={100}
-            className="h-10 min-w-0 px-3 py-2 text-sm bg-white"
+            className="h-10 min-w-0 px-3 py-2 text-sm bg-card"
             placeholder={config.searchPlaceholder}
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -308,10 +308,10 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
       ) : null}
 
       <div
-        className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_4px_24px_rgba(74,35,6,0.04)]"
+        className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_4px_24px_rgba(74,35,6,0.04)]"
         aria-busy={loading}
       >
-        <div className="border-b border-border bg-[#FFF9F5] px-4 py-3 text-sm text-[#6B3E26] sm:px-5">
+        <div className="border-b border-border bg-muted px-4 py-3 text-sm text-muted-foreground sm:px-5">
           {loading
             ? config.loadingText
             : `${totalItems.toLocaleString("vi-VN")} ${config.unitLabel}${search ? ` cho “${search}”` : ""}`}
@@ -323,7 +323,7 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
               <EmptyIcon className="size-6" aria-hidden="true" />
             </span>
             <div>
-              <p className="font-bold text-[#4A2306]">{config.emptyTitle}</p>
+              <p className="font-bold text-foreground">{config.emptyTitle}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {search
                   ? "Không tìm thấy kết quả phù hợp với từ khóa."
@@ -337,7 +337,7 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
           <>
             <div className="hidden overflow-x-auto xl:block">
               <table className="w-full table-fixed text-left text-sm">
-                <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+                <thead className="border-b border-border bg-muted text-muted-foreground">
                   <tr>
                     <th scope="col" className="w-[15%] px-4 py-3 font-semibold">
                       {config.nameHeader}
@@ -366,9 +366,9 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
                   {items.map((item) => (
                     <tr
                       key={item.id}
-                      className="align-top transition-colors hover:bg-[#FFF9F5]/70"
+                      className="align-top transition-colors hover:bg-muted/70"
                     >
-                      <td className="break-words px-4 py-4 font-semibold text-[#4A2306]">
+                      <td className="break-words px-4 py-4 font-semibold text-foreground">
                         {item.fullName}
                       </td>
                       {config.columns.map((column) => (
@@ -396,7 +396,7 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="break-words font-bold text-[#4A2306]">
+                      <h2 className="break-words font-bold text-foreground">
                         {item.fullName}
                       </h2>
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -408,7 +408,7 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
                   <dl className="grid gap-3 text-sm sm:grid-cols-2">
                     {config.columns.map((column) => (
                       <div key={column.key} className="min-w-0">
-                        <dt className="font-semibold text-[#4A2306]">
+                        <dt className="font-semibold text-foreground">
                           {column.header}
                         </dt>
                         <dd className="mt-1">{column.render(item)}</dd>

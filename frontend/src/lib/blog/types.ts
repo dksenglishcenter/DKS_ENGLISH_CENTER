@@ -1,6 +1,10 @@
 export type BlogSection = {
   heading: string;
   body: string;
+  imageUrl?: string | null;
+  imageAlt?: string;
+  linkLabel?: string;
+  linkHref?: string;
 };
 
 export type BlogPost = {
@@ -56,3 +60,16 @@ export type ListBlogPostsParams = {
   category?: string;
   publishedOnly?: boolean;
 };
+
+/** Internal path (/courses) or absolute http(s) URL. */
+export function isValidBlogLinkHref(href: string): boolean {
+  const value = href.trim();
+  if (!value) return false;
+  if (value.startsWith("/") && !value.startsWith("//")) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}

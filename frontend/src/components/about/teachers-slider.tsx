@@ -29,7 +29,7 @@ export function TeachersSlider({ teachers }: TeachersSliderProps) {
         {teachers.map((t) => (
           <div
             key={t.id}
-            className={`group overflow-hidden rounded-2xl border border-border bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${SNAP_SLIDER_ITEM_CLASS}`}
+            className={`group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${SNAP_SLIDER_ITEM_CLASS}`}
           >
             <div className="relative h-52 overflow-hidden bg-secondary">
               <Image
@@ -40,7 +40,7 @@ export function TeachersSlider({ teachers }: TeachersSliderProps) {
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#4A2306]/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
               <div className="absolute bottom-3 left-3 right-3">
                 <div className="inline-block rounded-full bg-primary px-3 py-1 text-xs font-bold text-white font-[family-name:var(--font-nunito)]">
                   {t.exp}
@@ -48,7 +48,7 @@ export function TeachersSlider({ teachers }: TeachersSliderProps) {
               </div>
             </div>
             <div className="p-5">
-              <h3 className="mb-1 font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+              <h3 className="mb-1 font-black text-foreground font-[family-name:var(--font-nunito)]">
                 {t.name}
               </h3>
               <div className="mb-2 text-xs font-semibold text-primary font-[family-name:var(--font-body)]">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { Check, Clock, Mail, MapPin, Phone, RefreshCw } from "lucide-react";
@@ -89,7 +89,7 @@ function ContactField({
     <div className="space-y-2">
       <Label
         htmlFor={field.name}
-        className="flex items-center gap-2 text-sm font-bold text-[#4A2306]"
+        className="flex items-center gap-2 text-sm font-bold text-foreground"
       >
         <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
         {field.label}
@@ -103,7 +103,7 @@ function ContactField({
         disabled={disabled}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
-        className={`bg-white ${error ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200" : ""}`}
+        className={`bg-card ${error ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200" : ""}`}
         onChange={(event) => onChange(field.name, event.target.value)}
       />
       {error ? (
@@ -221,7 +221,7 @@ export function ContactInformationAdmin() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl rounded-2xl border border-border bg-white p-6 text-sm text-[#9B6B50]">
+      <div className="max-w-2xl rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
         Đang tải thông tin liên hệ...
       </div>
     );
@@ -229,7 +229,7 @@ export function ContactInformationAdmin() {
 
   if (loadError) {
     return (
-      <div className="max-w-2xl rounded-2xl border border-red-200 bg-white p-6">
+      <div className="max-w-2xl rounded-2xl border border-red-200 bg-card p-6">
         <p role="alert" className="text-sm text-red-700">
           {loadError}
         </p>
@@ -252,11 +252,11 @@ export function ContactInformationAdmin() {
       <div className="mb-6">
         <h2
           id="contact-admin-title"
-          className="text-xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+          className="text-xl font-black text-foreground font-[family-name:var(--font-nunito)]"
         >
           Thông tin liên hệ
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-[#9B6B50]">
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           Thông tin liên hệ được sử dụng đồng bộ tại Footer và trang Liên hệ.
         </p>
       </div>
@@ -264,7 +264,7 @@ export function ContactInformationAdmin() {
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="space-y-5 rounded-2xl border border-border bg-white p-5 shadow-[0_4px_24px_rgba(74,35,6,0.04)] sm:p-6"
+        className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-[0_4px_24px_rgba(74,35,6,0.04)] sm:p-6"
       >
         {!hasExistingData ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">

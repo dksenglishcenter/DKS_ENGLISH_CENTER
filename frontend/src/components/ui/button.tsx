@@ -5,16 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "./utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 font-[family-name:var(--font-heading)] motion-reduce:transform-none",
+  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 font-[family-name:var(--font-heading)] motion-reduce:transform-none",
   {
     variants: {
       variant: {
         primary:
-          "bg-gradient-to-br from-primary to-primary-hover text-white shadow-md shadow-primary/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25",
+          "bg-gradient-to-br from-primary to-primary-hover text-primary-foreground shadow-md shadow-primary/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25",
         secondary:
-          "bg-gradient-to-br from-accent to-primary text-white shadow-md shadow-primary/15 hover:-translate-y-0.5 hover:shadow-lg",
+          "bg-gradient-to-br from-accent to-primary text-primary-foreground shadow-md shadow-primary/15 hover:-translate-y-0.5 hover:shadow-lg",
         outline:
-          "border-2 border-primary text-primary hover:-translate-y-0.5 hover:bg-primary hover:text-white",
+          "border-2 border-primary text-primary hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground",
         destructive:
           "border-2 border-red-400 text-red-500 hover:-translate-y-0.5 hover:bg-red-500 hover:text-white",
         ghost: "text-primary hover:bg-secondary",

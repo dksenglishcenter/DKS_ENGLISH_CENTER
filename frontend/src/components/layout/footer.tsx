@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { BookOpen, Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import { DKSLogo } from "@/components/brand/dks-logo";
 import { SocialIcon } from "@/components/brand/social-icon";
@@ -64,7 +64,10 @@ export async function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold text-white font-[family-name:var(--font-nunito)]">Khóa học</h4>
+            <h4 className="mb-4 flex items-center gap-2 font-bold text-white font-[family-name:var(--font-nunito)]">
+              <BookOpen className="h-4 w-4 text-accent" aria-hidden="true" />
+              Khóa học
+            </h4>
             <ul className="space-y-2 text-sm text-orange-100 font-[family-name:var(--font-body)]">
               {COURSE_LABELS.map((course) => (
                 <li key={course}>
@@ -77,7 +80,10 @@ export async function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold text-white font-[family-name:var(--font-nunito)]">Liên hệ</h4>
+            <h4 className="mb-4 flex items-center gap-2 font-bold text-white font-[family-name:var(--font-nunito)]">
+              <Phone className="h-4 w-4 text-accent" aria-hidden="true" />
+              Liên hệ
+            </h4>
             {contactInfo ? (
               <address className="not-italic">
                 <ul className="space-y-3 text-sm text-orange-100 font-[family-name:var(--font-body)]">

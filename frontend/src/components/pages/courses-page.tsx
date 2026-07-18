@@ -14,6 +14,7 @@ import {
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { CourseCoverImage } from "@/components/media/course-cover-image";
+import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { listCourses } from "@/lib/courses/api";
 import type { Course } from "@/lib/courses/types";
@@ -63,6 +64,7 @@ export function CoursesPage() {
   return (
     <div className="bg-background min-h-screen">
       <PageHero
+        icon={BookOpen}
         label="Khóa học DKS"
         title="Chọn Khóa Học Phù Hợp"
         description="Các chương trình trọng tâm từ tiếng Anh lớp 1–9 đến luyện thi vào lớp 10, THPT, Đại học và IELTS."
@@ -71,8 +73,8 @@ export function CoursesPage() {
       <Container className="py-16">
         <div className="flex flex-col gap-10 lg:flex-row">
           <aside className="lg:w-64 flex-shrink-0">
-            <div className="sticky top-24 rounded-2xl border border-border bg-white p-6">
-              <h3 className="mb-4 font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+            <div className="sticky top-24 rounded-2xl border border-border bg-card p-6">
+              <h3 className="mb-4 font-black text-foreground font-[family-name:var(--font-nunito)]">
                 Lọc theo loại
               </h3>
               <div className="flex flex-col gap-2">
@@ -83,8 +85,8 @@ export function CoursesPage() {
                     onClick={() => setActive(tab.id)}
                     className={`w-full rounded-lg px-4 py-3 text-left text-sm font-semibold transition-all font-[family-name:var(--font-nunito)] ${
                       active === tab.id
-                        ? "bg-primary text-white"
-                        : "text-[#4A2306] hover:bg-secondary"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-secondary"
                     }`}
                   >
                     {tab.label}
@@ -93,11 +95,10 @@ export function CoursesPage() {
               </div>
 
               <div
-                className="mt-8 rounded-xl p-4"
-                style={{ background: "linear-gradient(135deg, #FFF4EC, #FFFBF0)" }}
+                className="mt-8 rounded-xl bg-secondary p-4"
               >
                 <div className="mb-2 text-2xl">🤔</div>
-                <p className="mb-3 text-sm font-semibold text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                <p className="mb-3 text-sm font-semibold text-foreground font-[family-name:var(--font-nunito)]">
                   Chưa biết chọn khóa nào?
                 </p>
                 <Button asChild size="sm" className="w-full justify-center text-xs">
@@ -117,11 +118,11 @@ export function CoursesPage() {
             ) : null}
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {filtered.map((course) => (
+              {filtered.map((course, index) => (
+                <Reveal key={course.id} delayMs={Math.min(index, 5) * 50}>
                 <article
-                  key={course.id}
                   id={course.slug}
-                  className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white transition-shadow duration-300 hover:shadow-xl"
+                  className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow duration-300 hover:shadow-xl"
                 >
                   <div
                     className="relative h-48 shrink-0 overflow-hidden"
@@ -187,7 +188,7 @@ export function CoursesPage() {
                               {item.label}
                             </span>
                           </div>
-                          <div className="text-xs font-semibold text-[#4A2306] font-[family-name:var(--font-body)]">
+                          <div className="text-xs font-semibold text-foreground font-[family-name:var(--font-body)]">
                             {item.val}
                           </div>
                         </div>
@@ -202,7 +203,7 @@ export function CoursesPage() {
                         {course.perks.map((perk) => (
                           <li
                             key={perk}
-                            className="flex items-center gap-2 text-sm text-[#4A2306] font-[family-name:var(--font-body)]"
+                            className="flex items-center gap-2 text-sm text-foreground font-[family-name:var(--font-body)]"
                           >
                             <Check className="h-4 w-4 flex-shrink-0 text-primary" />
                             {perk}
@@ -218,6 +219,7 @@ export function CoursesPage() {
                     </Button>
                   </div>
                 </article>
+                </Reveal>
               ))}
             </div>
           </div>

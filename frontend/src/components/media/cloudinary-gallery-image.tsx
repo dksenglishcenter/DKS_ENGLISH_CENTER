@@ -60,7 +60,7 @@ export function CloudinaryGalleryImage({
         onLoad={() => setStatus("loaded")}
         onError={() => setStatus("error")}
       />
-      <span className="absolute inset-0 flex items-center justify-center bg-[#4A2306]/0 transition-colors duration-300 group-hover:bg-[#4A2306]/30 motion-reduce:transition-none">
+      <span className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors duration-300 group-hover:bg-foreground/30 motion-reduce:transition-none">
         <Camera className="h-8 w-8 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" aria-hidden="true" />
       </span>
     </>

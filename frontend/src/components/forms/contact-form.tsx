@@ -318,7 +318,7 @@ export function ContactForm() {
           aria-invalid={Boolean(fieldErrors.courseInterest)}
           aria-describedby={fieldErrors.courseInterest ? "contact-course-error" : undefined}
           required
-          className={`h-12 w-full cursor-pointer rounded-lg border bg-[#FFF9F5] px-4 py-3 text-[#4A2306] outline-none transition-all focus-visible:ring-2 font-[family-name:var(--font-body)] ${
+          className={`h-12 w-full cursor-pointer rounded-lg border bg-input-background px-4 py-3 text-foreground outline-none transition-all focus-visible:ring-2 font-[family-name:var(--font-body)] ${
             fieldErrors.courseInterest
               ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200"
               : "border-border focus-visible:border-primary focus-visible:ring-primary"
@@ -362,7 +362,7 @@ export function ContactForm() {
           className={
             submissionStatus.type === "error"
               ? "rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-relaxed text-red-800"
-              : "rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-[#4A2306]"
+              : "rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground"
           }
         >
           {submissionStatus.message}

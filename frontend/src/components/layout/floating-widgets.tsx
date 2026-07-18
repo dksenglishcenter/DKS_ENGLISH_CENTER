@@ -27,7 +27,7 @@ function FloatingAuth() {
 
   if (!user) {
     return (
-      <Link href={PAGE_PATHS.login} className={`${pillClass} bg-primary text-white`}>
+      <Link href={PAGE_PATHS.login} className={`${pillClass} bg-primary text-primary-foreground`}>
         Đăng nhập
       </Link>
     );
@@ -42,7 +42,7 @@ function FloatingAuth() {
     <div className="flex flex-col items-start gap-2">
       <Link
         href={accountHref}
-        className={`${pillClass} bg-primary text-white`}
+        className={`${pillClass} bg-primary text-primary-foreground`}
         title={isAdmin ? `Vào trang admin · ${user.email}` : user.email}
         aria-label={isAdmin ? "Vào trang quản trị" : `Tài khoản ${user.fullName}`}
       >
@@ -69,12 +69,13 @@ function FloatingAuth() {
 function FloatingWidgetsContent() {
   return (
     <>
-      <div className="pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 z-[100]">
+      <div className="pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 z-[100] animate-hero-enter">
         <FloatingAuth />
       </div>
 
       <div
-        className="pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-[100] flex flex-col gap-3"
+        className="pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-[100] flex flex-col gap-3 animate-hero-enter"
+        style={{ animationDelay: "120ms" }}
         aria-label="Liên hệ nhanh"
       >
         <a
@@ -101,7 +102,7 @@ function FloatingWidgetsContent() {
           href="tel:0834513456"
           title="Gọi ngay"
           aria-label="Gọi ngay 083 451 3456"
-          className={`${widgetClass} bg-primary text-white`}
+          className={`${widgetClass} bg-primary text-primary-foreground`}
         >
           <Phone className="h-5 w-5" aria-hidden="true" />
         </a>

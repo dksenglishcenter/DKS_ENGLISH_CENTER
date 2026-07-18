@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -168,12 +168,12 @@ function ColorField({
 }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-semibold text-[#4A2306]">{label}</span>
-      <span className="mb-2 block text-xs text-[#9B6B50]">{hint}</span>
+      <span className="mb-1 block font-semibold text-foreground">{label}</span>
+      <span className="mb-2 block text-xs text-muted-foreground">{hint}</span>
       <div className="flex items-center gap-3">
         <input
           type="color"
-          className="h-11 w-14 cursor-pointer rounded-lg border border-border bg-white p-1"
+          className="h-11 w-14 cursor-pointer rounded-lg border border-border bg-card p-1"
           value={/^#[0-9A-Fa-f]{6}$/.test(value) ? value : "#F16522"}
           onChange={(event) => onChange(event.target.value.toUpperCase())}
         />
@@ -210,9 +210,9 @@ function SelectField({
 
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-semibold text-[#4A2306]">{label}</span>
+      <span className="mb-1 block font-semibold text-foreground">{label}</span>
       <select
-        className={`w-full rounded-lg border bg-white px-3 py-2 ${
+        className={`w-full rounded-lg border bg-card px-3 py-2 ${
           error ? "border-red-500" : "border-border"
         }`}
         value={value}
@@ -472,7 +472,7 @@ export function CoursesAdmin() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+        <h2 className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
           Khóa học
         </h2>
         <Button
@@ -485,11 +485,11 @@ export function CoursesAdmin() {
       </div>
 
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
-      {loading ? <p className="text-sm text-[#9B6B50]">Đang tải...</p> : null}
+      {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+          <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-semibold">Khóa</th>
               <th className="px-4 py-3 font-semibold">Category</th>
@@ -503,8 +503,8 @@ export function CoursesAdmin() {
             {courses.map((course) => (
               <tr key={course.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3">
-                  <div className="font-semibold text-[#4A2306]">{course.title}</div>
-                  <div className="text-xs text-[#9B6B50]">{course.slug}</div>
+                  <div className="font-semibold text-foreground">{course.title}</div>
+                  <div className="text-xs text-muted-foreground">{course.slug}</div>
                 </td>
                 <td className="px-4 py-3">{course.category}</td>
                 <td className="px-4 py-3">{course.featured ? "Có" : "Không"}</td>
@@ -525,9 +525,9 @@ export function CoursesAdmin() {
       {showForm ? (
         <div
           ref={formRef}
-          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-white p-5"
+          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-card p-5"
         >
-          <h3 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <h3 className="text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
             {editingId ? "Sửa khóa học" : "Thêm khóa học"}
           </h3>
 
@@ -542,7 +542,7 @@ export function CoursesAdmin() {
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="block text-sm">
-                <span className="mb-1 block font-semibold text-[#4A2306]">{label}</span>
+                <span className="mb-1 block font-semibold text-foreground">{label}</span>
                 <input
                   className={`w-full rounded-lg border px-3 py-2 ${
                     fieldErrors[key] ? "border-red-500" : "border-border"
@@ -584,9 +584,9 @@ export function CoursesAdmin() {
             />
 
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Thứ tự hiển thị</span>
+              <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>
               <select
-                className={`w-full rounded-lg border bg-white px-3 py-2 ${
+                className={`w-full rounded-lg border bg-card px-3 py-2 ${
                   fieldErrors.sortOrder ? "border-red-500" : "border-border"
                 }`}
                 value={String(form.sortOrder ?? "")}
@@ -606,9 +606,9 @@ export function CoursesAdmin() {
             </label>
 
             <label className="block text-sm md:col-span-2">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Category (lọc sidebar)</span>
+              <span className="mb-1 block font-semibold text-foreground">Category (lọc sidebar)</span>
               <select
-                className={`w-full rounded-lg border bg-white px-3 py-2 ${
+                className={`w-full rounded-lg border bg-card px-3 py-2 ${
                   fieldErrors.category ? "border-red-500" : "border-border"
                 }`}
                 value={normalizeCategory(form.category)}
@@ -625,7 +625,7 @@ export function CoursesAdmin() {
             </label>
 
             <div className="md:col-span-2">
-              <span className="mb-1 block text-sm font-semibold text-[#4A2306]">Icon card</span>
+              <span className="mb-1 block text-sm font-semibold text-foreground">Icon card</span>
               <div className="flex flex-wrap gap-2">
                 {COURSE_ICONS.map((icon) => {
                   const active = form.icon === icon;
@@ -637,7 +637,7 @@ export function CoursesAdmin() {
                       className={`flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors ${
                         active
                           ? "border-primary bg-secondary"
-                          : "border-border bg-white hover:bg-secondary"
+                          : "border-border bg-card hover:bg-secondary"
                       }`}
                       aria-label={`Chọn icon ${icon}`}
                       aria-pressed={active}
@@ -651,8 +651,8 @@ export function CoursesAdmin() {
 
             <div className="flex flex-wrap items-end justify-between gap-3 md:col-span-2">
               <div>
-                <span className="block text-sm font-semibold text-[#4A2306]">Màu card</span>
-                <span className="text-xs text-[#9B6B50]">
+                <span className="block text-sm font-semibold text-foreground">Màu card</span>
+                <span className="text-xs text-muted-foreground">
                   Màu gốc: accent {DEFAULT_COURSE_COLORS.accent} · nền {DEFAULT_COURSE_COLORS.bg}
                 </span>
               </div>
@@ -687,7 +687,7 @@ export function CoursesAdmin() {
           </div>
 
           <label className="block text-sm">
-            <span className="mb-1 block font-semibold text-[#4A2306]">Mô tả</span>
+            <span className="mb-1 block font-semibold text-foreground">Mô tả</span>
             <textarea
               className={`min-h-28 w-full rounded-lg border px-3 py-2 ${
                 fieldErrors.description ? "border-red-500" : "border-border"
@@ -699,7 +699,7 @@ export function CoursesAdmin() {
           </label>
 
           <label className="block text-sm">
-            <span className="mb-1 block font-semibold text-[#4A2306]">
+            <span className="mb-1 block font-semibold text-foreground">
               Điểm nổi bật (mỗi dòng 1 ý)
             </span>
             <textarea
@@ -722,7 +722,7 @@ export function CoursesAdmin() {
           />
 
           <div className="flex flex-wrap gap-4">
-            <label className="flex items-center gap-2 text-sm font-semibold text-[#4A2306]">
+            <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <input
                 type="checkbox"
                 checked={Boolean(form.featured)}
@@ -730,7 +730,7 @@ export function CoursesAdmin() {
               />
               Featured (hiện trang chủ)
             </label>
-            <label className="flex items-center gap-2 text-sm font-semibold text-[#4A2306]">
+            <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <input
                 type="checkbox"
                 checked={Boolean(form.isPublished)}

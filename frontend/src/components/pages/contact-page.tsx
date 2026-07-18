@@ -7,6 +7,7 @@ import {
 import { ContactForm } from "@/components/forms/contact-form";
 import { Container } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
+import { Reveal } from "@/components/motion/reveal";
 import type { ContactInformation } from "@/lib/contact/types";
 import { getPhoneHref } from "@/lib/contact/validation";
 import { SOCIAL_LINKS } from "@/lib/social-links";
@@ -76,6 +77,7 @@ export function ContactPage({
   return (
     <div className="bg-background">
       <PageHero
+        icon={Mail}
         label="Liên hệ"
         title={
           <>
@@ -89,11 +91,12 @@ export function ContactPage({
 
       <Container className="py-16 md:py-20">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-14">
+          <Reveal>
           <section aria-labelledby="contact-information-title" className="space-y-8">
             <div>
               <h2
                 id="contact-information-title"
-                className="mb-6 text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+                className="mb-6 text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]"
               >
                 Thông Tin Liên Hệ
               </h2>
@@ -105,7 +108,7 @@ export function ContactPage({
                       <span className="mb-0.5 block text-xs font-bold uppercase tracking-wide text-muted-foreground">
                         {detail.label}
                       </span>
-                      <span className="block text-sm font-medium leading-relaxed text-[#4A2306]">
+                      <span className="block text-sm font-medium leading-relaxed text-foreground">
                         {detail.value}
                       </span>
                     </>
@@ -143,7 +146,7 @@ export function ContactPage({
             </div>
 
             <div>
-              <h3 className="mb-4 text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+              <h3 className="mb-4 text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
                 Mạng xã hội
               </h3>
               <ul
@@ -166,7 +169,7 @@ export function ContactPage({
               </ul>
             </div>
 
-            <div className="relative min-h-[280px] overflow-hidden rounded-2xl border border-border bg-[#F8F9FA]">
+            <div className="relative min-h-[280px] overflow-hidden rounded-2xl border border-border bg-muted">
               <svg
                 className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.06]"
                 viewBox="0 0 400 280"
@@ -194,11 +197,11 @@ export function ContactPage({
                 ))}
               </svg>
               <div className="relative flex min-h-[280px] flex-col items-center justify-center gap-4 px-6 text-center">
-                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[#D95518] text-white shadow-xl shadow-primary/20">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover text-primary-foreground shadow-xl shadow-primary/20">
                   <MapPin className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <div>
-                  <h3 className="mb-1 font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                  <h3 className="mb-1 font-black text-foreground font-[family-name:var(--font-nunito)]">
                     DKS English Center
                   </h3>
                   <p className="text-sm text-muted-foreground">
@@ -209,7 +212,7 @@ export function ContactPage({
                       href={mapHref}
                       target="_blank"
                       rel="noreferrer"
-                      className="pointer-events-auto mt-3 inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-[#D95518] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="pointer-events-auto mt-3 inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       Mở Google Maps →
                     </a>
@@ -218,15 +221,17 @@ export function ContactPage({
               </div>
             </div>
           </section>
+          </Reveal>
 
+          <Reveal delayMs={100}>
           <section aria-labelledby="contact-form-title">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-[0_4px_24px_rgba(74,35,6,0.06)] sm:p-8">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
               <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <FileText className="h-6 w-6" aria-hidden="true" />
               </span>
               <h2
                 id="contact-form-title"
-                className="mb-1 text-xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+                className="mb-1 text-xl font-black text-foreground font-[family-name:var(--font-nunito)]"
               >
                 Nhận Tư Vấn Lộ Trình Học Phù Hợp
               </h2>
@@ -241,12 +246,12 @@ export function ContactPage({
                 href={SOCIAL_LINKS.zalo}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="rounded-2xl border border-border bg-card p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F0FF]">
                   <SocialIcon network="zalo" className="h-5 w-5 text-[#0068FF]" />
                 </span>
-                <h3 className="mb-1 text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                <h3 className="mb-1 text-sm font-bold text-foreground font-[family-name:var(--font-nunito)]">
                   Chat Zalo
                 </h3>
                 <p className="text-xs text-muted-foreground">Phản hồi ngay lập tức</p>
@@ -254,12 +259,12 @@ export function ContactPage({
               <a
                 href={contactInfo ? getPhoneHref(contactInfo.phone) : undefined}
                 aria-disabled={!contactInfo}
-                className="rounded-2xl border border-border bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="rounded-2xl border border-border bg-card p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
                   <Phone className="h-5 w-5 text-primary" aria-hidden="true" />
                 </span>
-                <span className="mb-1 block text-sm font-bold text-[#4A2306] font-[family-name:var(--font-nunito)]">
+                <span className="mb-1 block text-sm font-bold text-foreground font-[family-name:var(--font-nunito)]">
                   Gọi ngay
                 </span>
                 <span className="block text-xs text-muted-foreground">
@@ -268,6 +273,7 @@ export function ContactPage({
               </a>
             </div>
           </section>
+          </Reveal>
         </div>
       </Container>
     </div>

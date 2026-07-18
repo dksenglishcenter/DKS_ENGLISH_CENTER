@@ -35,12 +35,12 @@ export function AuthInputField({
 
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-semibold text-[#4A2306] font-[family-name:var(--font-body)]">
+      <label className="mb-1.5 block text-sm font-semibold text-foreground font-[family-name:var(--font-body)]">
         {label}
         {required ? <span className="ml-0.5 text-primary">*</span> : null}
       </label>
       <div className="relative">
-        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9B6B50]" />
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           name={name}
           type={isPassword && showPassword ? "text" : type}
@@ -51,7 +51,7 @@ export function AuthInputField({
           onChange={(event) => onChange(event.target.value)}
           aria-invalid={Boolean(error)}
           className={cn(
-            "w-full rounded-[10px] bg-[#FFF9F5] py-3 pl-10 pr-10 text-sm text-[#4A2306] outline-none transition-all font-[family-name:var(--font-body)]",
+            "w-full rounded-[10px] bg-input-background py-3 pl-10 pr-10 text-sm text-foreground outline-none transition-all font-[family-name:var(--font-body)]",
             "border-[1.5px] focus-visible:border-primary",
             error ? "border-[#d4183d]" : "border-primary/20",
           )}
@@ -60,7 +60,7 @@ export function AuthInputField({
           <button
             type="button"
             onClick={() => setShowPassword((current) => !current)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9B6B50] transition-colors hover:text-primary"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-primary"
             aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

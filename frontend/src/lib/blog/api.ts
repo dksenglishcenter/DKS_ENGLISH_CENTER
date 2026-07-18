@@ -20,13 +20,32 @@ function normalizeSections(value: unknown): BlogSection[] {
   if (!Array.isArray(value)) return [];
   return value
     .filter(
-      (item): item is BlogSection =>
-        Boolean(item) &&
-        typeof item === "object" &&
-        typeof (item as BlogSection).heading === "string" &&
-        typeof (item as BlogSection).body === "string",
+      (item): item is Record<string, unknown> =>
+        Boolean(item) && typeof item === "object",
     )
-    .map((item) => ({ heading: item.heading, body: item.body }));
+    .filter(
+      (item) =>
+        typeof item.heading === "string" && typeof item.body === "string",
+    )
+    .map((item) => {
+      const section: BlogSection = {
+        heading: item.heading as string,
+        body: item.body as string,
+      };
+      if (typeof item.imageUrl === "string" && item.imageUrl.trim()) {
+        section.imageUrl = item.imageUrl.trim();
+      }
+      if (typeof item.imageAlt === "string" && item.imageAlt.trim()) {
+        section.imageAlt = item.imageAlt.trim();
+      }
+      if (typeof item.linkHref === "string" && item.linkHref.trim()) {
+        section.linkHref = item.linkHref.trim();
+      }
+      if (typeof item.linkLabel === "string" && item.linkLabel.trim()) {
+        section.linkLabel = item.linkLabel.trim();
+      }
+      return section;
+    });
 }
 
 function normalizeBlogPost(post: BlogPost): BlogPost {

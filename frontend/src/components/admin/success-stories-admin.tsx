@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -197,7 +197,7 @@ export function SuccessStoriesAdmin() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+        <h2 className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
           Câu chuyện thành công
         </h2>
         <Button
@@ -210,11 +210,11 @@ export function SuccessStoriesAdmin() {
       </div>
 
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
-      {loading ? <p className="text-sm text-[#9B6B50]">Đang tải...</p> : null}
+      {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+          <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-semibold">Học viên</th>
               <th className="px-4 py-3 font-semibold">Khóa</th>
@@ -228,8 +228,8 @@ export function SuccessStoriesAdmin() {
             {stories.map((story) => (
               <tr key={story.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3">
-                  <div className="font-semibold text-[#4A2306]">{story.name}</div>
-                  <div className="text-xs text-[#9B6B50]">{story.avatar}</div>
+                  <div className="font-semibold text-foreground">{story.name}</div>
+                  <div className="text-xs text-muted-foreground">{story.avatar}</div>
                 </td>
                 <td className="px-4 py-3">{story.course}</td>
                 <td className="px-4 py-3">{story.badge}</td>
@@ -250,16 +250,16 @@ export function SuccessStoriesAdmin() {
       {showForm ? (
         <div
           ref={formRef}
-          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-white p-5"
+          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-card p-5"
         >
-          <h3 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <h3 className="text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
             {editingId ? "Sửa câu chuyện" : "Thêm câu chuyện"}
           </h3>
           {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Tên học viên</span>
+              <span className="mb-1 block font-semibold text-foreground">Tên học viên</span>
               <input
                 className="w-full rounded-lg border border-border px-3 py-2"
                 value={form.name}
@@ -278,9 +278,9 @@ export function SuccessStoriesAdmin() {
             </label>
 
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Khóa học</span>
+              <span className="mb-1 block font-semibold text-foreground">Khóa học</span>
               <select
-                className="w-full rounded-lg border border-border bg-white px-3 py-2"
+                className="w-full rounded-lg border border-border bg-card px-3 py-2"
                 value={form.course}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, course: event.target.value }))
@@ -301,7 +301,7 @@ export function SuccessStoriesAdmin() {
             </label>
 
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Badge thành tích</span>
+              <span className="mb-1 block font-semibold text-foreground">Badge thành tích</span>
               <input
                 className="w-full rounded-lg border border-border px-3 py-2"
                 value={form.badge}
@@ -312,7 +312,7 @@ export function SuccessStoriesAdmin() {
             </label>
 
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Chữ trên avatar</span>
+              <span className="mb-1 block font-semibold text-foreground">Chữ trên avatar</span>
               <input
                 className="w-full rounded-lg border border-border px-3 py-2"
                 value={form.avatar}
@@ -324,15 +324,15 @@ export function SuccessStoriesAdmin() {
                   }))
                 }
               />
-              <span className="mt-1 block text-xs text-[#9B6B50]">
+              <span className="mt-1 block text-xs text-muted-foreground">
                 1–4 chữ hiện trong vòng tròn cam trên trang chủ (vd: MT, NM).
               </span>
             </label>
 
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Số sao</span>
+              <span className="mb-1 block font-semibold text-foreground">Số sao</span>
               <select
-                className="w-full rounded-lg border border-border bg-white px-3 py-2"
+                className="w-full rounded-lg border border-border bg-card px-3 py-2"
                 value={form.stars}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, stars: Number(event.target.value) }))
@@ -347,7 +347,7 @@ export function SuccessStoriesAdmin() {
             </label>
 
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Thứ tự hiển thị</span>
+              <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>
               <input
                 type="number"
                 min={0}
@@ -357,14 +357,14 @@ export function SuccessStoriesAdmin() {
                   setForm((prev) => ({ ...prev, sortOrder: Number(event.target.value) }))
                 }
               />
-              <span className="mt-1 block text-xs text-[#9B6B50]">
+              <span className="mt-1 block text-xs text-muted-foreground">
                 Nếu chọn số đã có, hai câu chuyện sẽ tự đổi chỗ khi Lưu.
               </span>
             </label>
           </div>
 
           <label className="block text-sm">
-            <span className="mb-1 block font-semibold text-[#4A2306]">Nội dung</span>
+            <span className="mb-1 block font-semibold text-foreground">Nội dung</span>
             <textarea
               className="min-h-28 w-full rounded-lg border border-border px-3 py-2"
               value={form.text}
@@ -372,7 +372,7 @@ export function SuccessStoriesAdmin() {
             />
           </label>
 
-          <label className="flex items-center gap-2 text-sm font-semibold text-[#4A2306]">
+          <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <input
               type="checkbox"
               checked={form.isPublished}

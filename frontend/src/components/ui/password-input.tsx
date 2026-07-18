@@ -30,7 +30,7 @@ export function PasswordInput({
       <button
         type="button"
         aria-label={visible ? toggleLabelHide : toggleLabelShow}
-        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-[#9B6B50] transition-colors hover:text-primary"
+        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted-foreground transition-colors hover:text-primary"
         onClick={() => setVisible((current) => !current)}
       >
         {visible ? (

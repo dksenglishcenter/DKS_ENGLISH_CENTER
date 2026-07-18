@@ -26,7 +26,7 @@ type AuthShellProps = {
 
 export function AuthShell({ tab, title, description, children }: AuthShellProps) {
   return (
-    <div className="flex min-h-screen bg-[#FFF9F5] font-[family-name:var(--font-body)]">
+    <div className="flex min-h-screen bg-input-background font-[family-name:var(--font-body)]">
       <aside className="relative hidden w-[480px] flex-shrink-0 flex-col justify-between overflow-hidden bg-[linear-gradient(145deg,#4A2306_0%,#7A3A10_50%,#F16522_100%)] lg:flex">
         <div className="pointer-events-none absolute inset-0 opacity-10" aria-hidden="true">
           <div className="absolute left-10 top-20 h-40 w-40 rounded-full border-2 border-white" />
@@ -96,7 +96,7 @@ export function AuthShell({ tab, title, description, children }: AuthShellProps)
         <div className="p-6">
           <Link
             href={PAGE_PATHS.home}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[#9B6B50] transition-colors hover:text-primary"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
           >
             <ArrowLeft className="h-4 w-4" /> Về trang chủ
           </Link>
@@ -106,16 +106,16 @@ export function AuthShell({ tab, title, description, children }: AuthShellProps)
           <div className="w-full max-w-md">
             <div className="mb-8 flex items-center gap-2 lg:hidden">
               <DKSLogo size="sm" priority />
-              <span className="font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+              <span className="font-black text-foreground font-[family-name:var(--font-nunito)]">
                 DKS English Center
               </span>
             </div>
 
             <div className="mb-6">
-              <h1 className="mb-1 text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+              <h1 className="mb-1 text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
                 {title}
               </h1>
-              <p className="text-sm text-[#9B6B50]">{description}</p>
+              <p className="text-sm text-muted-foreground">{description}</p>
             </div>
 
             <div className="mb-6 flex rounded-[12px] bg-[#F5EDE6] p-1">
@@ -124,8 +124,8 @@ export function AuthShell({ tab, title, description, children }: AuthShellProps)
                 className={cn(
                   "flex-1 rounded-[10px] py-2.5 text-center text-sm font-bold transition-all",
                   tab === "login"
-                    ? "bg-white text-primary shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
-                    : "text-[#9B6B50] hover:text-primary",
+                    ? "bg-card text-primary shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
+                    : "text-muted-foreground hover:text-primary",
                 )}
               >
                 Đăng nhập
@@ -135,8 +135,8 @@ export function AuthShell({ tab, title, description, children }: AuthShellProps)
                 className={cn(
                   "flex-1 rounded-[10px] py-2.5 text-center text-sm font-bold transition-all",
                   tab === "register"
-                    ? "bg-white text-primary shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
-                    : "text-[#9B6B50] hover:text-primary",
+                    ? "bg-card text-primary shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
+                    : "text-muted-foreground hover:text-primary",
                 )}
               >
                 Đăng ký

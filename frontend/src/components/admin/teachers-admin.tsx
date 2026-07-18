@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -211,7 +211,7 @@ export function TeachersAdmin() {
 
   const field = (key: FieldKey, label: string, multiline = false) => (
     <label className="block text-sm" data-invalid={fieldErrors[key] ? "true" : undefined}>
-      <span className="mb-1 block font-semibold text-[#4A2306]">{label}</span>
+      <span className="mb-1 block font-semibold text-foreground">{label}</span>
       {multiline ? (
         <textarea
           className={`min-h-28 w-full rounded-lg border px-3 py-2 ${
@@ -244,7 +244,7 @@ export function TeachersAdmin() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+        <h2 className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
           Giáo viên
         </h2>
         <Button
@@ -257,11 +257,11 @@ export function TeachersAdmin() {
       </div>
 
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
-      {loading ? <p className="text-sm text-[#9B6B50]">Đang tải...</p> : null}
+      {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+          <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-semibold">Ảnh</th>
               <th className="px-4 py-3 font-semibold">Tên</th>
@@ -275,7 +275,7 @@ export function TeachersAdmin() {
             {teachers.map((teacher) => (
               <tr key={teacher.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3">
-                  <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border bg-[#FFF9F5]">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border bg-muted">
                     {teacher.imageUrl ? (
                       <Image
                         src={teacher.imageUrl}
@@ -288,8 +288,8 @@ export function TeachersAdmin() {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="font-semibold text-[#4A2306]">{teacher.name}</div>
-                  <div className="text-xs text-[#9B6B50]">{teacher.cred}</div>
+                  <div className="font-semibold text-foreground">{teacher.name}</div>
+                  <div className="text-xs text-muted-foreground">{teacher.cred}</div>
                 </td>
                 <td className="px-4 py-3">{teacher.title}</td>
                 <td className="px-4 py-3">{teacher.sortOrder}</td>
@@ -309,9 +309,9 @@ export function TeachersAdmin() {
       {showForm ? (
         <div
           ref={formRef}
-          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-white p-5"
+          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-card p-5"
         >
-          <h3 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <h3 className="text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
             {editingId ? "Sửa giáo viên" : "Thêm giáo viên"}
           </h3>
           {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
@@ -322,7 +322,7 @@ export function TeachersAdmin() {
             {field("cred", "Bằng cấp / chứng chỉ")}
             {field("exp", "Kinh nghiệm")}
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Thứ tự hiển thị</span>
+              <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>
               <input
                 type="number"
                 min={0}
@@ -332,7 +332,7 @@ export function TeachersAdmin() {
                   setForm((prev) => ({ ...prev, sortOrder: Number(event.target.value) }))
                 }
               />
-              <span className="mt-1 block text-xs text-[#9B6B50]">
+              <span className="mt-1 block text-xs text-muted-foreground">
                 Nếu chọn số đã có, hai giáo viên sẽ tự đổi chỗ khi Lưu.
               </span>
             </label>
@@ -348,7 +348,7 @@ export function TeachersAdmin() {
             onFile={(file) => void handleUpload(file)}
           />
 
-          <label className="flex items-center gap-2 text-sm font-semibold text-[#4A2306]">
+          <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <input
               type="checkbox"
               checked={form.isPublished}

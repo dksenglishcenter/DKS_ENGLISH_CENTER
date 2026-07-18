@@ -1,30 +1,36 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Container } from "@/components/layout/container";
 import { SectionLabel } from "@/components/layout/section-heading";
+import { Reveal } from "@/components/motion/reveal";
 
 export function PageHero({
   label,
   title,
   description,
+  icon,
 }: {
   label: string;
   title: ReactNode;
   description: string;
+  icon?: LucideIcon;
 }) {
   return (
     <div
-      className="py-16 md:py-20"
-      style={{ background: "linear-gradient(135deg, #FFF4EC 0%, #FFFBF0 100%)" }}
+      className="relative overflow-hidden py-16 md:py-20"
+      style={{ background: "var(--hero-gradient)" }}
     >
-      <Container className="text-center">
-        <SectionLabel>{label}</SectionLabel>
-        <h1 className="text-4xl md:text-5xl font-black text-[#4A2306] mb-4 font-[family-name:var(--font-nunito)]">
-          {title}
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-[family-name:var(--font-body)]">
-          {description}
-        </p>
+      <Container className="relative text-center">
+        <Reveal>
+          <SectionLabel icon={icon}>{label}</SectionLabel>
+          <h1 className="mb-4 text-4xl font-black text-foreground md:text-5xl font-[family-name:var(--font-nunito)]">
+            {title}
+          </h1>
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground font-[family-name:var(--font-body)]">
+            {description}
+          </p>
+        </Reveal>
       </Container>
     </div>
   );

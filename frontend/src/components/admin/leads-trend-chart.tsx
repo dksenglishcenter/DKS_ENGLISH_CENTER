@@ -1,4 +1,4 @@
-import type { LeadsTrendPoint } from "@/lib/dashboard/types";
+﻿import type { LeadsTrendPoint } from "@/lib/dashboard/types";
 
 // SVG coordinate space (scaled to container width via viewBox).
 const W = 600;
@@ -20,11 +20,11 @@ export function LeadsTrendChart({ points }: { points?: LeadsTrendPoint[] }) {
   if (data.length === 0) {
     return (
       <div>
-        <h3 className="text-base font-bold text-[#4A2306]">Đơn gửi mỗi ngày</h3>
-        <p className="text-xs text-[#9B6B50]">
+        <h3 className="text-base font-bold text-foreground">Đơn gửi mỗi ngày</h3>
+        <p className="text-xs text-muted-foreground">
           Liên hệ + ứng tuyển · 30 ngày qua
         </p>
-        <p className="mt-6 text-sm text-[#9B6B50]">Chưa có dữ liệu.</p>
+        <p className="mt-6 text-sm text-muted-foreground">Chưa có dữ liệu.</p>
       </div>
     );
   }
@@ -52,16 +52,16 @@ export function LeadsTrendChart({ points }: { points?: LeadsTrendPoint[] }) {
     <div>
       <div className="mb-3 flex items-end justify-between">
         <div>
-          <h3 className="text-base font-bold text-[#4A2306]">
+          <h3 className="text-base font-bold text-foreground">
             Đơn gửi mỗi ngày
           </h3>
-          <p className="text-xs text-[#9B6B50]">Liên hệ + ứng tuyển · 30 ngày qua</p>
+          <p className="text-xs text-muted-foreground">Liên hệ + ứng tuyển · 30 ngày qua</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <p className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
             {total}
           </p>
-          <p className="text-xs text-[#9B6B50]">tổng đơn</p>
+          <p className="text-xs text-muted-foreground">tổng đơn</p>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export function LeadsTrendChart({ points }: { points?: LeadsTrendPoint[] }) {
       </svg>
 
       {/* x-axis labels: start / middle / end */}
-      <div className="mt-1 flex justify-between text-xs text-[#9B6B50]">
+      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
         <span>{ddmm(data[0]?.date ?? "")}</span>
         <span>{ddmm(data[mid]?.date ?? "")}</span>
         <span>{ddmm(data[n - 1]?.date ?? "")}</span>

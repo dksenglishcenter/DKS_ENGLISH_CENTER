@@ -30,6 +30,32 @@ const BLOG_POST_SELECT = {
   updatedAt: true,
 } satisfies Prisma.BlogPostSelect;
 
+function extractSectionImageUrls(sections: unknown): string[] {
+  if (!Array.isArray(sections)) return [];
+  const urls = new Set<string>();
+  const markdownImage =
+    /!\[[^\]]*]\((https?:\/\/[^)\s]+)\)/g;
+
+  for (const item of sections) {
+    if (!item || typeof item !== 'object') continue;
+    const record = item as { imageUrl?: unknown; body?: unknown };
+
+    if (typeof record.imageUrl === 'string' && record.imageUrl.trim()) {
+      urls.add(record.imageUrl.trim());
+    }
+
+    if (typeof record.body === 'string') {
+      let match: RegExpExecArray | null;
+      const pattern = new RegExp(markdownImage.source, 'g');
+      while ((match = pattern.exec(record.body)) !== null) {
+        urls.add(match[1]);
+      }
+    }
+  }
+
+  return [...urls];
+}
+
 @Injectable()
 export class BlogService {
   constructor(
@@ -107,13 +133,14 @@ export class BlogService {
   async update(id: string, dto: UpdateBlogPostDto) {
     const existing = await this.prisma.blogPost.findUnique({
       where: { id },
-      select: { id: true, coverImageUrl: true },
+      select: { id: true, coverImageUrl: true, sections: true },
     });
     if (!existing) {
       throw new NotFoundException('Không tìm thấy bài viết');
     }
 
     const nextCoverUrl = dto.coverImageUrl;
+    const previousSectionUrls = extractSectionImageUrls(existing.sections);
 
     try {
       const blogPost = await this.prisma.blogPost.update({
@@ -152,6 +179,15 @@ export class BlogService {
         nextCoverUrl,
       );
 
+      if (dto.sections !== undefined) {
+        const nextSectionUrls = new Set(extractSectionImageUrls(dto.sections));
+        await Promise.all(
+          previousSectionUrls
+            .filter((url) => !nextSectionUrls.has(url))
+            .map((url) => this.cloudinaryService.deleteImageByUrl(url)),
+        );
+      }
+
       return blogPost;
     } catch (error) {
       if (
@@ -167,7 +203,7 @@ export class BlogService {
   async remove(id: string) {
     const existing = await this.prisma.blogPost.findUnique({
       where: { id },
-      select: { id: true, coverImageUrl: true },
+      select: { id: true, coverImageUrl: true, sections: true },
     });
     if (!existing) {
       throw new NotFoundException('Không tìm thấy bài viết');
@@ -175,6 +211,11 @@ export class BlogService {
 
     await this.prisma.blogPost.delete({ where: { id } });
     await this.cloudinaryService.deleteImageByUrl(existing.coverImageUrl);
+    await Promise.all(
+      extractSectionImageUrls(existing.sections).map((url) =>
+        this.cloudinaryService.deleteImageByUrl(url),
+      ),
+    );
 
     return { message: 'Đã xóa bài viết và ảnh Cloudinary (nếu có)' };
   }

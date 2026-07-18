@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
-import { CalendarDays, Plus, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CalendarDays, Plus } from "lucide-react";
 
 import { AdminImageField } from "@/components/admin/admin-image-field";
+import { BlogSectionEditor } from "@/components/admin/blog-section-editor";
+import type { SectionMediaControls } from "@/components/admin/blog-section-editor";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { RowActions } from "./row-actions";
@@ -18,13 +20,11 @@ import {
   listBlogPosts,
   updateBlogPost,
 } from "@/lib/blog/api";
-import type {
-  BlogPost,
-  BlogPostPayload,
-  BlogSection,
-} from "@/lib/blog/types";
+import type { BlogPost, BlogPostPayload, BlogSection } from "@/lib/blog/types";
 import { formatError } from "@/lib/errors/format-error";
 import { isHttpUrl } from "@/lib/media/is-http-url";
+
+type EditableSection = BlogSection & { clientKey: string };
 
 type FieldKey =
   | keyof BlogPostPayload
@@ -34,7 +34,11 @@ type FieldKey =
 
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
-const EMPTY_SECTION: BlogSection = { heading: "", body: "" };
+const createEmptySection = (): EditableSection => ({
+  clientKey: crypto.randomUUID(),
+  heading: "",
+  body: "",
+});
 
 const CATEGORY_OPTIONS = [
   "IELTS Tips",
@@ -45,7 +49,11 @@ const CATEGORY_OPTIONS = [
   "Phụ Huynh",
 ] as const;
 
-const EMPTY_FORM: BlogPostPayload = {
+type BlogFormState = Omit<BlogPostPayload, "sections"> & {
+  sections: EditableSection[];
+};
+
+const EMPTY_FORM: BlogFormState = {
   slug: "",
   title: "",
   excerpt: "",
@@ -55,11 +63,48 @@ const EMPTY_FORM: BlogPostPayload = {
   coverImageUrl: "",
   featured: false,
   intro: "",
-  sections: [{ ...EMPTY_SECTION }],
+  sections: [createEmptySection()],
   takeaway: "",
   sortOrder: 0,
   isPublished: true,
 };
+
+function toEditableSections(sections: BlogSection[]): EditableSection[] {
+  if (!sections.length) return [createEmptySection()];
+  return sections.map((section) => ({
+    clientKey: crypto.randomUUID(),
+    heading: section.heading,
+    body: section.body,
+    // Keep legacy fields in form state so save doesn't wipe old data accidentally
+    // until editor migrates content into body markdown.
+    imageUrl: section.imageUrl ?? null,
+    imageAlt: section.imageAlt ?? "",
+    linkLabel: section.linkLabel ?? "",
+    linkHref: section.linkHref ?? "",
+  }));
+}
+
+function serializeSections(sections: EditableSection[]): BlogSection[] {
+  return sections.map((section) => {
+    const next: BlogSection = {
+      heading: section.heading.trim(),
+      body: section.body.trim(),
+    };
+    // Preserve legacy optional fields if still present (old posts).
+    const imageUrl = section.imageUrl?.trim();
+    if (imageUrl) {
+      next.imageUrl = imageUrl;
+      const alt = section.imageAlt?.trim();
+      if (alt) next.imageAlt = alt;
+    }
+    const linkHref = section.linkHref?.trim();
+    if (linkHref) {
+      next.linkHref = linkHref;
+      next.linkLabel = section.linkLabel?.trim() || linkHref;
+    }
+    return next;
+  });
+}
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -78,13 +123,31 @@ export function BlogAdmin() {
   const [listError, setListError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<BlogPostPayload>(EMPTY_FORM);
+  const [form, setForm] = useState<BlogFormState>(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<BlogPost | null>(null);
   /** Tăng mỗi lần bấm Thêm/Sửa để luôn cuộn tới form, kể cả bấm lại cùng bài. */
   const [scrollTick, setScrollTick] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
   const cover = useCloudinaryImageReplace({ category: "blog-cover" });
+  const sectionMediaControlsRef = useRef(new Map<number, SectionMediaControls>());
+
+  const registerSectionControls = useCallback(
+    (index: number, controls: SectionMediaControls) => {
+      sectionMediaControlsRef.current.set(index, controls);
+    },
+    [],
+  );
+
+  const unregisterSectionControls = useCallback((index: number) => {
+    sectionMediaControlsRef.current.delete(index);
+  }, []);
+
+  const discardAllSectionMedia = async () => {
+    const controls = [...sectionMediaControlsRef.current.values()];
+    await Promise.all(controls.map((control) => control.discard()));
+    sectionMediaControlsRef.current.clear();
+  };
 
   const load = async () => {
     setLoading(true);
@@ -118,18 +181,20 @@ export function BlogAdmin() {
 
   const openCreate = async () => {
     await cover.discard();
+    await discardAllSectionMedia();
     setEditingId(null);
     setFieldErrors({});
     cover.reset(null);
     const nextOrder =
       posts.reduce((max, post) => Math.max(max, post.sortOrder), -1) + 1;
-    setForm({ ...EMPTY_FORM, sortOrder: nextOrder });
+    setForm({ ...EMPTY_FORM, sections: [createEmptySection()], sortOrder: nextOrder });
     setShowForm(true);
     setScrollTick((tick) => tick + 1);
   };
 
   const openEdit = async (post: BlogPost) => {
     await cover.discard();
+    await discardAllSectionMedia();
     setEditingId(post.id);
     setFieldErrors({});
     cover.reset(post.coverImageUrl);
@@ -143,9 +208,7 @@ export function BlogAdmin() {
       coverImageUrl: post.coverImageUrl,
       featured: post.featured,
       intro: post.intro,
-      sections: post.sections.length
-        ? post.sections.map((section) => ({ ...section }))
-        : [{ ...EMPTY_SECTION }],
+      sections: toEditableSections(post.sections),
       takeaway: post.takeaway,
       sortOrder: post.sortOrder,
       isPublished: post.isPublished,
@@ -156,11 +219,12 @@ export function BlogAdmin() {
 
   const closeForm = async () => {
     await cover.discard();
+    await discardAllSectionMedia();
     setShowForm(false);
     setEditingId(null);
     setFieldErrors({});
     cover.reset(null);
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, sections: [createEmptySection()] });
   };
 
   const toggleCreateForm = async () => {
@@ -232,6 +296,7 @@ export function BlogAdmin() {
 
     setSaving(true);
     try {
+      const sections = serializeSections(form.sections);
       const payload: BlogPostPayload = {
         ...form,
         slug: form.slug.trim(),
@@ -241,19 +306,22 @@ export function BlogAdmin() {
         coverImageUrl: form.coverImageUrl.trim(),
         intro: form.intro.trim(),
         takeaway: form.takeaway.trim(),
-        sections: form.sections.map((section) => ({
-          heading: section.heading.trim(),
-          body: section.body.trim(),
-        })),
+        sections,
       };
 
       if (editingId) await updateBlogPost(editingId, payload);
       else await createBlogPost(payload);
 
       await cover.commit(payload.coverImageUrl);
+      await Promise.all(
+        sections.map((section, index) =>
+          sectionMediaControlsRef.current.get(index)?.commit(section.body),
+        ),
+      );
+      sectionMediaControlsRef.current.clear();
       setShowForm(false);
       setEditingId(null);
-      setForm(EMPTY_FORM);
+      setForm({ ...EMPTY_FORM, sections: [createEmptySection()] });
       await load();
     } catch (error) {
       setFieldErrors({ form: formatError(error) });
@@ -279,18 +347,24 @@ export function BlogAdmin() {
     }
   };
 
-  const updateSection = (
-    index: number,
-    key: keyof BlogSection,
-    value: string,
-  ) => {
+  const patchSection = (index: number, patch: Partial<BlogSection>) => {
     setForm((prev) => ({
       ...prev,
       sections: prev.sections.map((section, sectionIndex) =>
-        sectionIndex === index ? { ...section, [key]: value } : section,
+        sectionIndex === index ? { ...section, ...patch } : section,
       ),
     }));
-    clearFieldError(`sections.${index}.${key}`);
+    if ("heading" in patch) clearFieldError(`sections.${index}.heading`);
+    if ("body" in patch) clearFieldError(`sections.${index}.body`);
+  };
+
+  const removeSection = async (index: number) => {
+    const controls = sectionMediaControlsRef.current.get(index);
+    if (controls) await controls.discard();
+    setForm((prev) => ({
+      ...prev,
+      sections: prev.sections.filter((_, sectionIndex) => sectionIndex !== index),
+    }));
   };
 
   return (
@@ -299,12 +373,12 @@ export function BlogAdmin() {
         <div>
           <h2
             id="blog-admin-title"
-            className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]"
+            className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]"
           >
             Blog
           </h2>
-          <p className="mt-1 text-sm text-[#9B6B50]">
-            Quản lý bài viết blog: intro, sections và ảnh cover.
+          <p className="mt-1 text-sm text-muted-foreground">
+            Quản lý bài viết blog: intro, sections, ảnh và link.
           </p>
         </div>
         <Button
@@ -318,11 +392,11 @@ export function BlogAdmin() {
       </div>
 
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
-      {loading ? <p className="text-sm text-[#9B6B50]">Đang tải...</p> : null}
+      {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+          <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-semibold">Bài viết</th>
               <th className="px-4 py-3 font-semibold">Chuyên mục</th>
@@ -335,8 +409,8 @@ export function BlogAdmin() {
             {posts.map((post) => (
               <tr key={post.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3">
-                  <div className="font-semibold text-[#4A2306]">{post.title}</div>
-                  <div className="text-xs text-[#9B6B50]">/{post.slug}</div>
+                  <div className="font-semibold text-foreground">{post.title}</div>
+                  <div className="text-xs text-muted-foreground">/{post.slug}</div>
                 </td>
                 <td className="px-4 py-3">{post.category}</td>
                 <td className="px-4 py-3">
@@ -366,9 +440,9 @@ export function BlogAdmin() {
       {showForm ? (
         <div
           ref={formRef}
-          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-white p-5"
+          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-card p-5"
         >
-          <h3 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <h3 className="text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
             {editingId ? "Sửa bài viết" : "Thêm bài viết"}
           </h3>
           {fieldErrors.form ? (
@@ -379,7 +453,7 @@ export function BlogAdmin() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm" data-invalid={fieldErrors.title ? "true" : undefined}>
-              <span className="mb-1 block font-semibold text-[#4A2306]">Tiêu đề</span>
+              <span className="mb-1 block font-semibold text-foreground">Tiêu đề</span>
               <Input
                 className={fieldErrors.title ? "border-red-500" : ""}
                 value={form.title}
@@ -397,7 +471,7 @@ export function BlogAdmin() {
             </label>
 
             <label className="block text-sm" data-invalid={fieldErrors.slug ? "true" : undefined}>
-              <span className="mb-1 block font-semibold text-[#4A2306]">Slug</span>
+              <span className="mb-1 block font-semibold text-foreground">Slug</span>
               <Input
                 className={fieldErrors.slug ? "border-red-500" : ""}
                 value={form.slug}
@@ -410,7 +484,7 @@ export function BlogAdmin() {
             </label>
 
             <label className="block text-sm md:col-span-2" data-invalid={fieldErrors.excerpt ? "true" : undefined}>
-              <span className="mb-1 block font-semibold text-[#4A2306]">Tóm tắt</span>
+              <span className="mb-1 block font-semibold text-foreground">Tóm tắt</span>
               <textarea
                 className={`min-h-24 w-full rounded-lg border px-3 py-2 ${
                   fieldErrors.excerpt ? "border-red-500" : "border-border"
@@ -425,9 +499,9 @@ export function BlogAdmin() {
             </label>
 
             <label className="block text-sm" data-invalid={fieldErrors.category ? "true" : undefined}>
-              <span className="mb-1 block font-semibold text-[#4A2306]">Chuyên mục</span>
+              <span className="mb-1 block font-semibold text-foreground">Chuyên mục</span>
               <select
-                className={`w-full rounded-lg border bg-white px-3 py-2 ${
+                className={`w-full rounded-lg border bg-card px-3 py-2 ${
                   fieldErrors.category ? "border-red-500" : "border-border"
                 }`}
                 value={form.category}
@@ -450,7 +524,7 @@ export function BlogAdmin() {
             </label>
 
             <label className="block text-sm" data-invalid={fieldErrors.publishedAt ? "true" : undefined}>
-              <span className="mb-1 block font-semibold text-[#4A2306]">Ngày đăng</span>
+              <span className="mb-1 block font-semibold text-foreground">Ngày đăng</span>
               <div className="relative">
                 <Input
                   type="date"
@@ -465,14 +539,14 @@ export function BlogAdmin() {
                 />
                 <CalendarDays
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#9B6B50]"
+                  className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                 />
               </div>
               <FieldError message={fieldErrors.publishedAt} />
             </label>
 
             <label className="block text-sm" data-invalid={fieldErrors.readTimeMinutes ? "true" : undefined}>
-              <span className="mb-1 block font-semibold text-[#4A2306]">Phút đọc</span>
+              <span className="mb-1 block font-semibold text-foreground">Phút đọc</span>
               <Input
                 type="number"
                 min={1}
@@ -490,7 +564,7 @@ export function BlogAdmin() {
             </label>
 
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-[#4A2306]">Thứ tự</span>
+              <span className="mb-1 block font-semibold text-foreground">Thứ tự</span>
               <Input
                 type="number"
                 min={0}
@@ -505,7 +579,7 @@ export function BlogAdmin() {
             </label>
 
             <div className="flex flex-wrap gap-4 md:col-span-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-[#4A2306]">
+              <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <input
                   type="checkbox"
                   checked={Boolean(form.featured)}
@@ -515,7 +589,7 @@ export function BlogAdmin() {
                 />
                 Featured
               </label>
-              <label className="flex items-center gap-2 text-sm font-semibold text-[#4A2306]">
+              <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <input
                   type="checkbox"
                   checked={Boolean(form.isPublished)}
@@ -546,7 +620,7 @@ export function BlogAdmin() {
             </div>
 
             <label className="block text-sm md:col-span-2" data-invalid={fieldErrors.intro ? "true" : undefined}>
-              <span className="mb-1 block font-semibold text-[#4A2306]">Intro</span>
+              <span className="mb-1 block font-semibold text-foreground">Intro</span>
               <textarea
                 className={`min-h-28 w-full rounded-lg border px-3 py-2 ${
                   fieldErrors.intro ? "border-red-500" : "border-border"
@@ -563,7 +637,7 @@ export function BlogAdmin() {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <h4 className="font-bold text-[#4A2306]">Sections</h4>
+              <h4 className="font-bold text-foreground">Sections</h4>
               <Button
                 type="button"
                 size="sm"
@@ -571,7 +645,7 @@ export function BlogAdmin() {
                 onClick={() =>
                   setForm((prev) => ({
                     ...prev,
-                    sections: [...prev.sections, { ...EMPTY_SECTION }],
+                    sections: [...prev.sections, createEmptySection()],
                   }))
                 }
               >
@@ -582,82 +656,23 @@ export function BlogAdmin() {
             <FieldError message={fieldErrors.sections} />
 
             {form.sections.map((section, index) => (
-              <div
-                key={index}
-                className="space-y-3 rounded-xl border border-border bg-[#FFF9F5] p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-[#4A2306]">
-                    Section {index + 1}
-                  </p>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={form.sections.length <= 1}
-                    onClick={() =>
-                      setForm((prev) => ({
-                        ...prev,
-                        sections: prev.sections.filter(
-                          (_, sectionIndex) => sectionIndex !== index,
-                        ),
-                      }))
-                    }
-                  >
-                    <Trash2 className="size-4" aria-hidden="true" />
-                    Xóa
-                  </Button>
-                </div>
-                <label
-                  className="block text-sm"
-                  data-invalid={
-                    fieldErrors[`sections.${index}.heading`] ? "true" : undefined
-                  }
-                >
-                  <span className="mb-1 block font-semibold text-[#4A2306]">
-                    Heading
-                  </span>
-                  <Input
-                    className={
-                      fieldErrors[`sections.${index}.heading`]
-                        ? "border-red-500"
-                        : ""
-                    }
-                    value={section.heading}
-                    onChange={(event) =>
-                      updateSection(index, "heading", event.target.value)
-                    }
-                  />
-                  <FieldError message={fieldErrors[`sections.${index}.heading`]} />
-                </label>
-                <label
-                  className="block text-sm"
-                  data-invalid={
-                    fieldErrors[`sections.${index}.body`] ? "true" : undefined
-                  }
-                >
-                  <span className="mb-1 block font-semibold text-[#4A2306]">
-                    Body
-                  </span>
-                  <textarea
-                    className={`min-h-28 w-full rounded-lg border px-3 py-2 ${
-                      fieldErrors[`sections.${index}.body`]
-                        ? "border-red-500"
-                        : "border-border"
-                    }`}
-                    value={section.body}
-                    onChange={(event) =>
-                      updateSection(index, "body", event.target.value)
-                    }
-                  />
-                  <FieldError message={fieldErrors[`sections.${index}.body`]} />
-                </label>
-              </div>
+              <BlogSectionEditor
+                key={section.clientKey}
+                index={index}
+                section={section}
+                canRemove={form.sections.length > 1}
+                headingError={fieldErrors[`sections.${index}.heading`]}
+                bodyError={fieldErrors[`sections.${index}.body`]}
+                onChange={patchSection}
+                onRemove={(sectionIndex) => void removeSection(sectionIndex)}
+                onRegisterControls={registerSectionControls}
+                onUnregisterControls={unregisterSectionControls}
+              />
             ))}
           </div>
 
           <label className="block text-sm" data-invalid={fieldErrors.takeaway ? "true" : undefined}>
-            <span className="mb-1 block font-semibold text-[#4A2306]">Takeaway</span>
+            <span className="mb-1 block font-semibold text-foreground">Takeaway</span>
             <textarea
               className={`min-h-24 w-full rounded-lg border px-3 py-2 ${
                 fieldErrors.takeaway ? "border-red-500" : "border-border"

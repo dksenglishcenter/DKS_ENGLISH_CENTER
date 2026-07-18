@@ -355,7 +355,7 @@ export function CareerApplicationForm({
           }
           required
           className={cn(
-            "h-12 w-full cursor-pointer rounded-lg border bg-[#FFF9F5] px-4 py-3 font-[family-name:var(--font-body)] text-[#4A2306] outline-none transition-all focus-visible:ring-2",
+            "h-12 w-full cursor-pointer rounded-lg border bg-input-background px-4 py-3 font-[family-name:var(--font-body)] text-foreground outline-none transition-all focus-visible:ring-2",
             fieldErrors.jobId
               ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200"
               : "border-border focus-visible:border-primary focus-visible:ring-primary",

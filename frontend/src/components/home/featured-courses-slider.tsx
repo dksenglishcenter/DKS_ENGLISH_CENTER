@@ -32,7 +32,7 @@ export function FeaturedCoursesSlider({ courses }: FeaturedCoursesSliderProps) {
         <Link
           key={course.id}
           href={`${PAGE_PATHS.courses}#${course.slug}`}
-          className={`group flex flex-col overflow-hidden rounded-2xl border border-border bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none ${SNAP_SLIDER_ITEM_CLASS}`}
+          className={`group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none ${SNAP_SLIDER_ITEM_CLASS}`}
         >
           <div
             className="relative h-40 shrink-0 overflow-hidden"
@@ -59,7 +59,7 @@ export function FeaturedCoursesSlider({ courses }: FeaturedCoursesSliderProps) {
             </div>
           </div>
           <div className="flex flex-1 flex-col p-5">
-            <h3 className="mb-1 text-base font-black text-[#4A2306] font-[family-name:var(--font-nunito)] sm:min-h-6">
+            <h3 className="mb-1 text-base font-black text-foreground font-[family-name:var(--font-nunito)] sm:min-h-6">
               {course.title}
             </h3>
             <p className="mb-3 text-xs text-muted-foreground sm:min-h-8">{course.subtitle}</p>
@@ -68,7 +68,7 @@ export function FeaturedCoursesSlider({ courses }: FeaturedCoursesSliderProps) {
               <span className="text-xs font-semibold text-primary">{course.target}</span>
             </div>
             <div className="mt-auto flex items-center justify-between gap-3">
-              <span className="text-sm font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+              <span className="text-sm font-black text-foreground font-[family-name:var(--font-nunito)]">
                 {course.tuition}
               </span>
               <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-secondary transition-colors group-hover:bg-primary">

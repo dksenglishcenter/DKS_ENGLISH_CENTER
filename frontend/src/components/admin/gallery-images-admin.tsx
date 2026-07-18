@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -197,10 +197,10 @@ export function GalleryImagesAdmin() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <h2 className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
             Môi trường học tập
           </h2>
-          <p className="text-sm text-[#9B6B50]">
+          <p className="text-sm text-muted-foreground">
             Tối đa {MAX_GALLERY_IMAGES} ảnh · hiện {images.length}/{MAX_GALLERY_IMAGES}
           </p>
         </div>
@@ -215,11 +215,11 @@ export function GalleryImagesAdmin() {
       </div>
 
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
-      {loading ? <p className="text-sm text-[#9B6B50]">Đang tải...</p> : null}
+      {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-border bg-[#FFF9F5] text-[#9B6B50]">
+          <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-semibold">Ảnh</th>
               <th className="px-4 py-3 font-semibold">Alt</th>
@@ -232,7 +232,7 @@ export function GalleryImagesAdmin() {
             {images.map((image) => (
               <tr key={image.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3">
-                  <div className="relative h-14 w-20 overflow-hidden rounded-lg border border-border bg-[#FFF9F5]">
+                  <div className="relative h-14 w-20 overflow-hidden rounded-lg border border-border bg-muted">
                     <Image
                       src={image.imageUrl}
                       alt={image.alt}
@@ -261,15 +261,15 @@ export function GalleryImagesAdmin() {
       {showForm ? (
         <div
           ref={formRef}
-          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-white p-5"
+          className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-card p-5"
         >
-          <h3 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <h3 className="text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
             {editingId ? "Sửa ảnh" : "Thêm ảnh"}
           </h3>
           {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
 
           <label className="block text-sm" data-invalid={fieldErrors.alt ? "true" : undefined}>
-            <span className="mb-1 block font-semibold text-[#4A2306]">Alt text</span>
+            <span className="mb-1 block font-semibold text-foreground">Alt text</span>
             <input
               className={`w-full rounded-lg border px-3 py-2 ${
                 fieldErrors.alt ? "border-red-500" : "border-border"
@@ -286,7 +286,7 @@ export function GalleryImagesAdmin() {
           </label>
 
           <label className="block text-sm md:max-w-xs">
-            <span className="mb-1 block font-semibold text-[#4A2306]">Thứ tự hiển thị</span>
+            <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>
             <input
               type="number"
               min={0}
@@ -297,7 +297,7 @@ export function GalleryImagesAdmin() {
                 setForm((prev) => ({ ...prev, sortOrder: Number(event.target.value) }))
               }
             />
-            <span className="mt-1 block text-xs text-[#9B6B50]">
+            <span className="mt-1 block text-xs text-muted-foreground">
               Nếu chọn số đã có, hai ảnh sẽ tự đổi chỗ khi Lưu.
             </span>
           </label>
@@ -311,7 +311,7 @@ export function GalleryImagesAdmin() {
             onFile={(file) => void handleUpload(file)}
           />
 
-          <label className="flex items-center gap-2 text-sm font-semibold text-[#4A2306]">
+          <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <input
               type="checkbox"
               checked={form.isPublished}
