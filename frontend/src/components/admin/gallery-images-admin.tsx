@@ -144,7 +144,7 @@ export function GalleryImagesAdmin() {
     setFormError(null);
     const errors: { alt?: string; imageUrl?: string } = {};
     if (form.alt.trim().length < 2) errors.alt = "Alt text cần tối thiểu 2 ký tự";
-    if (!isHttpUrl(form.imageUrl)) errors.imageUrl = "Chưa có ảnh — upload Cloudinary rồi lưu";
+    if (!isHttpUrl(form.imageUrl)) errors.imageUrl = "Chưa có ảnh — vui lòng chọn ảnh rồi lưu";
     setFieldErrors(errors);
     if (Object.keys(errors).length) {
       setFormError("Vui lòng sửa các ô còn lỗi trước khi lưu.");

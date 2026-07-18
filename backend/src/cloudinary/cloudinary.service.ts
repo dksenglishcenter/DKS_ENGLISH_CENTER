@@ -64,9 +64,27 @@ export class CloudinaryService {
     });
   }
 
+  private managedFolders() {
+    return [
+      CLOUDINARY_FOLDERS.courses,
+      CLOUDINARY_FOLDERS.blog,
+      CLOUDINARY_FOLDERS.homeGallery,
+      CLOUDINARY_FOLDERS.aboutFacilities,
+      CLOUDINARY_FOLDERS.aboutVision,
+      CLOUDINARY_FOLDERS.aboutTeachers,
+    ];
+  }
+
+  private isManagedPublicId(publicId: string) {
+    return this.managedFolders().some(
+      (folder) => publicId === folder || publicId.startsWith(`${folder}/`),
+    );
+  }
+
   /**
-   * Lấy public_id ảnh quản lý từ URL Cloudinary (courses / home gallery).
+   * Lấy public_id ảnh quản lý từ URL Cloudinary.
    * Unsplash / URL ngoài → null (không xóa).
+   * Hỗ trợ cả URL legacy kết thúc đúng bằng folder (vd: .../about/vision).
    */
   extractManagedPublicId(url: string | null | undefined): string | null {
     if (!url) return null;
@@ -75,23 +93,22 @@ export class CloudinaryService {
       const parsed = new URL(url);
       if (!parsed.hostname.includes('res.cloudinary.com')) return null;
 
-      const folders = [
-        CLOUDINARY_FOLDERS.courses,
-        CLOUDINARY_FOLDERS.blog,
-        CLOUDINARY_FOLDERS.homeGallery,
-        CLOUDINARY_FOLDERS.aboutFacilities,
-        CLOUDINARY_FOLDERS.aboutVision,
-        CLOUDINARY_FOLDERS.aboutTeachers,
-      ];
+      const pathname = decodeURIComponent(parsed.pathname);
 
-      for (const folder of folders) {
+      for (const folder of this.managedFolders()) {
         const folderPrefix = `${folder}/`;
-        const folderIdx = parsed.pathname.indexOf(folderPrefix);
-        if (folderIdx === -1) continue;
+        const nestedIdx = pathname.indexOf(folderPrefix);
+        if (nestedIdx !== -1) {
+          return pathname.slice(nestedIdx).replace(/\.[a-zA-Z0-9]+$/, '') || null;
+        }
 
-        let publicId = parsed.pathname.slice(folderIdx);
-        publicId = decodeURIComponent(publicId).replace(/\.[a-zA-Z0-9]+$/, '');
-        return publicId || null;
+        // Legacy: public_id trùng đúng folder (không có tên file phía sau)
+        const exactIdx = pathname.indexOf(folder);
+        if (exactIdx === -1) continue;
+        const after = pathname.slice(exactIdx + folder.length);
+        if (after === '' || /^\.[a-zA-Z0-9]+$/.test(after)) {
+          return folder;
+        }
       }
 
       return null;
@@ -140,11 +157,22 @@ export class CloudinaryService {
     const originalPublicId = this.extractManagedPublicId(url);
     if (!originalPublicId) return null;
 
-    const leaf = originalPublicId.split('/').pop();
-    if (!leaf) return null;
-
-    const folder = originalPublicId.slice(0, originalPublicId.length - leaf.length - 1);
-    const stashPublicId = `${folder}/_stash/${leaf}_${Date.now()}`;
+    // Legacy URL kết thúc đúng bằng folder → stash trong folder/_stash
+    const isExactFolder = this.managedFolders().some(
+      (folder) => folder === originalPublicId,
+    );
+    const stashPublicId = isExactFolder
+      ? `${originalPublicId}/_stash/asset_${Date.now()}`
+      : (() => {
+          const leaf = originalPublicId.split('/').pop();
+          if (!leaf) return null;
+          const folder = originalPublicId.slice(
+            0,
+            originalPublicId.length - leaf.length - 1,
+          );
+          return `${folder}/_stash/${leaf}_${Date.now()}`;
+        })();
+    if (!stashPublicId) return null;
 
     try {
       const result = await cloudinary.uploader.rename(
@@ -172,20 +200,11 @@ export class CloudinaryService {
     originalPublicId: string,
   ): Promise<{ url: string; publicId: string } | null> {
     const allowed =
-      (stashPublicId.startsWith(`${CLOUDINARY_ROOT}/`) &&
-        originalPublicId.startsWith(`${CLOUDINARY_ROOT}/`) &&
-        (stashPublicId.includes('/courses/') ||
-          stashPublicId.includes('/home/gallery/') ||
-          stashPublicId.includes('/about/facilities/') ||
-          stashPublicId.includes('/about/vision/') ||
-          stashPublicId.includes('/about/teachers/'))) &&
-      (originalPublicId.startsWith(`${CLOUDINARY_FOLDERS.courses}/`) ||
-        originalPublicId.startsWith(`${CLOUDINARY_FOLDERS.homeGallery}/`) ||
-        originalPublicId.startsWith(`${CLOUDINARY_FOLDERS.aboutFacilities}/`) ||
-        originalPublicId.startsWith(`${CLOUDINARY_FOLDERS.aboutVision}/`) ||
-        originalPublicId.startsWith(`${CLOUDINARY_FOLDERS.aboutTeachers}/`));
+      stashPublicId.startsWith(`${CLOUDINARY_ROOT}/`) &&
+      stashPublicId.includes('/_stash/') &&
+      this.isManagedPublicId(originalPublicId);
 
-    if (!allowed || !stashPublicId.includes('/_stash/')) {
+    if (!allowed) {
       return null;
     }
 

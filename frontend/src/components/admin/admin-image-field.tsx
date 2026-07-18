@@ -13,13 +13,13 @@ type AdminImageFieldProps = {
   onFile: (file: File | null) => void;
 };
 
-/** Ô URL + upload Cloudinary + preview — dùng chung mọi admin có ảnh. */
+/** Ô URL + upload ảnh + preview — dùng chung mọi admin có ảnh. */
 export function AdminImageField({
   label = "Ảnh",
   url,
   uploading,
   objectPosition = "center",
-  hint = "Upload ảnh mới sẽ ẩn ảnh cũ trên Cloudinary ngay. Hủy → hoàn tác ảnh cũ; Lưu → xóa ảnh cũ vĩnh viễn.",
+  hint,
   invalid,
   error,
   onFile,
@@ -41,7 +41,7 @@ export function AdminImageField({
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-semibold text-[#4A2306]">Upload Cloudinary</span>
+          <span className="mb-1 block font-semibold text-[#4A2306]">Chọn ảnh</span>
           <input
             type="file"
             accept="image/*"

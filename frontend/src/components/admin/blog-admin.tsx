@@ -199,7 +199,7 @@ export function BlogAdmin() {
       errors.readTimeMinutes = "Thời gian đọc phải >= 1";
     }
     if (!isHttpUrl(form.coverImageUrl)) {
-      errors.coverImageUrl = "Chưa có ảnh — upload Cloudinary rồi lưu";
+      errors.coverImageUrl = "Chưa có ảnh — vui lòng chọn ảnh rồi lưu";
     }
     if (form.intro.trim().length < 10) errors.intro = "Intro cần tối thiểu 10 ký tự";
     if (form.takeaway.trim().length < 10) errors.takeaway = "Takeaway cần tối thiểu 10 ký tự";
@@ -303,7 +303,7 @@ export function BlogAdmin() {
             Blog
           </h2>
           <p className="mt-1 text-sm text-[#9B6B50]">
-            Quản lý bài viết blog: intro, sections và ảnh cover Cloudinary.
+            Quản lý bài viết blog: intro, sections và ảnh cover.
           </p>
         </div>
         <Button

@@ -133,7 +133,7 @@ export function AboutAdmin() {
     setVisionError(null);
     setVisionMessage(null);
     if (!isHttpUrl(visionUrl)) {
-      setVisionError("Chưa có ảnh — upload lên Cloudinary rồi lưu");
+      setVisionError("Chưa có ảnh — vui lòng chọn ảnh rồi lưu");
       scrollToFirstInvalid(visionSectionRef.current);
       return;
     }
@@ -227,7 +227,7 @@ export function AboutAdmin() {
     setFormError(null);
     const errors: { title?: string; imageUrl?: string } = {};
     if (form.title.trim().length < 2) errors.title = "Tiêu đề ảnh cần tối thiểu 2 ký tự";
-    if (!isHttpUrl(form.imageUrl)) errors.imageUrl = "Chưa có ảnh — upload lên Cloudinary rồi lưu";
+    if (!isHttpUrl(form.imageUrl)) errors.imageUrl = "Chưa có ảnh — vui lòng chọn ảnh rồi lưu";
     setFieldErrors(errors);
     if (Object.keys(errors).length) {
       setFormError("Vui lòng sửa các ô còn lỗi trước khi lưu.");

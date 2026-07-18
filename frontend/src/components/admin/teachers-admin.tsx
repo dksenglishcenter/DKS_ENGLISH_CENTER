@@ -151,7 +151,7 @@ export function TeachersAdmin() {
     if (form.cred.trim().length < 2) errors.cred = "Bằng cấp cần tối thiểu 2 ký tự";
     if (form.exp.trim().length < 2) errors.exp = "Kinh nghiệm cần tối thiểu 2 ký tự";
     if (form.bio.trim().length < 10) errors.bio = "Bio cần tối thiểu 10 ký tự";
-    if (!isHttpUrl(form.imageUrl)) errors.imageUrl = "Chưa có ảnh — upload Cloudinary rồi lưu";
+    if (!isHttpUrl(form.imageUrl)) errors.imageUrl = "Chưa có ảnh — vui lòng chọn ảnh rồi lưu";
     return errors;
   };
 

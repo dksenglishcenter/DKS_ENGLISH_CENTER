@@ -113,11 +113,15 @@ export function useCloudinaryImageReplace({
           !stashRef.current &&
           saved.includes("res.cloudinary.com")
         ) {
-          const stashed = await stashMediaAsset(saved);
-          stashRef.current = {
-            originalPublicId: stashed.originalPublicId,
-            stashPublicId: stashed.stashPublicId,
-          };
+          try {
+            const stashed = await stashMediaAsset(saved);
+            stashRef.current = {
+              originalPublicId: stashed.originalPublicId,
+              stashPublicId: stashed.stashPublicId,
+            };
+          } catch {
+            // URL legacy / ảnh đã mất trên Cloudinary — vẫn cho upload ảnh mới
+          }
         }
 
         const uploaded = await uploadMediaAsset(file, { category });

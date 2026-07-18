@@ -379,7 +379,7 @@ export function CoursesAdmin() {
     if (!normalizeCategory(payload.category)) errors.category = "Vui lòng chọn category";
     if (!isHttpUrl(payload.coverImageUrl)) {
       errors.coverImageUrl =
-        "Chưa có ảnh cover — chọn file để upload Cloudinary (đợi xong) hoặc dán URL https";
+        "Chưa có ảnh cover — vui lòng chọn ảnh rồi lưu";
     }
     if (!availableSortOrders.includes(payload.sortOrder ?? -1)) {
       errors.sortOrder = "Thứ tự này đã được dùng — chọn số khác";

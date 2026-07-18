@@ -103,6 +103,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     if (!mobileSidebarOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -111,8 +115,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       }
     };
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [mobileSidebarOpen]);
 
   const handleLogout = async () => {
@@ -157,70 +166,112 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       );
     });
 
+  const renderSidebarFooter = () => (
+    <div className="border-t border-white/10 p-4">
+      <div className="mb-3 text-xs text-white/70">
+        <div className="font-semibold text-white">{user.fullName}</div>
+        <div>{user.email}</div>
+      </div>
+      <button
+        type="button"
+        onClick={() => void handleLogout()}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
+      >
+        <LogOut className="h-4 w-4" />
+        Đăng xuất
+      </button>
+    </div>
+  );
+
   return (
     <AdminUserContext.Provider value={user}>
       <div className="flex min-h-screen bg-[#FFF9F5] font-[family-name:var(--font-body)]">
-        <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 flex-col border-r border-border bg-[#4A2306] text-white md:flex">
+        {/* Desktop sidebar — chỉ từ lg (1024px), tablet/iPad dùng drawer */}
+        <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 flex-col border-r border-border bg-[#4A2306] text-white lg:flex">
           <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
             <DKSLogo size="sm" />
             <div>
-              <div className="text-sm font-black font-[family-name:var(--font-nunito)]">DKS Admin</div>
+              <div className="text-sm font-black font-[family-name:var(--font-nunito)]">
+                DKS Admin
+              </div>
               <div className="text-xs text-white/60">Quản trị hệ thống</div>
             </div>
           </div>
 
           <nav className="flex-1 space-y-1 overflow-y-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {NAV_ITEMS.map((item) => {
-              const Icon = item.icon;
-              const active =
-                item.href === PAGE_PATHS.admin
-                  ? pathname === PAGE_PATHS.admin
-                  : pathname.startsWith(item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors",
-                    active ? "bg-primary text-white" : "text-white/75 hover:bg-white/10 hover:text-white",
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
+            {renderNavigation()}
           </nav>
 
-          <div className="border-t border-white/10 p-4">
-            <div className="mb-3 text-xs text-white/70">
-              <div className="font-semibold text-white">{user.fullName}</div>
-              <div>{user.email}</div>
-            </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
-            >
-              <LogOut className="h-4 w-4" />
-              Đăng xuất
-            </button>
-          </div>
+          {renderSidebarFooter()}
         </aside>
 
+        {/* Mobile / tablet drawer */}
+        {mobileSidebarOpen ? (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <button
+              type="button"
+              aria-label="Đóng menu"
+              className="absolute inset-0 bg-black/45"
+              onClick={() => setMobileSidebarOpen(false)}
+            />
+            <aside
+              id="admin-mobile-sidebar"
+              className="absolute inset-y-0 left-0 flex w-[min(20rem,86vw)] flex-col bg-[#4A2306] text-white shadow-xl"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
+                <div className="flex items-center gap-3">
+                  <DKSLogo size="sm" />
+                  <div>
+                    <div className="text-sm font-black font-[family-name:var(--font-nunito)]">
+                      DKS Admin
+                    </div>
+                    <div className="text-xs text-white/60">Quản trị hệ thống</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng menu"
+                  className="rounded-lg p-2 text-white/80 hover:bg-white/10"
+                  onClick={() => setMobileSidebarOpen(false)}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <nav className="flex-1 space-y-1 overflow-y-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {renderNavigation(() => setMobileSidebarOpen(false))}
+              </nav>
+
+              {renderSidebarFooter()}
+            </aside>
+          </div>
+        ) : null}
+
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex items-center justify-between border-b border-border bg-white px-4 py-3 md:px-8">
-            <div>
-              <h1 className="text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
+          <header className="flex items-center justify-between gap-3 border-b border-border bg-white px-4 py-3 sm:px-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                className="rounded-lg border border-border p-2 text-[#4A2306] hover:bg-[#FFF9F5] lg:hidden"
+                aria-label="Mở menu"
+                aria-expanded={mobileSidebarOpen}
+                aria-controls="admin-mobile-sidebar"
+                onClick={() => setMobileSidebarOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <h1 className="truncate text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)]">
                 Bảng điều khiển
               </h1>
             </div>
-            <Link href={PAGE_PATHS.home} className="text-sm font-semibold text-primary hover:underline">
+            <Link
+              href={PAGE_PATHS.home}
+              className="shrink-0 text-sm font-semibold text-primary hover:underline"
+            >
               Về website
             </Link>
           </header>
-          <main className="flex-1 p-4 md:p-8">{children}</main>
+          <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
         </div>
       </div>
     </AdminUserContext.Provider>

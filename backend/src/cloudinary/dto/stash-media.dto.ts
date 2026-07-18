@@ -7,7 +7,7 @@ export class StashMediaDto {
 }
 
 const PUBLIC_ID_PATTERN =
-  /^dks-english-center\/(courses|home\/gallery|about\/facilities|about\/vision|about\/teachers)(\/[\w.-]+)+$/;
+  /^dks-english-center\/(courses|home\/gallery|about\/facilities|about\/vision|about\/teachers|blog)(\/[\w.-]+)*$/;
 
 export class RestoreMediaDto {
   @IsString()
