@@ -1,7 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
-  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -9,15 +8,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-
-export const CONTACT_COURSE_OPTIONS = [
-  'IELTS Preparation',
-  '9-to-10 Prep',
-  'Communicative English',
-  '1-on-1 Tutoring',
-] as const;
-
-export type ContactCourseOption = (typeof CONTACT_COURSE_OPTIONS)[number];
 
 const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}\s.'’-]*$/u;
 const PHONE_PATTERN = /^(?=(?:\D*\d){8,15}\D*$)[+\d][\d\s().-]*$/;
@@ -64,8 +54,8 @@ export class CreateContactDto {
   @Trim()
   @IsString()
   @IsNotEmpty()
-  @IsIn(CONTACT_COURSE_OPTIONS)
-  courseInterest!: ContactCourseOption;
+  @MaxLength(200)
+  courseInterest!: string;
 
   @TrimOptional()
   @IsOptional()

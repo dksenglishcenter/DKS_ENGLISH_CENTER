@@ -41,8 +41,10 @@ const SOCIAL_CHANNELS = [
 
 export function ContactPage({
   contactInfo,
+  courseOptions,
 }: {
   contactInfo: ContactInformation | null;
+  courseOptions: string[];
 }) {
   const mapHref = contactInfo?.mapUrl;
   const contactDetails = contactInfo
@@ -238,7 +240,7 @@ export function ContactPage({
               <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                Chúng tôi sẽ liên hệ trong thời gian sớm nhất để tư vấn khóa học phù hợp với trình độ và mục tiêu của bạn
               </p>
-              <ContactForm />
+              <ContactForm courseOptions={courseOptions} />
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
