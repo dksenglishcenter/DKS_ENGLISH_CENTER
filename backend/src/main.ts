@@ -2,11 +2,19 @@ import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import type { NestExpressApplication } from '@nestjs/platform-express';
+import {
+  ExpressAdapter,
+  type NestExpressApplication,
+} from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Truyền ExpressAdapter tường minh — tránh Nest PackageLoader
+  // không resolve được @nestjs/platform-express trên Render monorepo/hoisting.
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule,
+    new ExpressAdapter(),
+  );
 
   // Behind the Render/Vercel proxy: read the real client IP from X-Forwarded-For.
   // Without this every request looks like one IP and rate limiting blocks everyone.
