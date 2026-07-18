@@ -335,9 +335,9 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
 
         {items.length > 0 ? (
           <>
-            <div className="hidden overflow-x-auto xl:block">
+            <div className="hidden overflow-x-auto xl:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <table className="w-full table-fixed text-left text-sm">
-                <thead className="border-b border-border bg-muted text-muted-foreground">
+                <thead className="border-b border-border bg-[#FFF4EC] text-[#9B6B50] dark:bg-muted dark:text-muted-foreground">
                   <tr>
                     <th scope="col" className="w-[15%] px-4 py-3 font-semibold">
                       {config.nameHeader}

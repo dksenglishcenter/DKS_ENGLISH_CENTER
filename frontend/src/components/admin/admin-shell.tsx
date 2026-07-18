@@ -135,7 +135,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   if (checking || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+      <div className="flex min-h-screen items-center justify-center bg-[#FFF9F5] text-sm text-[#9B6B50] dark:bg-background dark:text-muted-foreground">
         Đang kiểm tra phiên đăng nhập...
       </div>
     );
@@ -157,7 +157,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors",
             active
-              ? "bg-primary text-primary-foreground"
+              ? "bg-primary text-white"
               : "text-white/75 hover:bg-white/10 hover:text-white",
           )}
         >
@@ -186,9 +186,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminUserContext.Provider value={user}>
-      <div className="flex min-h-screen bg-background font-[family-name:var(--font-body)] text-foreground">
+      <div className="flex min-h-screen bg-[#FFF9F5] font-[family-name:var(--font-body)] text-[#4A2306] dark:bg-background dark:text-foreground">
         {/* Desktop sidebar — chỉ từ lg (1024px), tablet/iPad dùng drawer */}
-        <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 flex-col border-r border-border bg-[#4A2306] text-white dark:bg-[#1A1410] lg:flex">
+        <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 flex-col border-r border-border bg-[#4A2306] text-white dark:bg-[#121214] lg:flex">
           <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
             <DKSLogo size="sm" />
             <div>
@@ -217,7 +217,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             />
             <aside
               id="admin-mobile-sidebar"
-              className="absolute inset-y-0 left-0 flex w-[min(20rem,86vw)] flex-col bg-[#4A2306] text-white shadow-xl dark:bg-[#1A1410]"
+              className="absolute inset-y-0 left-0 flex w-[min(20rem,86vw)] flex-col bg-[#4A2306] text-white shadow-xl dark:bg-[#121214]"
             >
               <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
                 <div className="flex items-center gap-3">
@@ -249,11 +249,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6 lg:px-8">
+          <header className="flex items-center justify-between gap-3 border-b border-border bg-white px-4 py-3 sm:px-6 lg:px-8 dark:bg-card">
             <div className="flex min-w-0 items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg border border-border p-2 text-foreground hover:bg-secondary lg:hidden"
+                className="rounded-lg border border-border p-2 text-[#4A2306] hover:bg-[#FFF9F5] lg:hidden dark:text-foreground dark:hover:bg-secondary"
                 aria-label="Mở menu"
                 aria-expanded={mobileSidebarOpen}
                 aria-controls="admin-mobile-sidebar"
@@ -261,7 +261,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               >
                 <Menu className="h-5 w-5" />
               </button>
-              <h1 className="truncate text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
+              <h1 className="truncate text-lg font-black text-[#4A2306] font-[family-name:var(--font-nunito)] dark:text-foreground">
                 Bảng điều khiển
               </h1>
             </div>
