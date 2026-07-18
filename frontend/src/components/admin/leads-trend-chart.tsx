@@ -13,21 +13,36 @@ function ddmm(iso: string): string {
 }
 
 // Area + line chart of daily submissions over the period.
-export function LeadsTrendChart({ points }: { points: LeadsTrendPoint[] }) {
-  const total = points.reduce((sum, p) => sum + p.count, 0);
-  const max = Math.max(...points.map((p) => p.count), 1);
-  const n = points.length;
+export function LeadsTrendChart({ points }: { points?: LeadsTrendPoint[] }) {
+  const data = points ?? [];
+
+  // Guard: older backend deploys may not return leadsTrend yet.
+  if (data.length === 0) {
+    return (
+      <div>
+        <h3 className="text-base font-bold text-[#4A2306]">Đơn gửi mỗi ngày</h3>
+        <p className="text-xs text-[#9B6B50]">
+          Liên hệ + ứng tuyển · 30 ngày qua
+        </p>
+        <p className="mt-6 text-sm text-[#9B6B50]">Chưa có dữ liệu.</p>
+      </div>
+    );
+  }
+
+  const total = data.reduce((sum, p) => sum + p.count, 0);
+  const max = Math.max(...data.map((p) => p.count), 1);
+  const n = data.length;
 
   const x = (i: number) =>
     PAD_X + (i * (W - PAD_X * 2)) / Math.max(n - 1, 1);
   const y = (value: number) =>
     H - PAD_BOTTOM - (value / max) * (H - PAD_TOP - PAD_BOTTOM);
 
-  const linePath = points
+  const linePath = data
     .map((p, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(p.count).toFixed(1)}`)
     .join(" ");
   const baseline = H - PAD_BOTTOM;
-  const areaPath = `M ${x(0).toFixed(1)} ${baseline} ${points
+  const areaPath = `M ${x(0).toFixed(1)} ${baseline} ${data
     .map((p, i) => `L ${x(i).toFixed(1)} ${y(p.count).toFixed(1)}`)
     .join(" ")} L ${x(n - 1).toFixed(1)} ${baseline} Z`;
 
@@ -87,7 +102,7 @@ export function LeadsTrendChart({ points }: { points: LeadsTrendPoint[] }) {
         />
 
         {/* markers on days that have submissions */}
-        {points.map((p, i) =>
+        {data.map((p, i) =>
           p.count > 0 ? (
             <circle
               key={p.date}
@@ -107,9 +122,9 @@ export function LeadsTrendChart({ points }: { points: LeadsTrendPoint[] }) {
 
       {/* x-axis labels: start / middle / end */}
       <div className="mt-1 flex justify-between text-xs text-[#9B6B50]">
-        <span>{ddmm(points[0]?.date ?? "")}</span>
-        <span>{ddmm(points[mid]?.date ?? "")}</span>
-        <span>{ddmm(points[n - 1]?.date ?? "")}</span>
+        <span>{ddmm(data[0]?.date ?? "")}</span>
+        <span>{ddmm(data[mid]?.date ?? "")}</span>
+        <span>{ddmm(data[n - 1]?.date ?? "")}</span>
       </div>
     </div>
   );
