@@ -6,16 +6,10 @@ import { SocialIcon } from "@/components/brand/social-icon";
 import { Container } from "@/components/layout/container";
 import { getPublicContactInformation } from "@/lib/contact/server";
 import { getPhoneHref } from "@/lib/contact/validation";
+import { listCourses } from "@/lib/courses/api";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 import type { SocialNetwork } from "@/lib/social-links";
-
-const COURSE_LABELS = [
-  "Luyện thi vào lớp 10",
-  "Luyện thi THPT & Đại học",
-  "IELTS 1:1",
-  "Global Success lớp 1–9",
-] as const;
 
 const FOOTER_SOCIALS: { network: SocialNetwork; href: string; label: string }[] = [
   { network: "zalo", href: SOCIAL_LINKS.zalo, label: "Zalo" },
@@ -24,7 +18,11 @@ const FOOTER_SOCIALS: { network: SocialNetwork; href: string; label: string }[] 
 ];
 
 export async function Footer() {
-  const contactInfo = await getPublicContactInformation();
+  const [contactInfo, coursesResponse] = await Promise.all([
+    getPublicContactInformation(),
+    listCourses({ publishedOnly: true }).catch(() => ({ courses: [] })),
+  ]);
+  const courses = coursesResponse.courses.slice(0, 4);
 
   return (
     <footer className="bg-[#4A2306] text-white">
@@ -66,10 +64,13 @@ export async function Footer() {
           <div>
             <h4 className="mb-4 font-bold text-white font-[family-name:var(--font-nunito)]">Khóa học</h4>
             <ul className="space-y-2 text-sm text-orange-100 font-[family-name:var(--font-body)]">
-              {COURSE_LABELS.map((course) => (
-                <li key={course}>
-                  <Link href={PAGE_PATHS.courses} className="transition-colors hover:text-accent">
-                    {course}
+              {courses.map((course) => (
+                <li key={course.id}>
+                  <Link
+                    href={`${PAGE_PATHS.courses}#${course.slug}`}
+                    className="transition-colors hover:text-accent"
+                  >
+                    {course.title}
                   </Link>
                 </li>
               ))}

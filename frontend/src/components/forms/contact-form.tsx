@@ -9,8 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { submitContactForm } from "@/lib/contact/api";
 import {
-  CONTACT_COURSE_OPTIONS,
-  type ContactCourseOption,
   type ContactFormPayload,
 } from "@/lib/contact/types";
 import { ApiError } from "@/lib/errors/format-error";
@@ -67,11 +65,15 @@ function containsHtmlCharacters(value: string) {
   return /[<>]/.test(value);
 }
 
-function isContactCourseOption(value: string): value is ContactCourseOption {
-  return CONTACT_COURSE_OPTIONS.some((option) => option === value);
+function isContactCourseOption(value: string, courseOptions: string[]) {
+  return courseOptions.includes(value);
 }
 
-function getFieldError(field: ContactField, rawValue: string): string | undefined {
+function getFieldError(
+  field: ContactField,
+  rawValue: string,
+  courseOptions: string[],
+): string | undefined {
   const value = rawValue.trim();
 
   if (field === "fullName") {
@@ -100,7 +102,10 @@ function getFieldError(field: ContactField, rawValue: string): string | undefine
     if (!EMAIL_PATTERN.test(value)) return "Vui lòng nhập đúng định dạng email.";
   }
 
-  if (field === "courseInterest" && !isContactCourseOption(value)) {
+  if (
+    field === "courseInterest" &&
+    !isContactCourseOption(value, courseOptions)
+  ) {
     return "Vui lòng chọn một khóa học hợp lệ.";
   }
 
@@ -119,9 +124,9 @@ function getFieldError(field: ContactField, rawValue: string): string | undefine
   return undefined;
 }
 
-function validateForm(values: ContactFormValues) {
+function validateForm(values: ContactFormValues, courseOptions: string[]) {
   return CONTACT_FIELDS.reduce<FieldErrors>((errors, field) => {
-    const error = getFieldError(field, values[field]);
+    const error = getFieldError(field, values[field], courseOptions);
     if (error) errors[field] = error;
     return errors;
   }, {});
@@ -158,7 +163,7 @@ function FieldError({ id, error }: { id: string; error?: string }) {
   );
 }
 
-export function ContactForm() {
+export function ContactForm({ courseOptions }: { courseOptions: string[] }) {
   const [values, setValues] = useState<ContactFormValues>(INITIAL_FORM_VALUES);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -182,7 +187,7 @@ export function ContactForm() {
   function validateField(field: ContactField) {
     setFieldErrors((currentErrors) => ({
       ...currentErrors,
-      [field]: getFieldError(field, values[field]),
+      [field]: getFieldError(field, values[field], courseOptions),
     }));
   }
 
@@ -192,7 +197,7 @@ export function ContactForm() {
 
     const form = event.currentTarget;
     const normalizedValues = normalizeFormValues(values);
-    const errors = validateForm(normalizedValues);
+    const errors = validateForm(normalizedValues, courseOptions);
     const firstInvalidField = CONTACT_FIELDS.find((field) => errors[field]);
 
     setValues(normalizedValues);
@@ -205,7 +210,9 @@ export function ContactForm() {
       return;
     }
 
-    if (!isContactCourseOption(normalizedValues.courseInterest)) return;
+    if (!isContactCourseOption(normalizedValues.courseInterest, courseOptions)) {
+      return;
+    }
 
     const payload: ContactFormPayload = {
       fullName: normalizedValues.fullName,
@@ -318,6 +325,7 @@ export function ContactForm() {
           aria-invalid={Boolean(fieldErrors.courseInterest)}
           aria-describedby={fieldErrors.courseInterest ? "contact-course-error" : undefined}
           required
+          disabled={courseOptions.length === 0 || isSubmitting}
           className={`h-12 w-full cursor-pointer rounded-lg border bg-[#FFF9F5] px-4 py-3 text-[#4A2306] outline-none transition-all focus-visible:ring-2 font-[family-name:var(--font-body)] ${
             fieldErrors.courseInterest
               ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-200"
@@ -325,9 +333,11 @@ export function ContactForm() {
           }`}
         >
           <option value="" disabled>
-            -- Chọn khóa học quan tâm --
+            {courseOptions.length > 0
+              ? "-- Chọn khóa học quan tâm --"
+              : "Chưa có khóa học đang mở"}
           </option>
-          {CONTACT_COURSE_OPTIONS.map((course) => (
+          {courseOptions.map((course) => (
             <option key={course} value={course}>
               {course}
             </option>
@@ -373,7 +383,7 @@ export function ContactForm() {
         type="submit"
         className="min-h-12 w-full justify-center"
         size="lg"
-        disabled={isSubmitting}
+        disabled={isSubmitting || courseOptions.length === 0}
       >
         {isSubmitting ? (
           <LoaderCircle className="h-5 w-5 animate-spin" aria-hidden="true" />
