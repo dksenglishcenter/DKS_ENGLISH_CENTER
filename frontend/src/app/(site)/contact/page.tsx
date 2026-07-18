@@ -1,5 +1,6 @@
 import { ContactPage } from "@/components/pages/contact-page";
 import { getPublicContactInformation } from "@/lib/contact/server";
+import { listCourses } from "@/lib/courses/api";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
@@ -10,7 +11,18 @@ export const metadata = createPageMetadata({
 });
 
 export default async function Page() {
-  const contactInfo = await getPublicContactInformation();
+  const [contactInfo, coursesResponse] = await Promise.all([
+    getPublicContactInformation(),
+    listCourses({ publishedOnly: true }).catch(() => ({ courses: [] })),
+  ]);
+  const courseOptions = Array.from(
+    new Set(coursesResponse.courses.map((course) => course.title)),
+  );
 
-  return <ContactPage contactInfo={contactInfo} />;
+  return (
+    <ContactPage
+      contactInfo={contactInfo}
+      courseOptions={courseOptions}
+    />
+  );
 }

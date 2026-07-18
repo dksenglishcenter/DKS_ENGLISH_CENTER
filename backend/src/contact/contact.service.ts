@@ -89,12 +89,24 @@ export class ContactService {
   }
 
   async create(dto: CreateContactDto) {
+    const course = await this.prisma.course.findFirst({
+      where: {
+        title: dto.courseInterest,
+        isPublished: true,
+      },
+      select: { title: true },
+    });
+
+    if (!course) {
+      throw new BadRequestException('Khóa học đã chọn không còn mở đăng ký.');
+    }
+
     return this.prisma.contactSubmission.create({
       data: {
         fullName: dto.fullName.trim(),
         phone: dto.phone.trim(),
         email: dto.email?.trim() || null,
-        courseInterest: dto.courseInterest,
+        courseInterest: course.title,
         learningNeeds: dto.learningNeeds?.trim() || null,
       },
       select: {
