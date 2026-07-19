@@ -38,25 +38,12 @@ function formatDateTime(value: Date) {
   }).format(value);
 }
 
-function parseMailFrom(raw: string): { name: string; email: string } {
-  const match = raw.match(/^(.*)<([^>]+)>$/);
-  if (match) {
-    return {
-      name: match[1].trim().replace(/^["']|["']$/g, '') || 'DKS English Center',
-      email: match[2].trim(),
-    };
-  }
-  return { name: 'DKS English Center', email: raw.trim() };
-}
-
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private readonly transporter: Transporter | null;
-  private readonly brevoApiKey: string | null;
   private readonly notifyEmails: string[];
   private readonly mailFrom: string;
-  private readonly sender: { name: string; email: string };
 
   constructor() {
     const enabled = process.env.MAIL_ENABLED !== 'false';
@@ -64,7 +51,6 @@ export class MailService {
     const port = Number(process.env.SMTP_PORT ?? '587');
     const user = process.env.SMTP_USER?.trim();
     const pass = process.env.SMTP_PASS?.replace(/\s+/g, '').trim();
-    const brevoKey = process.env.BREVO_API_KEY?.trim() || null;
     const notifyRaw = process.env.NOTIFY_EMAIL?.trim() ?? '';
 
     this.mailFrom = (
@@ -72,19 +58,16 @@ export class MailService {
       (user ? `DKS English Center <${user}>` : '') ||
       'DKS English Center <noreply@dks.local>'
     ).replace(/^["']|["']$/g, '');
-    this.sender = parseMailFrom(this.mailFrom);
     this.notifyEmails = notifyRaw
       .split(',')
       .map((email) => email.trim())
       .filter(Boolean);
-    this.brevoApiKey = enabled ? brevoKey : null;
 
     const secure =
       process.env.SMTP_SECURE === 'true' ||
       process.env.SMTP_SECURE === '1' ||
       port === 465;
 
-    // SMTP (local / paid Render). Render Free chặn port 25/465/587 → dùng BREVO_API_KEY (HTTPS).
     if (enabled && user && pass) {
       this.transporter = host
         ? nodemailer.createTransport({
@@ -103,7 +86,7 @@ export class MailService {
 
     if (!this.isConfigured()) {
       this.logger.warn(
-        'Mail tắt hoặc thiếu BREVO_API_KEY / SMTP_USER+SMTP_PASS. Form vẫn lưu DB.',
+        'Mail tắt hoặc thiếu SMTP_USER+SMTP_PASS. Form vẫn lưu DB.',
       );
       return;
     }
@@ -115,12 +98,12 @@ export class MailService {
     }
 
     this.logger.log(
-      `Mail ready — mode=${this.brevoApiKey ? 'brevo-api' : 'smtp'}; from=${this.mailFrom}; notify=${this.notifyEmails.length}`,
+      `Mail ready — smtp; from=${this.mailFrom}; notify=${this.notifyEmails.length}`,
     );
   }
 
   isConfigured() {
-    return this.brevoApiKey !== null || this.transporter !== null;
+    return this.transporter !== null;
   }
 
   async notifyContactSubmission(payload: ContactNotifyPayload) {
@@ -347,59 +330,20 @@ export class MailService {
     text: string;
     html: string;
   }) {
+    if (!this.transporter) return;
+
     try {
-      if (this.brevoApiKey) {
-        await this.sendViaBrevoApi(options);
-      } else if (this.transporter) {
-        await this.transporter.sendMail({
-          from: this.mailFrom,
-          to: options.to,
-          subject: options.subject,
-          text: options.text,
-          html: options.html,
-        });
-      } else {
-        return;
-      }
+      await this.transporter.sendMail({
+        from: this.mailFrom,
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      });
       this.logger.log(`Đã gửi mail → ${options.to}: ${options.subject}`);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Gửi email thất bại → ${options.to}: ${message}`);
-    }
-  }
-
-  /** HTTPS :443 — Render Free không chặn (SMTP 587 bị chặn). */
-  private async sendViaBrevoApi(options: {
-    to: string;
-    subject: string;
-    text: string;
-    html: string;
-  }) {
-    const toList = options.to
-      .split(',')
-      .map((email) => email.trim())
-      .filter(Boolean)
-      .map((email) => ({ email }));
-
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        'api-key': this.brevoApiKey!,
-      },
-      body: JSON.stringify({
-        sender: this.sender,
-        to: toList,
-        subject: options.subject,
-        htmlContent: options.html,
-        textContent: options.text,
-      }),
-    });
-
-    if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`Brevo API ${response.status}: ${body}`);
     }
   }
 
