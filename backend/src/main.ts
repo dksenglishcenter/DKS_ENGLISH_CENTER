@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
-import { ValidationPipe } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
   ExpressAdapter,
@@ -28,14 +28,18 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.setGlobalPrefix('api');
+  // /health ngoài prefix — Render health check không bị 404 vì mọi route nằm dưới /api.
+  app.setGlobalPrefix('api', {
+    exclude: [{ path: 'health', method: RequestMethod.GET }],
+  });
   app.enableCors({
     origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
     credentials: true,
   });
 
-  const port = process.env.PORT ?? 3001;
-  await app.listen(port);
-  console.log(`Backend running on http://localhost:${port}/api`);
+  const port = Number(process.env.PORT ?? 3001);
+  // Render cần bind 0.0.0.0 để nhận traffic từ proxy.
+  await app.listen(port, '0.0.0.0');
+  console.log(`Backend running on http://0.0.0.0:${port}/api`);
 }
 bootstrap();
