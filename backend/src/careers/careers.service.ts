@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 
+import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCareerApplicationDto } from './dto/create-career-application.dto';
 import { ListCareerApplicationsQueryDto } from './dto/list-career-applications-query.dto';
@@ -29,7 +30,10 @@ const CAREER_APPLICATION_SELECT = {
 
 @Injectable()
 export class CareersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   async listApplications(query: ListCareerApplicationsQueryDto) {
     const { page, pageSize, jobId } = query;
@@ -111,7 +115,7 @@ export class CareersService {
       );
     }
 
-    return this.prisma.careerApplication.create({
+    const application = await this.prisma.careerApplication.create({
       data: {
         jobId: publishedJob.id,
         fullName: dto.fullName.trim(),
@@ -122,8 +126,28 @@ export class CareersService {
       },
       select: {
         id: true,
+        fullName: true,
+        email: true,
+        phone: true,
+        position: true,
+        introduction: true,
         createdAt: true,
       },
     });
+
+    void this.mailService.notifyCareerApplication({
+      id: application.id,
+      fullName: application.fullName,
+      email: application.email,
+      phone: application.phone,
+      position: application.position,
+      introduction: application.introduction,
+      createdAt: application.createdAt,
+    });
+
+    return {
+      id: application.id,
+      createdAt: application.createdAt,
+    };
   }
 }

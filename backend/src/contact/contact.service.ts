@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 
+import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { ListContactSubmissionsQueryDto } from './dto/list-contact-submissions-query.dto';
@@ -21,7 +22,10 @@ const CONTACT_SUBMISSION_SELECT = {
 
 @Injectable()
 export class ContactService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   async listSubmissions(query: ListContactSubmissionsQueryDto) {
     const { page, pageSize } = query;
@@ -101,7 +105,7 @@ export class ContactService {
       throw new BadRequestException('Khóa học đã chọn không còn mở đăng ký.');
     }
 
-    return this.prisma.contactSubmission.create({
+    const submission = await this.prisma.contactSubmission.create({
       data: {
         fullName: dto.fullName.trim(),
         phone: dto.phone.trim(),
@@ -109,10 +113,22 @@ export class ContactService {
         courseInterest: course.title,
         learningNeeds: dto.learningNeeds?.trim() || null,
       },
-      select: {
-        id: true,
-        createdAt: true,
-      },
+      select: CONTACT_SUBMISSION_SELECT,
     });
+
+    void this.mailService.notifyContactSubmission({
+      id: submission.id,
+      fullName: submission.fullName,
+      phone: submission.phone,
+      email: submission.email,
+      courseInterest: submission.courseInterest,
+      learningNeeds: submission.learningNeeds,
+      createdAt: submission.createdAt,
+    });
+
+    return {
+      id: submission.id,
+      createdAt: submission.createdAt,
+    };
   }
 }
