@@ -9,8 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}\s.'’-]*$/u;
-const PHONE_PATTERN = /^(?=(?:\D*\d){8,15}\D*$)[+\d][\d\s().-]*$/;
+import { NAME_PATTERN, PHONE_PATTERN } from '../../common/validation/person';
 
 const Trim = () =>
   Transform(({ value }: { value: unknown }) =>

@@ -1,15 +1,11 @@
 # DKS English Center
 
-Monorepo gồm frontend Next.js và backend NestJS.
+Monorepo website + CMS cho trung tâm Anh ngữ DKS.
 
-## Cấu trúc
-
-```
-dks_english_center/
-├── frontend/   # Next.js 16 + React 19 + Tailwind CSS 4
-├── backend/    # NestJS 11 + Prisma + Supabase PostgreSQL
-└── package.json
-```
+| App | Stack |
+|-----|--------|
+| `frontend/` | Next.js 16, React 19, Tailwind CSS 4 |
+| `backend/` | NestJS 11, Prisma, Supabase PostgreSQL |
 
 ## Yêu cầu
 
@@ -22,98 +18,119 @@ dks_english_center/
 npm install
 ```
 
-## Chạy development
+Copy env:
 
-Chạy cả frontend và backend:
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+```
+
+Điền Supabase, Cloudinary, JWT, SMTP (xem bên dưới).
+
+## Chạy development
 
 ```bash
 npm run dev
 ```
 
-Hoặc chạy riêng:
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:3001/api |
 
-```bash
-npm run dev:frontend   # http://localhost:3000
-npm run dev:backend    # http://localhost:3001/api
-```
+Chạy riêng: `npm run dev:frontend` / `npm run dev:backend`.
 
-## API
-
-| Endpoint        | Mô tả              |
-|-----------------|--------------------|
-| `GET /api`      | Thông tin service  |
-| `GET /api/health` | Health check |
+Browser gọi API qua **same-origin** `/api` (Next rewrite → Nest). Biến chính FE là `BACKEND_URL`, không cần `NEXT_PUBLIC_API_URL` khi local.
 
 ## Database (Supabase + Prisma)
 
-### Bước 1 — Tạo Supabase project
-
-1. [supabase.com/dashboard](https://supabase.com/dashboard) → **Create organization**
-2. **New project** → đặt tên, chọn region (Singapore)
-3. Lưu **Database password**
-
-### Bước 2 — Lấy connection string
-
-**Project Settings → Database → Connection string**:
+1. Tạo project tại [supabase.com/dashboard](https://supabase.com/dashboard)
+2. **Project Settings → Database → Connection string**
 
 | Biến | Port | Dùng cho |
 |------|------|----------|
 | `DATABASE_URL` | 6543 (pooler) | App runtime |
-| `DIRECT_URL` | 5432 (direct) | `prisma migrate` |
+| `DIRECT_URL` | 5432 | `prisma migrate` |
 
-Paste vào `backend/.env`:
-
-```env
-DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
-```
-
-### Bước 3 — Generate client
+3. Paste vào `backend/.env`, rồi:
 
 ```bash
 npm run db:generate -w backend
-```
-
-Khi có schema, chạy migrate:
-
-```bash
 npm run db:migrate -w backend
+npm run db:seed -w backend
 ```
 
-## Storage (Cloudflare R2)
+## Storage (Cloudinary)
 
-R2 lưu **ảnh, audio, file video (.mp4)** dạng file tĩnh. Không phải dịch vụ video streaming (transcode/HLS/player) — cái đó là **Cloudflare Stream** (setup sau nếu cần).
+Ảnh upload qua admin → Nest → Cloudinary (không dùng Cloudflare R2).
 
-### Tạo R2 bucket
-
-1. Cloudflare Dashboard → **Storage & Databases → R2**
-2. **Create bucket** → đặt tên (vd: `dks-media`)
-3. **Manage R2 API Tokens → Create API token** → quyền Object Read & Write cho bucket đó
-4. Copy `Account ID`, `Access Key ID`, `Secret Access Key` vào `backend/.env`
+1. [Cloudinary Console](https://console.cloudinary.com) → **Product environment credentials**
+2. Lấy `CLOUDINARY_URL` dạng:
 
 ```env
-R2_ACCOUNT_ID=...
-R2_ACCESS_KEY_ID=...
-R2_SECRET_ACCESS_KEY=...
-R2_BUCKET_NAME=dks-media
-R2_PUBLIC_URL=https://pub-xxx.r2.dev   # Settings > Public access > r2.dev subdomain
+CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
 ```
+
+3. Frontend (Next/Image):
+
+```env
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+```
+
+Folder gốc: `dks-english-center/...` (courses, blog, gallery, about, …).
+
+## Email (Gmail SMTP + Nodemailer)
+
+Local: App Password Gmail qua `SMTP_*`.
+
+```env
+MAIL_ENABLED=true
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your.gmail@gmail.com
+SMTP_PASS=your-16-char-app-password
+MAIL_FROM="DKS English Center <your.gmail@gmail.com>"
+NOTIFY_EMAIL=admin-inbox@gmail.com
+```
+
+- `SMTP_USER` / `MAIL_FROM` = tài khoản **gửi**
+- `NOTIFY_EMAIL` = hộp thư **nhận** khi có form liên hệ / tuyển dụng
+
+**Lưu ý:** Render Free chặn outbound SMTP (587/465). Cần plan paid hoặc host khác cho phép SMTP.
 
 ## Biến môi trường
 
-**Backend** (`backend/.env`):
+**Backend** (`backend/.env`) — xem đầy đủ `backend/.env.example`:
 
-```
+```env
 PORT=3001
 FRONTEND_URL=http://localhost:3000
 DATABASE_URL=...
 DIRECT_URL=...
+CLOUDINARY_URL=...
+JWT_SECRET=...
+# + SMTP / NOTIFY_EMAIL / ZALO_*
 ```
 
-**Frontend** (`frontend/.env.local`):
+Production (Vercel FE + Render BE): set `FRONTEND_URL` = URL Vercel, `COOKIE_SAME_SITE=none`.
 
-```
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
+**Frontend** (`frontend/.env.local`) — xem `frontend/.env.example`:
+
+```env
+BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_ZALO_CONTACT_URL=https://zalo.me/0834513456
+# Optional:
+# NEXT_PUBLIC_API_URL=http://localhost:3001/api
+# NEXT_PUBLIC_GA_MEASUREMENT_ID=
 ```
 
-Copy từ file `.env.example` tương ứng nếu chưa có.
+## Deploy (tóm tắt)
+
+| Phần | Nơi |
+|------|-----|
+| Frontend | Vercel |
+| Backend | Render |
+| DB | Supabase |
+| Media | Cloudinary |

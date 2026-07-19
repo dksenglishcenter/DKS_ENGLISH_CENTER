@@ -21,11 +21,8 @@ import type { FacilityImage } from "@/lib/facility-images/types";
 import { listTeachers } from "@/lib/teachers/api";
 import type { Teacher } from "@/lib/teachers/types";
 
-const FALLBACK_VISION =
-  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&h=800&fit=crop&auto=format";
-
 export async function AboutPage() {
-  let visionImageUrl = FALLBACK_VISION;
+  let visionImageUrl: string | null = null;
   let facilities: FacilityImage[] = [];
   let teachers: Teacher[] = [];
 
@@ -41,7 +38,7 @@ export async function AboutPage() {
     facilities = facilitiesRes.images;
     teachers = teachersRes.teachers;
   } catch {
-    // keep fallbacks
+    // keep empty fallbacks
   }
 
   const values = [
@@ -122,16 +119,24 @@ export async function AboutPage() {
               </div>
             </div>
             <div className="relative">
-              <div className="relative h-80 overflow-hidden rounded-2xl">
-                <Image
-                  src={visionImageUrl}
-                  alt="DKS English Center"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                  unoptimized
-                />
+              <div className="relative h-80 overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-card to-muted">
+                {visionImageUrl ? (
+                  <Image
+                    src={visionImageUrl}
+                    alt="DKS English Center"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center px-6 text-center">
+                    <p className="text-sm font-semibold text-muted-foreground font-[family-name:var(--font-body)]">
+                      DKS English Center
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="absolute -bottom-5 -left-5 rounded-2xl border border-border bg-card p-5 shadow-xl">
                 <div className="text-3xl font-black text-primary font-[family-name:var(--font-nunito)]">

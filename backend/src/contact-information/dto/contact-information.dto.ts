@@ -12,14 +12,15 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-const PHONE_PATTERN = /^(?=(?:\D*\d){7,15}\D*$)[+\d][\d\s().-]*$/;
+import { PHONE_PATTERN } from '../../common/validation/person';
+
 const GOOGLE_MAPS_URL_PATTERN =
   /^https:\/\/(?:(?:www\.)?google\.com\/maps(?!\/embed(?:[/?#]|$))(?:[/?#].*)?|maps\.google\.com(?!\/embed(?:[/?#]|$))(?:[/?#].*)?|maps\.app\.goo\.gl\/[A-Za-z0-9_-]+(?:[/?#].*)?|goo\.gl\/maps\/[A-Za-z0-9_-]+(?:[/?#].*)?)$/i;
 const GOOGLE_MAPS_EMBED_URL_PATTERN =
   /^https:\/\/(?:(?:www\.)?google\.com\/maps\/embed(?:[/?#]|$)|maps\.google\.com\/embed(?:[/?#]|$))/i;
 
 const PHONE_VALIDATION_MESSAGE =
-  'Số điện thoại phải có từ 7 đến 15 chữ số và chỉ chứa số, khoảng trắng, +, -, dấu chấm hoặc dấu ngoặc.';
+  'Số điện thoại phải có từ 8 đến 15 chữ số và chỉ chứa số, khoảng trắng, +, -, dấu chấm hoặc dấu ngoặc.';
 const MAP_REQUIRED_MESSAGE = 'Google Maps URL là bắt buộc.';
 const MAP_EMBED_VALIDATION_MESSAGE =
   'Không sử dụng link Nhúng. Hãy sao chép link từ mục Chia sẻ.';

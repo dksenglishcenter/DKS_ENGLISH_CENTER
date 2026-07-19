@@ -9,9 +9,11 @@ import {
   Matches,
 } from 'class-validator';
 
-const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}\s.'’-]*$/u;
-const PHONE_PATTERN = /^(?=(?:\D*\d){8,15}\D*$)[+\d][\d\s().-]*$/;
-const NO_HTML_BRACKETS_PATTERN = /^[^<>]*$/;
+import {
+  NAME_PATTERN,
+  NO_HTML_BRACKETS,
+  PHONE_PATTERN,
+} from '../../common/validation/person';
 
 const Trim = () =>
   Transform(({ value }: { value: unknown }) =>
@@ -76,7 +78,7 @@ export class CreateCareerApplicationDto {
   @IsString()
   @MinLength(10)
   @MaxLength(2000)
-  @Matches(NO_HTML_BRACKETS_PATTERN, {
+  @Matches(NO_HTML_BRACKETS, {
     message: 'Giới thiệu bản thân không được chứa ký tự < hoặc >.',
   })
   introduction?: string;

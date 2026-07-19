@@ -11,7 +11,12 @@ import { submitContactForm } from "@/lib/contact/api";
 import {
   type ContactFormPayload,
 } from "@/lib/contact/types";
-import { ApiError } from "@/lib/errors/format-error";
+import {
+  getEmailValidationError,
+  getNameValidationError,
+  containsHtmlCharacters,
+} from "@/lib/validation/person";
+import { getPublicFormSubmissionError } from "@/lib/validation/form-submit";
 import {
   getPhoneValidationError,
   normalizePhone,
@@ -58,13 +63,6 @@ const CONTACT_FIELDS: ContactField[] = [
   "learningNeeds",
 ];
 
-const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}\s.'’-]*$/u;
-const EMAIL_PATTERN = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
-
-function containsHtmlCharacters(value: string) {
-  return /[<>]/.test(value);
-}
-
 function isContactCourseOption(value: string, courseOptions: string[]) {
   return courseOptions.includes(value);
 }
@@ -77,17 +75,10 @@ function getFieldError(
   const value = rawValue.trim();
 
   if (field === "fullName") {
-    if (!value) return "Vui lòng nhập họ và tên.";
-    if (containsHtmlCharacters(value)) return "Họ và tên không được chứa thẻ HTML.";
-    if (value.length < FORM_LIMITS.fullName.min) {
-      return `Họ và tên phải có ít nhất ${FORM_LIMITS.fullName.min} ký tự.`;
-    }
-    if (value.length > FORM_LIMITS.fullName.max) {
-      return `Họ và tên không được vượt quá ${FORM_LIMITS.fullName.max} ký tự.`;
-    }
-    if (!NAME_PATTERN.test(value)) {
-      return "Họ và tên chỉ được chứa chữ cái, khoảng trắng, dấu chấm, dấu nháy hoặc dấu gạch nối.";
-    }
+    return getNameValidationError(value, {
+      min: FORM_LIMITS.fullName.min,
+      max: FORM_LIMITS.fullName.max,
+    });
   }
 
   if (field === "phone") {
@@ -95,11 +86,7 @@ function getFieldError(
   }
 
   if (field === "email" && value) {
-    if (containsHtmlCharacters(value)) return "Email không được chứa thẻ HTML.";
-    if (value.length > FORM_LIMITS.email) {
-      return `Email không được vượt quá ${FORM_LIMITS.email} ký tự.`;
-    }
-    if (!EMAIL_PATTERN.test(value)) return "Vui lòng nhập đúng định dạng email.";
+    return getEmailValidationError(value, { max: FORM_LIMITS.email });
   }
 
   if (
@@ -142,16 +129,6 @@ function normalizeFormValues(values: ContactFormValues): ContactFormValues {
   };
 }
 
-function getSubmissionErrorMessage(error: unknown) {
-  if (error instanceof ApiError) {
-    if (error.status >= 400 && error.status < 500) {
-      return "Thông tin gửi lên chưa hợp lệ. Vui lòng kiểm tra lại các trường.";
-    }
-    return "Hệ thống đang bận. Vui lòng thử lại sau.";
-  }
-
-  return "Không thể kết nối tới hệ thống. Vui lòng kiểm tra mạng và thử lại.";
-}
 
 function FieldError({ id, error }: { id: string; error?: string }) {
   if (!error) return null;
@@ -233,7 +210,7 @@ export function ContactForm({ courseOptions }: { courseOptions: string[] }) {
       setFieldErrors({});
       setSubmissionStatus({ type: "success", message: response.message });
     } catch (error) {
-      setSubmissionStatus({ type: "error", message: getSubmissionErrorMessage(error) });
+      setSubmissionStatus({ type: "error", message: getPublicFormSubmissionError(error) });
     } finally {
       setIsSubmitting(false);
     }

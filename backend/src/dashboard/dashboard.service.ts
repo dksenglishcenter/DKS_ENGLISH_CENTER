@@ -127,7 +127,7 @@ export class DashboardService {
     };
   }
 
-  // Daily count of submissions (contacts + job applications) over the last 30 days.
+  // Daily count of submissions (contacts + careers) over the last 30 days.
   private async getLeadsTrend(): Promise<{ date: string; count: number }[]> {
     const since = new Date(Date.now() - (TREND_DAYS - 1) * DAY_MS);
 

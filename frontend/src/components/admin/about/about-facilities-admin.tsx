@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
@@ -6,38 +6,36 @@ import Image from "next/image";
 import { AdminImageField } from "@/components/admin/admin-image-field";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { RowActions } from "./row-actions";
 import { useAdminResourceList } from "@/hooks/use-admin-resource-list";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { nextSortOrder } from "@/lib/admin/sort-order";
 import { formatError } from "@/lib/errors/format-error";
 import {
-  createGalleryImage,
-  deleteGalleryImage,
-  listGalleryImages,
-  updateGalleryImage,
-} from "@/lib/gallery-images/api";
-import type { GalleryImage, GalleryImagePayload } from "@/lib/gallery-images/types";
-import { MAX_GALLERY_IMAGES } from "@/lib/gallery-images/types";
+  createFacilityImage,
+  deleteFacilityImage,
+  listFacilityImages,
+  updateFacilityImage,
+} from "@/lib/facility-images/api";
+import type { FacilityImage, FacilityImagePayload } from "@/lib/facility-images/types";
+import { MAX_FACILITY_IMAGES } from "@/lib/facility-images/types";
 import { isHttpUrl } from "@/lib/media/is-http-url";
 
-const EMPTY_FORM: GalleryImagePayload = {
+const EMPTY_FACILITY_FORM: FacilityImagePayload = {
   imageUrl: "",
-  alt: "",
-  objectPosition: "center",
+  title: "",
   sortOrder: 0,
   isPublished: true,
 };
 
-export function GalleryImagesAdmin() {
+export function AboutFacilitiesAdmin() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{ alt?: string; imageUrl?: string }>({});
-  const [form, setForm] = useState<GalleryImagePayload>(EMPTY_FORM);
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; imageUrl?: string }>({});
+  const [form, setForm] = useState<FacilityImagePayload>(EMPTY_FACILITY_FORM);
 
   const loadItems = useCallback(async () => {
-    const response = await listGalleryImages({ publishedOnly: false });
+    const response = await listFacilityImages({ publishedOnly: false });
     return response.images;
   }, []);
 
@@ -57,76 +55,75 @@ export function GalleryImagesAdmin() {
     formRef,
     load,
     resetFormChrome,
-  } = useAdminResourceList<GalleryImage>({ loadItems });
+  } = useAdminResourceList<FacilityImage>({ loadItems });
 
   const editingIdRef = useRef<string | null>(null);
   editingIdRef.current = editingId;
 
-  const cover = useCloudinaryImageReplace({
-    category: "home-gallery",
+  const facilityImage = useCloudinaryImageReplace({
+    category: "about-facilities",
     onLivePersist: async (url) => {
       const id = editingIdRef.current;
-      if (id) await updateGalleryImage(id, { imageUrl: url });
+      if (id) await updateFacilityImage(id, { imageUrl: url });
     },
     onLiveRestore: async (url) => {
       const id = editingIdRef.current;
-      if (id) await updateGalleryImage(id, { imageUrl: url });
+      if (id) await updateFacilityImage(id, { imageUrl: url });
     },
   });
 
-  const closeForm = async () => {
-    await cover.discard();
+  const closeFacilityForm = async () => {
+    await facilityImage.discard();
     resetFormChrome();
     setFormError(null);
     setFieldErrors({});
-    cover.reset(null);
-    setForm(EMPTY_FORM);
+    facilityImage.reset(null);
+    setForm(EMPTY_FACILITY_FORM);
   };
 
-  const openCreate = async () => {
-    if (images.length >= MAX_GALLERY_IMAGES) {
-      setListError(`Chỉ tối đa ${MAX_GALLERY_IMAGES} ảnh. Xóa bớt rồi thêm mới.`);
+  const openCreateFacility = async () => {
+    if (images.length >= MAX_FACILITY_IMAGES) {
+      setListError(`Chỉ tối đa ${MAX_FACILITY_IMAGES} ảnh. Xóa bớt rồi thêm mới.`);
       return;
     }
-    await cover.discard();
+    await facilityImage.discard();
     const nextOrder = nextSortOrder(images);
     setEditingId(null);
     setFormError(null);
     setFieldErrors({});
-    cover.reset(null);
-    setForm({ ...EMPTY_FORM, sortOrder: nextOrder });
+    facilityImage.reset(null);
+    setForm({ ...EMPTY_FACILITY_FORM, sortOrder: nextOrder });
     setShowForm(true);
   };
 
-  const toggleCreateForm = async () => {
+  const toggleCreateFacility = async () => {
     if (showForm && !editingId) {
-      await closeForm();
+      await closeFacilityForm();
       return;
     }
-    await openCreate();
+    await openCreateFacility();
   };
 
-  const openEdit = async (image: GalleryImage) => {
-    await cover.discard();
+  const openEditFacility = async (image: FacilityImage) => {
+    await facilityImage.discard();
     setEditingId(image.id);
     setFormError(null);
     setFieldErrors({});
-    cover.reset(image.imageUrl);
+    facilityImage.reset(image.imageUrl);
     setForm({
       imageUrl: image.imageUrl,
-      alt: image.alt,
-      objectPosition: image.objectPosition,
+      title: image.title,
       sortOrder: image.sortOrder,
       isPublished: image.isPublished,
     });
     setShowForm(true);
   };
 
-  const handleUpload = async (file: File | null) => {
+  const handleFacilityUpload = async (file: File | null) => {
     setFormError(null);
     setFieldErrors((prev) => ({ ...prev, imageUrl: undefined }));
     try {
-      const url = await cover.upload(file);
+      const url = await facilityImage.upload(file);
       if (url) setForm((prev) => ({ ...prev, imageUrl: url }));
     } catch (err) {
       setFormError(formatError(err));
@@ -134,10 +131,10 @@ export function GalleryImagesAdmin() {
     }
   };
 
-  const handleSave = async () => {
+  const handleFacilitySave = async () => {
     setFormError(null);
-    const errors: { alt?: string; imageUrl?: string } = {};
-    if (form.alt.trim().length < 2) errors.alt = "Alt text cần tối thiểu 2 ký tự";
+    const errors: { title?: string; imageUrl?: string } = {};
+    if (form.title.trim().length < 2) errors.title = "Tiêu đề ảnh cần tối thiểu 2 ký tự";
     if (!isHttpUrl(form.imageUrl)) errors.imageUrl = "Chưa có ảnh — vui lòng chọn ảnh rồi lưu";
     setFieldErrors(errors);
     if (Object.keys(errors).length) {
@@ -148,18 +145,17 @@ export function GalleryImagesAdmin() {
 
     setSaving(true);
     try {
-      const payload: GalleryImagePayload = {
+      const payload: FacilityImagePayload = {
         ...form,
         imageUrl: form.imageUrl.trim(),
-        alt: form.alt.trim(),
-        objectPosition: form.objectPosition?.trim() || "center",
+        title: form.title.trim(),
       };
-      if (editingId) await updateGalleryImage(editingId, payload);
-      else await createGalleryImage(payload);
+      if (editingId) await updateFacilityImage(editingId, payload);
+      else await createFacilityImage(payload);
 
-      await cover.commit(payload.imageUrl);
+      await facilityImage.commit(payload.imageUrl);
       resetFormChrome();
-      setForm(EMPTY_FORM);
+      setForm(EMPTY_FACILITY_FORM);
       await load();
     } catch (err) {
       setFormError(formatError(err));
@@ -169,13 +165,13 @@ export function GalleryImagesAdmin() {
     }
   };
 
-  const handleDelete = async () => {
+  const handleFacilityDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     setListError(null);
     try {
-      await deleteGalleryImage(deleteTarget.id);
-      if (editingId === deleteTarget.id) await closeForm();
+      await deleteFacilityImage(deleteTarget.id);
+      if (editingId === deleteTarget.id) await closeFacilityForm();
       setDeleteTarget(null);
       await load();
     } catch (err) {
@@ -186,21 +182,21 @@ export function GalleryImagesAdmin() {
   };
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
-            Môi trường học tập
+            Cơ sở vật chất
           </h2>
           <p className="text-sm text-muted-foreground">
-            Tối đa {MAX_GALLERY_IMAGES} ảnh · hiện {images.length}/{MAX_GALLERY_IMAGES}
+            Tối đa {MAX_FACILITY_IMAGES} ảnh · hiện {images.length}/{MAX_FACILITY_IMAGES}
           </p>
         </div>
         <Button
           type="button"
           variant={showForm && !editingId ? "outline" : "primary"}
-          onClick={() => void toggleCreateForm()}
-          disabled={!showForm && images.length >= MAX_GALLERY_IMAGES && !editingId}
+          onClick={() => void toggleCreateFacility()}
+          disabled={!showForm && images.length >= MAX_FACILITY_IMAGES && !editingId}
         >
           {showForm && !editingId ? "Đóng form thêm" : "Thêm ảnh"}
         </Button>
@@ -214,10 +210,10 @@ export function GalleryImagesAdmin() {
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-semibold">Ảnh</th>
-              <th className="px-4 py-3 font-semibold">Alt</th>
+              <th className="px-4 py-3 font-semibold">Tiêu đề</th>
               <th className="px-4 py-3 font-semibold">Order</th>
               <th className="px-4 py-3 font-semibold">Published</th>
-              <th className="px-4 py-3 text-right font-semibold">Actions</th>
+              <th className="px-4 py-3 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -227,22 +223,35 @@ export function GalleryImagesAdmin() {
                   <div className="relative h-14 w-20 overflow-hidden rounded-lg border border-border bg-muted">
                     <Image
                       src={image.imageUrl}
-                      alt={image.alt}
+                      alt={image.title}
                       fill
                       className="object-cover"
                       unoptimized
-                      style={{ objectPosition: image.objectPosition }}
                     />
                   </div>
                 </td>
-                <td className="max-w-xs truncate px-4 py-3">{image.alt}</td>
+                <td className="max-w-xs truncate px-4 py-3">{image.title}</td>
                 <td className="px-4 py-3">{image.sortOrder}</td>
                 <td className="px-4 py-3">{image.isPublished ? "Có" : "Ẩn"}</td>
                 <td className="px-4 py-3">
-                  <RowActions
-                    onEdit={() => void openEdit(image)}
-                    onDelete={() => setDeleteTarget(image)}
-                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void openEditFacility(image)}
+                    >
+                      Sửa
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDeleteTarget(image)}
+                    >
+                      Xóa
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -256,24 +265,26 @@ export function GalleryImagesAdmin() {
           className="scroll-mt-6 space-y-4 rounded-2xl border border-border bg-card p-5"
         >
           <h3 className="text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
-            {editingId ? "Sửa ảnh" : "Thêm ảnh"}
+            {editingId ? "Sửa ảnh cơ sở" : "Thêm ảnh cơ sở"}
           </h3>
           {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
 
-          <label className="block text-sm" data-invalid={fieldErrors.alt ? "true" : undefined}>
-            <span className="mb-1 block font-semibold text-foreground">Alt text</span>
+          <label className="block text-sm" data-invalid={fieldErrors.title ? "true" : undefined}>
+            <span className="mb-1 block font-semibold text-foreground">
+              Tiêu đề (label trên ảnh)
+            </span>
             <input
               className={`w-full rounded-lg border px-3 py-2 ${
-                fieldErrors.alt ? "border-red-500" : "border-border"
+                fieldErrors.title ? "border-red-500" : "border-border"
               }`}
-              value={form.alt}
+              value={form.title}
               onChange={(event) => {
-                setForm((prev) => ({ ...prev, alt: event.target.value }));
-                setFieldErrors((prev) => ({ ...prev, alt: undefined }));
+                setForm((prev) => ({ ...prev, title: event.target.value }));
+                setFieldErrors((prev) => ({ ...prev, title: undefined }));
               }}
             />
-            {fieldErrors.alt ? (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.alt}</p>
+            {fieldErrors.title ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.title}</p>
             ) : null}
           </label>
 
@@ -282,7 +293,7 @@ export function GalleryImagesAdmin() {
             <input
               type="number"
               min={0}
-              max={MAX_GALLERY_IMAGES - 1}
+              max={MAX_FACILITY_IMAGES - 1}
               className="w-full rounded-lg border border-border px-3 py-2"
               value={form.sortOrder}
               onChange={(event) =>
@@ -296,11 +307,10 @@ export function GalleryImagesAdmin() {
 
           <AdminImageField
             url={form.imageUrl}
-            uploading={cover.uploading}
-            objectPosition={form.objectPosition}
+            uploading={facilityImage.uploading}
             invalid={Boolean(fieldErrors.imageUrl)}
             error={fieldErrors.imageUrl}
-            onFile={(file) => void handleUpload(file)}
+            onFile={(file) => void handleFacilityUpload(file)}
           />
 
           <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -311,18 +321,23 @@ export function GalleryImagesAdmin() {
                 setForm((prev) => ({ ...prev, isPublished: event.target.checked }))
               }
             />
-            Published (hiện trang chủ)
+            Published (hiện trang About)
           </label>
 
           <div className="flex gap-2">
             <Button
               type="button"
-              disabled={saving || cover.uploading}
-              onClick={() => void handleSave()}
+              variant="primary"
+              disabled={saving || facilityImage.uploading}
+              onClick={() => void handleFacilitySave()}
             >
-              {cover.uploading ? "Đang upload..." : saving ? "Đang lưu..." : "Lưu"}
+              {facilityImage.uploading
+                ? "Đang upload..."
+                : saving
+                  ? "Đang lưu..."
+                  : "Lưu"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => void closeForm()}>
+            <Button type="button" variant="outline" onClick={() => void closeFacilityForm()}>
               Hủy
             </Button>
           </div>
@@ -331,18 +346,18 @@ export function GalleryImagesAdmin() {
 
       <ConfirmDialog
         open={Boolean(deleteTarget)}
-        title="Xóa ảnh gallery?"
+        title="Xóa ảnh cơ sở?"
         description={
           deleteTarget
-            ? `Bạn chắc muốn xóa ảnh “${deleteTarget.alt}”?`
+            ? `Bạn chắc muốn xóa ảnh “${deleteTarget.title}”?`
             : ""
         }
         busy={deleting}
         onCancel={() => {
           if (!deleting) setDeleteTarget(null);
         }}
-        onConfirm={() => void handleDelete()}
+        onConfirm={() => void handleFacilityDelete()}
       />
-    </div>
+    </section>
   );
 }

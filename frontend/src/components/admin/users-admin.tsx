@@ -1,46 +1,27 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState, type ComponentProps, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Pencil, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 
 import { useAdminUser } from "@/components/admin/admin-shell";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import { UsersForm } from "@/components/admin/users/users-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PasswordInput } from "@/components/ui/password-input";
 import { formatAdminDateTime } from "@/lib/admin/format";
-import { scrollToElement, scrollToFirstInvalid } from "@/lib/admin/scroll";
+import { scrollToElement } from "@/lib/admin/scroll";
 import { formatError } from "@/lib/errors/format-error";
-import {
-  createUser,
-  deleteUser,
-  listUsers,
-  updateUser,
-} from "@/lib/users/api";
-import type {
-  ManagedUser,
-  UserPayload,
-  UserRole,
-  UsersMeta,
-} from "@/lib/users/types";
+import { deleteUser, listUsers } from "@/lib/users/api";
+import type { ManagedUser, UserRole, UsersMeta } from "@/lib/users/types";
 
 const PAGE_SIZE = 10;
-const EMPTY_FORM: UserPayload = {
-  fullName: "",
-  email: "",
-  phone: "",
-  password: "",
-  role: "USER",
-};
 
 const FILTER_CONTROL =
   "h-11 rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground outline-none transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary";
 
-type TextField = "fullName" | "email" | "phone" | "password" | "role";
-
 export function UsersAdmin() {
   const currentUser = useAdminUser();
-  const formRef = useRef<HTMLFormElement>(null);
+  const formSectionRef = useRef<HTMLDivElement>(null);
 
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [meta, setMeta] = useState<UsersMeta | null>(null);
@@ -51,19 +32,13 @@ export function UsersAdmin() {
   const [reloadKey, setReloadKey] = useState(0);
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<UserPayload>(EMPTY_FORM);
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<TextField, string>>>({});
+  const [formUser, setFormUser] = useState<ManagedUser | null | undefined>(undefined);
+  const [formSession, setFormSession] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<ManagedUser | null>(null);
-
-  const editingSelf = editingId === currentUser.id;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -93,122 +68,36 @@ export function UsersAdmin() {
   }, [page, reloadKey, roleFilter, search]);
 
   useEffect(() => {
-    if (showForm) scrollToElement(formRef.current);
-  }, [showForm, editingId]);
+    if (formUser !== undefined) scrollToElement(formSectionRef.current);
+  }, [formUser, formSession]);
 
   function reload() {
     setReloadKey((current) => current + 1);
   }
 
-  function resetFormState() {
-    setEditingId(null);
-    setForm(EMPTY_FORM);
-    setFormError(null);
-    setFieldErrors({});
-  }
-
-  function openCreate() {
-    resetFormState();
+  function openForm(user: ManagedUser | null) {
+    setFormUser(user);
+    setFormSession((current) => current + 1);
     setNotice(null);
-    setShowForm(true);
-  }
-
-  function openEdit(user: ManagedUser) {
-    setEditingId(user.id);
-    setForm({
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone ?? "",
-      password: "",
-      role: user.role,
-    });
-    setFormError(null);
-    setFieldErrors({});
-    setNotice(null);
-    setShowForm(true);
   }
 
   function closeForm() {
-    if (saving) return;
-    setShowForm(false);
-    resetFormState();
+    setFormUser(undefined);
+  }
+
+  function handleSaved(message: string) {
+    setNotice(message);
+    closeForm();
+    if (page !== 1) setPage(1);
+    else reload();
   }
 
   function toggleCreateForm() {
-    if (showForm && !editingId) {
+    if (formUser !== undefined && formUser === null) {
       closeForm();
       return;
     }
-    openCreate();
-  }
-
-  function setField<K extends keyof UserPayload>(key: K, value: UserPayload[K]) {
-    setForm((current) => ({ ...current, [key]: value }));
-    if (key in fieldErrors) {
-      setFieldErrors((current) => ({ ...current, [key]: undefined }));
-    }
-  }
-
-  function validate(): Partial<Record<TextField, string>> {
-    const errors: Partial<Record<TextField, string>> = {};
-    const fullName = form.fullName.trim();
-    const email = form.email.trim();
-    const password = form.password?.trim() ?? "";
-
-    if (fullName.length < 2) errors.fullName = "Họ tên cần ít nhất 2 ký tự.";
-    if (!email) errors.email = "Email là bắt buộc.";
-    if (!editingId && !password) errors.password = "Mật khẩu là bắt buộc khi tạo tài khoản.";
-    if (password && password.length < 8) errors.password = "Mật khẩu cần tối thiểu 8 ký tự.";
-    return errors;
-  }
-
-  async function handleSave(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setFormError(null);
-    setNotice(null);
-
-    const errors = validate();
-    setFieldErrors(errors);
-    if (Object.keys(errors).length) {
-      setFormError("Vui lòng sửa các ô còn lỗi trước khi lưu.");
-      scrollToFirstInvalid(formRef.current);
-      return;
-    }
-
-    const fullName = form.fullName.trim().replace(/\s+/g, " ");
-    const email = form.email.trim().toLowerCase();
-    const phone = form.phone?.trim() || null;
-    const password = form.password?.trim();
-
-    setSaving(true);
-    try {
-      const response = editingId
-        ? await updateUser(editingId, {
-            fullName,
-            email,
-            phone,
-            role: form.role,
-            ...(password ? { password } : {}),
-          })
-        : await createUser({
-            fullName,
-            email,
-            phone,
-            role: form.role,
-            password: password!,
-          });
-
-      setNotice(response.message);
-      setShowForm(false);
-      resetFormState();
-      if (page !== 1) setPage(1);
-      else reload();
-    } catch (error) {
-      setFormError(formatError(error));
-      scrollToFirstInvalid(formRef.current);
-    } finally {
-      setSaving(false);
-    }
+    openForm(null);
   }
 
   async function handleDelete() {
@@ -221,6 +110,7 @@ export function UsersAdmin() {
       const response = await deleteUser(deleteTarget.id);
       setNotice(response.message);
       setDeleteTarget(null);
+      if (formUser?.id === deleteTarget.id) closeForm();
       if (users.length === 1 && page > 1) setPage((current) => current - 1);
       else reload();
     } catch (error) {
@@ -242,24 +132,7 @@ export function UsersAdmin() {
     setPage(1);
   }
 
-  const textField = (
-    key: Exclude<TextField, "role" | "password">,
-    label: string,
-    props: ComponentProps<typeof Input> = {},
-  ) => (
-    <label className="block text-sm" data-invalid={fieldErrors[key] ? "true" : undefined}>
-      <span className="mb-1 block font-semibold text-foreground">{label}</span>
-      <Input
-        className={`bg-card ${fieldErrors[key] ? "border-red-500" : ""}`}
-        value={String(form[key] ?? "")}
-        onChange={(event) => setField(key, event.target.value)}
-        {...props}
-      />
-      {fieldErrors[key] ? (
-        <p className="mt-1 text-xs text-red-600">{fieldErrors[key]}</p>
-      ) : null}
-    </label>
-  );
+  const creating = formUser !== undefined && formUser === null;
 
   return (
     <section className="space-y-6" aria-labelledby="users-title">
@@ -277,11 +150,11 @@ export function UsersAdmin() {
         </div>
         <Button
           type="button"
-          variant={showForm && !editingId ? "outline" : "primary"}
+          variant={creating ? "outline" : "primary"}
           onClick={toggleCreateForm}
         >
           <Plus className="size-4" aria-hidden="true" />
-          {showForm && !editingId ? "Đóng form thêm" : "Tạo tài khoản"}
+          {creating ? "Đóng form thêm" : "Tạo tài khoản"}
         </Button>
       </div>
 
@@ -292,69 +165,16 @@ export function UsersAdmin() {
         </p>
       ) : null}
 
-      {showForm ? (
-        <form
-          ref={formRef}
-          onSubmit={handleSave}
-          className="scroll-mt-6 grid gap-4 rounded-2xl border border-border bg-card p-5 md:grid-cols-2"
-        >
-          <h3 className="md:col-span-2 text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
-            {editingId ? "Sửa tài khoản" : "Thêm tài khoản"}
-          </h3>
-
-          {formError ? (
-            <p role="alert" className="md:col-span-2 text-sm text-red-600">
-              {formError}
-            </p>
-          ) : null}
-
-          {textField("fullName", "Họ và tên", { maxLength: 100, required: true })}
-          {textField("email", "Email", { type: "email", maxLength: 255, required: true })}
-          {textField("phone", "Số điện thoại", { maxLength: 20 })}
-
-          <label className="block text-sm" data-invalid={fieldErrors.role ? "true" : undefined}>
-            <span className="mb-1 block font-semibold text-foreground">Quyền</span>
-            <select
-              className={`h-12 w-full ${FILTER_CONTROL}`}
-              value={form.role}
-              disabled={editingSelf}
-              onChange={(event) => setField("role", event.target.value as UserRole)}
-            >
-              <option value="USER">USER</option>
-              <option value="ADMIN">ADMIN</option>
-            </select>
-          </label>
-
-          <label
-            className="block text-sm md:col-span-2"
-            data-invalid={fieldErrors.password ? "true" : undefined}
-          >
-            <span className="mb-1 block font-semibold text-foreground">
-              {editingId ? "Mật khẩu mới (để trống nếu không đổi)" : "Mật khẩu"}
-            </span>
-            <PasswordInput
-              className={`bg-card ${fieldErrors.password ? "border-red-500" : ""}`}
-              value={form.password ?? ""}
-              minLength={8}
-              maxLength={72}
-              required={!editingId}
-              autoComplete="new-password"
-              onChange={(event) => setField("password", event.target.value)}
-            />
-            {fieldErrors.password ? (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>
-            ) : null}
-          </label>
-
-          <div className="flex justify-end gap-2 md:col-span-2">
-            <Button type="button" variant="outline" disabled={saving} onClick={closeForm}>
-              Hủy
-            </Button>
-            <Button type="submit" disabled={saving}>
-              {saving ? "Đang lưu..." : "Lưu tài khoản"}
-            </Button>
-          </div>
-        </form>
+      {formUser !== undefined ? (
+        <div ref={formSectionRef}>
+          <UsersForm
+            key={`${formUser?.id ?? "create"}-${formSession}`}
+            user={formUser}
+            currentUserId={currentUser.id}
+            onCancel={closeForm}
+            onSaved={handleSaved}
+          />
+        </div>
       ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -459,7 +279,7 @@ export function UsersAdmin() {
                             size="sm"
                             variant="outline"
                             className="w-[92px] rounded-lg"
-                            onClick={() => openEdit(user)}
+                            onClick={() => openForm(user)}
                           >
                             <Pencil className="size-4" aria-hidden="true" />
                             Sửa

@@ -9,7 +9,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ListJobsQueryDto } from './dto/list-jobs-query.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { type SalaryCurrency, type SalaryType } from './job-salary';
+import {
+  SALARY_AMOUNT,
+  type SalaryCurrency,
+  type SalaryType,
+} from './job-salary';
 
 const JOB_SELECT = {
   id: true,
@@ -63,8 +67,14 @@ export class JobsService {
       return;
     }
 
-    if (!Number.isInteger(salaryMin) || (salaryMin ?? 0) <= 0) {
-      throw new BadRequestException('Lương tối thiểu phải là số nguyên dương');
+    if (
+      !Number.isInteger(salaryMin) ||
+      (salaryMin ?? 0) < SALARY_AMOUNT.min ||
+      (salaryMin ?? 0) > SALARY_AMOUNT.max
+    ) {
+      throw new BadRequestException(
+        `Lương tối thiểu phải là số nguyên từ ${SALARY_AMOUNT.min} đến ${SALARY_AMOUNT.max}`,
+      );
     }
 
     if (salaryType === 'FIXED') {
@@ -74,8 +84,14 @@ export class JobsService {
       return;
     }
 
-    if (!Number.isInteger(salaryMax) || (salaryMax ?? 0) <= 0) {
-      throw new BadRequestException('Lương tối đa phải là số nguyên dương');
+    if (
+      !Number.isInteger(salaryMax) ||
+      (salaryMax ?? 0) < SALARY_AMOUNT.min ||
+      (salaryMax ?? 0) > SALARY_AMOUNT.max
+    ) {
+      throw new BadRequestException(
+        `Lương tối đa phải là số nguyên từ ${SALARY_AMOUNT.min} đến ${SALARY_AMOUNT.max}`,
+      );
     }
     if ((salaryMax as number) < (salaryMin as number)) {
       throw new BadRequestException(

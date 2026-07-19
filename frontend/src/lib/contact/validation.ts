@@ -1,6 +1,9 @@
 import type { ContactInformation, ContactInformationPayload } from "./types";
+import { PHONE_LIMITS } from "@/lib/validation/phone";
 
-const PHONE_PATTERN = /^(?=(?:\D*\d){7,15}\D*$)[+\d][\d\s().-]*$/;
+const PHONE_PATTERN = new RegExp(
+  `^(?=(?:\\D*\\d){${PHONE_LIMITS.minDigits},${PHONE_LIMITS.maxDigits}}\\D*$)[+\\d][\\d\\s().-]*$`,
+);
 const GOOGLE_MAPS_URL_PATTERN =
   /^https:\/\/(?:(?:www\.)?google\.com\/maps(?!\/embed(?:[/?#]|$))(?:[/?#].*)?|maps\.google\.com(?!\/embed(?:[/?#]|$))(?:[/?#].*)?|maps\.app\.goo\.gl\/[A-Za-z0-9_-]+(?:[/?#].*)?|goo\.gl\/maps\/[A-Za-z0-9_-]+(?:[/?#].*)?)$/i;
 const GOOGLE_MAPS_EMBED_URL_PATTERN =
@@ -44,7 +47,7 @@ export function validateContactInformation(
   const mapUrl = values.mapUrl.trim();
 
   if (!PHONE_PATTERN.test(phone) || phone.length > 20) {
-    errors.phone = "Số điện thoại cần có 7–15 chữ số và đúng định dạng.";
+    errors.phone = `Số điện thoại cần có ${PHONE_LIMITS.minDigits}–${PHONE_LIMITS.maxDigits} chữ số và đúng định dạng.`;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255) {
     errors.email = "Email chưa đúng định dạng.";

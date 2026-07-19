@@ -1,14 +1,15 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 
 import { AdminImageField } from "@/components/admin/admin-image-field";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { RowActions } from "./row-actions";
+import { useAdminResourceList } from "@/hooks/use-admin-resource-list";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
-import { scrollToElement, scrollToFirstInvalid } from "@/lib/admin/scroll";
+import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { nextSortOrder } from "@/lib/admin/sort-order";
 import { formatError } from "@/lib/errors/format-error";
 import { isHttpUrl } from "@/lib/media/is-http-url";
@@ -35,19 +36,34 @@ type FieldKey = "name" | "title" | "cred" | "exp" | "bio" | "imageUrl";
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
 export function TeachersAdmin() {
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [listError, setListError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<TeacherPayload>(EMPTY_FORM);
-  const [showForm, setShowForm] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<Teacher | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
-  const formRef = useRef<HTMLDivElement>(null);
+  const loadItems = useCallback(async () => {
+    const response = await listTeachers({ publishedOnly: false });
+    return response.teachers;
+  }, []);
+
+  const {
+    items: teachers,
+    loading,
+    listError,
+    setListError,
+    showForm,
+    setShowForm,
+    editingId,
+    setEditingId,
+    deleteTarget,
+    setDeleteTarget,
+    deleting,
+    setDeleting,
+    formRef,
+    load,
+    resetFormChrome,
+  } = useAdminResourceList<Teacher>({ loadItems });
+
   const editingIdRef = useRef<string | null>(null);
   editingIdRef.current = editingId;
 
@@ -63,36 +79,13 @@ export function TeachersAdmin() {
     },
   });
 
-  const load = async () => {
-    setLoading(true);
-    setListError(null);
-    try {
-      const response = await listTeachers({ publishedOnly: false });
-      setTeachers(response.teachers);
-    } catch (err) {
-      setListError(formatError(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void load();
-  }, []);
-
-  useEffect(() => {
-    if (showForm) scrollToElement(formRef.current);
-  }, [showForm, editingId]);
-
   const closeForm = async () => {
     await photo.discard();
-    setShowForm(false);
-    setEditingId(null);
+    resetFormChrome();
     setFormError(null);
     setFieldErrors({});
     photo.reset(null);
     setForm(EMPTY_FORM);
-    await load();
   };
 
   const openCreate = async () => {
@@ -181,8 +174,7 @@ export function TeachersAdmin() {
       else await createTeacher(payload);
 
       await photo.commit(payload.imageUrl);
-      setShowForm(false);
-      setEditingId(null);
+      resetFormChrome();
       setForm(EMPTY_FORM);
       await load();
     } catch (err) {

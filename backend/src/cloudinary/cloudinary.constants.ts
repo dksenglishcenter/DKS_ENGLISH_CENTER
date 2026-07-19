@@ -9,7 +9,6 @@ export const CLOUDINARY_FOLDERS = {
   aboutTeachers: `${CLOUDINARY_ROOT}/about/teachers`,
   courses: `${CLOUDINARY_ROOT}/courses`,
   blog: `${CLOUDINARY_ROOT}/blog`,
-  branches: `${CLOUDINARY_ROOT}/branches`,
 } as const;
 
 export const SOCIAL_PLATFORMS = [
@@ -46,7 +45,6 @@ export const MEDIA_CATEGORIES: MediaCategory[] = [
 
 export type FolderContext = {
   platform?: SocialPlatform;
-  branchId?: string;
 };
 
 type FolderResolver = (ctx: FolderContext) => string;

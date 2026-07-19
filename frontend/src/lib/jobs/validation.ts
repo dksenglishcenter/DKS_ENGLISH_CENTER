@@ -1,4 +1,5 @@
 import type { JobFormValues, JobPayload } from "./types";
+import { SALARY_AMOUNT, isValidSalaryAmount } from "./salary";
 
 export type JobTextField =
   | "title"
@@ -96,30 +97,24 @@ export function validateJobForm(values: JobFormValues): JobFormErrors {
   } else if (values.salaryType === "RANGE") {
     if (
       values.salaryMin.trim() === "" ||
-      !Number.isInteger(salaryMin) ||
-      salaryMin <= 0 ||
-      salaryMin > 1000000000
+      !isValidSalaryAmount(salaryMin)
     ) {
-      errors.salaryMin = "Lương tối thiểu phải là số nguyên từ 1 đến 1 tỷ.";
+      errors.salaryMin = `Lương tối thiểu phải là số nguyên từ ${SALARY_AMOUNT.min} đến ${SALARY_AMOUNT.max.toLocaleString("vi-VN")}.`;
     }
     if (
       values.salaryMax.trim() === "" ||
-      !Number.isInteger(salaryMax) ||
-      salaryMax <= 0 ||
-      salaryMax > 1000000000
+      !isValidSalaryAmount(salaryMax)
     ) {
-      errors.salaryMax = "Lương tối đa phải là số nguyên từ 1 đến 1 tỷ.";
+      errors.salaryMax = `Lương tối đa phải là số nguyên từ ${SALARY_AMOUNT.min} đến ${SALARY_AMOUNT.max.toLocaleString("vi-VN")}.`;
     } else if (!errors.salaryMin && salaryMax < salaryMin) {
       errors.salaryMax = "Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.";
     }
   } else if (values.salaryType === "FIXED") {
     if (
       values.salaryMin.trim() === "" ||
-      !Number.isInteger(salaryMin) ||
-      salaryMin <= 0 ||
-      salaryMin > 1000000000
+      !isValidSalaryAmount(salaryMin)
     ) {
-      errors.salaryMin = "Mức lương phải là số nguyên từ 1 đến 1 tỷ.";
+      errors.salaryMin = `Mức lương phải là số nguyên từ ${SALARY_AMOUNT.min} đến ${SALARY_AMOUNT.max.toLocaleString("vi-VN")}.`;
     }
   }
 

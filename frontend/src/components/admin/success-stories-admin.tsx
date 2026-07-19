@@ -1,13 +1,14 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { RowActions } from "./row-actions";
+import { useAdminResourceList } from "@/hooks/use-admin-resource-list";
 import { listCourses } from "@/lib/courses/api";
 import type { Course } from "@/lib/courses/types";
-import { scrollToElement, scrollToFirstInvalid } from "@/lib/admin/scroll";
+import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { nextSortOrder } from "@/lib/admin/sort-order";
 import { formatError } from "@/lib/errors/format-error";
 import {
@@ -40,43 +41,37 @@ function initialsFromName(name: string) {
 }
 
 export function SuccessStoriesAdmin() {
-  const [stories, setStories] = useState<SuccessStory[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [listError, setListError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<SuccessStoryPayload>(EMPTY_FORM);
-  const [showForm, setShowForm] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<SuccessStory | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
 
-  const load = async () => {
-    setLoading(true);
-    setListError(null);
-    try {
-      const [storiesRes, coursesRes] = await Promise.all([
-        listSuccessStories({ publishedOnly: false }),
-        listCourses({ publishedOnly: false }),
-      ]);
-      setStories(storiesRes.stories);
-      setCourses(coursesRes.courses);
-    } catch (err) {
-      setListError(formatError(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void load();
+  const loadItems = useCallback(async () => {
+    const [storiesRes, coursesRes] = await Promise.all([
+      listSuccessStories({ publishedOnly: false }),
+      listCourses({ publishedOnly: false }),
+    ]);
+    setCourses(coursesRes.courses);
+    return storiesRes.stories;
   }, []);
 
-  useEffect(() => {
-    if (showForm) scrollToElement(formRef.current);
-  }, [showForm, editingId]);
+  const {
+    items: stories,
+    loading,
+    listError,
+    setListError,
+    showForm,
+    setShowForm,
+    editingId,
+    setEditingId,
+    deleteTarget,
+    setDeleteTarget,
+    deleting,
+    setDeleting,
+    formRef,
+    load,
+    resetFormChrome,
+  } = useAdminResourceList<SuccessStory>({ loadItems });
 
   const courseOptions = (() => {
     const titles = courses.map((course) => course.title);
@@ -87,8 +82,7 @@ export function SuccessStoriesAdmin() {
   })();
 
   const closeForm = () => {
-    setShowForm(false);
-    setEditingId(null);
+    resetFormChrome();
     setFormError(null);
     setForm(EMPTY_FORM);
   };

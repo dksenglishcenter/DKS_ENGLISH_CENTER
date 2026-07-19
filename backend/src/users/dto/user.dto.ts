@@ -14,7 +14,8 @@ import {
 } from 'class-validator';
 import { Role } from '../../../generated/prisma/client';
 
-const PHONE_PATTERN = /^(?=(?:\D*\d){8,15}\D*$)[+\d][\d\s().-]*$/;
+import { PHONE_PATTERN } from '../../common/validation/person';
+
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).+$/;
 
 const Trim = () =>

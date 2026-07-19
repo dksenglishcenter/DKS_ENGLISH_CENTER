@@ -42,7 +42,7 @@ export function CourseCoverImage({
       priority={priority}
       className={cn("object-cover bg-secondary", className)}
       onError={() => setFailed(true)}
-      unoptimized={src.includes("images.unsplash.com")}
+      unoptimized
     />
   );
 }

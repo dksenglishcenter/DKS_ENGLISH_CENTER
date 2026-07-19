@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import nodemailer, { type Transporter } from 'nodemailer';
 
+import {
+  DEFAULT_ZALO_PHONE,
+  DEFAULT_ZALO_URL,
+} from '../common/contact-defaults';
+
 export type ContactNotifyPayload = {
   id: string;
   fullName: string;
@@ -349,9 +354,8 @@ export class MailService {
 
   private zaloContact() {
     return {
-      zaloUrl:
-        process.env.ZALO_CONTACT_URL?.trim() || 'https://zalo.me/0834513456',
-      zaloPhone: process.env.ZALO_CONTACT_PHONE?.trim() || '0834513456',
+      zaloUrl: process.env.ZALO_CONTACT_URL?.trim() || DEFAULT_ZALO_URL,
+      zaloPhone: process.env.ZALO_CONTACT_PHONE?.trim() || DEFAULT_ZALO_PHONE,
     };
   }
 }
