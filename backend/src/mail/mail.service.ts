@@ -82,9 +82,7 @@ export class MailService {
     }
 
     this.transporter = nodemailer.createTransport({
-      host,
-      port: Number.isFinite(port) ? port : 587,
-      secure,
+      service: 'gmail',
       auth: { user, pass },
     });
   }
@@ -107,15 +105,14 @@ export class MailService {
       ['Khóa học quan tâm', payload.courseInterest],
       ['Nhu cầu học', payload.learningNeeds ?? '(không ghi)'],
       ['Thời gian', formatDateTime(payload.createdAt)],
-      ['Mã đơn', payload.id],
     ] as const;
 
     if (this.notifyEmails.length > 0) {
       await this.sendSafe({
         to: this.notifyEmails.join(', '),
         subject: `[DKS] Liên hệ mới — ${payload.fullName}`,
-        text: this.toText('Yêu cầu tư vấn mới từ form Liên hệ', adminRows),
-        html: this.toHtml('Yêu cầu tư vấn mới từ form Liên hệ', adminRows),
+        text: this.toAdminText('Yêu cầu tư vấn mới từ form Liên hệ', adminRows),
+        html: this.toAdminHtml('Yêu cầu tư vấn mới từ form Liên hệ', adminRows),
       });
     }
 
@@ -133,7 +130,7 @@ export class MailService {
           `Xin chào ${payload.fullName},`,
           '',
           'DKS English Center đã nhận được yêu cầu tư vấn của bạn.',
-          'Chúng tôi sẽ liên hệ sớm nhất có thể.',
+          'Cảm ơn bạn đã quan tâm. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.',
           '',
           ...confirmRows.map(([label, value]) => `${label}: ${value}`),
           '',
@@ -141,11 +138,12 @@ export class MailService {
           'DKS English Center',
         ].join('\n'),
         html: `
-          <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#4A2306">
-            <p>Xin chào <strong>${escapeHtml(payload.fullName)}</strong>,</p>
-            <p>DKS English Center đã nhận được yêu cầu tư vấn của bạn. Chúng tôi sẽ liên hệ sớm nhất có thể.</p>
+          <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
+            <p style="color:#000000">Xin chào <strong>${escapeHtml(payload.fullName)}</strong>,</p>
+            <p style="color:#000000">DKS English Center đã nhận được yêu cầu tư vấn của bạn.</p>
             ${this.toHtmlTable(confirmRows)}
-            <p style="margin-top:16px">Trân trọng,<br/>DKS English Center</p>
+            <p style="margin:16px 0 0;color:#000000">Cảm ơn bạn đã quan tâm. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.</p>
+            <p style="margin-top:16px;color:#000000">Trân trọng,<br/>DKS English Center</p>
           </div>
         `,
       });
@@ -162,15 +160,14 @@ export class MailService {
       ['Vị trí', payload.position],
       ['Giới thiệu', payload.introduction ?? '(không ghi)'],
       ['Thời gian', formatDateTime(payload.createdAt)],
-      ['Mã đơn', payload.id],
     ] as const;
 
     if (this.notifyEmails.length > 0) {
       await this.sendSafe({
         to: this.notifyEmails.join(', '),
         subject: `[DKS] Ứng tuyển mới — ${payload.position} — ${payload.fullName}`,
-        text: this.toText('Đơn ứng tuyển mới từ form Tuyển dụng', adminRows),
-        html: this.toHtml('Đơn ứng tuyển mới từ form Tuyển dụng', adminRows),
+        text: this.toAdminText('Đơn ứng tuyển mới từ form Tuyển dụng', adminRows),
+        html: this.toAdminHtml('Đơn ứng tuyển mới từ form Tuyển dụng', adminRows),
       });
     }
 
@@ -187,7 +184,7 @@ export class MailService {
         `Xin chào ${payload.fullName},`,
         '',
         `DKS English Center đã nhận đơn ứng tuyển vị trí "${payload.position}" của bạn.`,
-        'Chúng tôi sẽ phản hồi khi có cập nhật.',
+        'Cảm ơn bạn đã quan tâm. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.',
         '',
         ...confirmRows.map(([label, value]) => `${label}: ${value}`),
         '',
@@ -195,17 +192,18 @@ export class MailService {
         'DKS English Center',
       ].join('\n'),
       html: `
-        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#4A2306">
-          <p>Xin chào <strong>${escapeHtml(payload.fullName)}</strong>,</p>
-          <p>DKS English Center đã nhận đơn ứng tuyển vị trí <strong>${escapeHtml(payload.position)}</strong> của bạn. Chúng tôi sẽ phản hồi khi có cập nhật.</p>
+        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
+          <p style="color:#000000">Xin chào <strong>${escapeHtml(payload.fullName)}</strong>,</p>
+          <p style="color:#000000">DKS English Center đã nhận đơn ứng tuyển vị trí <strong>${escapeHtml(payload.position)}</strong> của bạn.</p>
           ${this.toHtmlTable(confirmRows)}
-          <p style="margin-top:16px">Trân trọng,<br/>DKS English Center</p>
+          <p style="margin:16px 0 0;color:#000000">Cảm ơn bạn đã quan tâm. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.</p>
+          <p style="margin-top:16px;color:#000000">Trân trọng,<br/>DKS English Center</p>
         </div>
       `,
     });
   }
 
-  private toText(
+  private toAdminText(
     title: string,
     rows: ReadonlyArray<readonly [string, string]>,
   ) {
@@ -218,27 +216,26 @@ export class MailService {
     ].join('\n');
   }
 
-  private toHtmlTable(rows: ReadonlyArray<readonly [string, string]>) {
-    const body = rows
-      .map(
-        ([label, value]) =>
-          `<tr><td style="padding:6px 12px 6px 0;color:#9B6B50;vertical-align:top;white-space:nowrap"><strong>${escapeHtml(label)}</strong></td><td style="padding:6px 0;color:#4A2306">${escapeHtml(value).replaceAll('\n', '<br/>')}</td></tr>`,
-      )
-      .join('');
-    return `<table style="border-collapse:collapse">${body}</table>`;
-  }
-
-  private toHtml(
+  private toAdminHtml(
     title: string,
     rows: ReadonlyArray<readonly [string, string]>,
   ) {
     return `
-      <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#4A2306">
-        <h2 style="margin:0 0 12px;color:#F16522">${escapeHtml(title)}</h2>
+      <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
+        <h2 style="margin:0 0 12px;color:#000000">${escapeHtml(title)}</h2>
         ${this.toHtmlTable(rows)}
-        <p style="margin:16px 0 0;color:#9B6B50;font-size:12px">Email tự động từ hệ thống DKS English Center.</p>
       </div>
     `;
+  }
+
+  private toHtmlTable(rows: ReadonlyArray<readonly [string, string]>) {
+    const body = rows
+      .map(
+        ([label, value]) =>
+          `<tr><td style="padding:6px 12px 6px 0;color:#000000;vertical-align:top;white-space:nowrap"><strong>${escapeHtml(label)}</strong></td><td style="padding:6px 0;color:#000000">${escapeHtml(value).replaceAll('\n', '<br/>')}</td></tr>`,
+      )
+      .join('');
+    return `<table style="border-collapse:collapse">${body}</table>`;
   }
 
   private async sendSafe(options: {
@@ -262,5 +259,53 @@ export class MailService {
         `Gửi email thất bại → ${options.to}: ${message}`,
       );
     }
+  }
+
+  /** Hướng dẫn quên mật khẩu: liên hệ Zalo trung tâm để được cấp lại. */
+  async sendForgotPasswordHelp(to: string, fullName?: string | null) {
+    if (!this.isConfigured() || !this.transporter) return;
+
+    const zaloUrl =
+      process.env.ZALO_CONTACT_URL?.trim() || 'https://zalo.me/0834513456';
+    const zaloPhone =
+      process.env.ZALO_CONTACT_PHONE?.trim() || '0834513456';
+    const name = fullName?.trim() || 'bạn';
+
+    await this.sendSafe({
+      to,
+      subject: 'DKS — Hướng dẫn lấy lại mật khẩu',
+      text: [
+        `Xin chào ${name},`,
+        '',
+        'Bạn (hoặc ai đó) vừa yêu cầu lấy lại mật khẩu tài khoản DKS English Center.',
+        '',
+        'Để được cấp lại mật khẩu, vui lòng liên hệ Zalo trung tâm:',
+        `- Zalo: DKS English Center`,
+        `- SĐT / Zalo: ${zaloPhone}`,
+        `- Link: ${zaloUrl}`,
+        '',
+        'Nhắn tin kèm email tài khoản của bạn để được hỗ trợ.',
+        '',
+        'Nếu bạn không yêu cầu, hãy bỏ qua email này.',
+        '',
+        'Trân trọng,',
+        'DKS English Center',
+      ].join('\n'),
+      html: `
+        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
+          <p style="color:#000000">Xin chào <strong>${escapeHtml(name)}</strong>,</p>
+          <p style="color:#000000">Bạn (hoặc ai đó) vừa yêu cầu lấy lại mật khẩu tài khoản DKS English Center.</p>
+          <p style="color:#000000"><strong>Để được cấp lại mật khẩu, vui lòng liên hệ Zalo trung tâm:</strong></p>
+          <ul style="color:#000000">
+            <li>Zalo: <strong>DKS English Center</strong></li>
+            <li>SĐT / Zalo: <strong>${escapeHtml(zaloPhone)}</strong></li>
+            <li>Link: <a href="${escapeHtml(zaloUrl)}" style="color:#000000">${escapeHtml(zaloUrl)}</a></li>
+          </ul>
+          <p style="color:#000000">Nhắn tin kèm <strong>email tài khoản</strong> của bạn để được hỗ trợ.</p>
+          <p style="color:#000000">Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+          <p style="color:#000000">Trân trọng,<br/>DKS English Center</p>
+        </div>
+      `,
+    });
   }
 }

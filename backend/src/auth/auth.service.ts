@@ -5,9 +5,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomBytes } from 'crypto';
+import { createHash } from 'crypto';
 import type { Response } from 'express';
 import { Role } from '../../generated/prisma/client';
+import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   AUTH_COOKIE_NAMES,
@@ -22,13 +23,13 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokenService } from './token.service';
 
 const BCRYPT_ROUNDS = 12;
-const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
+    private readonly mailService: MailService,
   ) {}
 
   async register(dto: RegisterDto, res: Response) {
@@ -42,7 +43,7 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         email,
-        fullName: dto.fullName.trim().replace(/\s+/g, ' '),
+        fullName: dto.fullName.trim(),
         phone: dto.phone?.trim() || null,
         passwordHash,
         role: Role.USER,
@@ -50,7 +51,7 @@ export class AuthService {
       select: this.userSelect,
     });
 
-    this.setAuthCookies(res, user);
+    this.setAuthCookies(res, user, false);
     return {
       message: 'Đăng ký thành công',
       user,
@@ -78,7 +79,7 @@ export class AuthService {
       createdAt: user.createdAt,
     };
 
-    this.setAuthCookies(res, safeUser);
+    this.setAuthCookies(res, safeUser, Boolean(dto.rememberMe));
     return {
       message: 'Đăng nhập thành công',
       user: safeUser,
@@ -107,8 +108,8 @@ export class AuthService {
       throw new UnauthorizedException('Tài khoản không còn tồn tại');
     }
 
-    // Rotate cả access + refresh cookie
-    this.setAuthCookies(res, user);
+    // Giữ trạng thái ghi nhớ đăng nhập khi rotate cookie
+    this.setAuthCookies(res, user, Boolean(payload.remember));
     return {
       message: 'Đã làm mới phiên đăng nhập',
       user,
@@ -128,37 +129,19 @@ export class AuthService {
 
   async forgotPassword(dto: ForgotPasswordDto) {
     const email = dto.email.trim().toLowerCase();
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, fullName: true },
+    });
 
     // Không lộ email có tồn tại hay không
     const generic = {
       message:
-        'Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.',
+        'Nếu email tồn tại trong hệ thống, bạn sẽ nhận hướng dẫn liên hệ Zalo trung tâm để được cấp lại mật khẩu.',
     };
 
-    if (!user) {
-      return generic;
-    }
-
-    const rawToken = randomBytes(32).toString('hex');
-    const tokenHash = this.hashToken(rawToken);
-    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
-
-    await this.prisma.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        tokenHash,
-        expiresAt,
-      },
-    });
-
-    // Chưa gắn email SMTP — trả token ở môi trường non-production để test
-    if (process.env.NODE_ENV !== 'production') {
-      return {
-        ...generic,
-        resetToken: rawToken,
-        resetPath: `/reset-password?token=${rawToken}`,
-      };
+    if (user) {
+      void this.mailService.sendForgotPasswordHelp(user.email, user.fullName);
     }
 
     return generic;
@@ -176,7 +159,9 @@ export class AuthService {
     });
 
     if (!record) {
-      throw new BadRequestException('Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn');
+      throw new BadRequestException(
+        'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn',
+      );
     }
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
@@ -198,9 +183,10 @@ export class AuthService {
   private setAuthCookies(
     res: Response,
     user: { id: string; email: string; role: Role },
+    rememberMe: boolean,
   ) {
     const accessToken = this.tokenService.signAccessToken(user);
-    const refreshToken = this.tokenService.signRefreshToken(user);
+    const refreshToken = this.tokenService.signRefreshToken(user, rememberMe);
 
     res.cookie(
       AUTH_COOKIE_NAMES.accessToken,
@@ -210,7 +196,7 @@ export class AuthService {
     res.cookie(
       AUTH_COOKIE_NAMES.refreshToken,
       refreshToken,
-      getRefreshTokenCookieOptions(),
+      getRefreshTokenCookieOptions(rememberMe),
     );
   }
 

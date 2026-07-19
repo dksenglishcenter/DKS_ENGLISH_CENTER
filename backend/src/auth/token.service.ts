@@ -7,6 +7,8 @@ export type JwtPayload = {
   email: string;
   role: Role;
   type: 'access' | 'refresh';
+  /** Chỉ có trên refresh token khi user chọn ghi nhớ đăng nhập. */
+  remember?: boolean;
 };
 
 @Injectable()
@@ -29,14 +31,20 @@ export class TokenService {
     return jwt.sign(payload, this.secret, { expiresIn: '15m' });
   }
 
-  signRefreshToken(user: { id: string; email: string; role: Role }) {
+  signRefreshToken(
+    user: { id: string; email: string; role: Role },
+    rememberMe = false,
+  ) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
       type: 'refresh',
+      ...(rememberMe ? { remember: true } : {}),
     };
-    return jwt.sign(payload, this.secret, { expiresIn: '7d' });
+    return jwt.sign(payload, this.secret, {
+      expiresIn: rememberMe ? '30d' : '1d',
+    });
   }
 
   verifyAccessToken(token: string): JwtPayload {

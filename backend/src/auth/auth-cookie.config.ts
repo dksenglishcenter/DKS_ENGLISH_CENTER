@@ -40,24 +40,33 @@ function resolveSameSite(): "lax" | "none" {
 }
 
 /** Cấu hình httpOnly cookie — không cho JS frontend đọc token. */
-export function getAuthCookieOptions(maxAgeMs: number): CookieOptions {
+export function getAuthCookieOptions(
+  maxAgeMs?: number,
+): CookieOptions {
   const sameSite = resolveSameSite();
-  return {
+  const options: CookieOptions = {
     httpOnly: true,
     // SameSite=None bắt buộc Secure
     secure: isProduction || sameSite === "none",
     sameSite,
     path: "/",
-    maxAge: maxAgeMs,
   };
+  if (typeof maxAgeMs === "number") {
+    options.maxAge = maxAgeMs;
+  }
+  return options;
 }
 
 export function getAccessTokenCookieOptions(): CookieOptions {
   return getAuthCookieOptions(15 * 60 * 1000);
 }
 
-export function getRefreshTokenCookieOptions(): CookieOptions {
-  return getAuthCookieOptions(7 * 24 * 60 * 60 * 1000);
+/** rememberMe: 30 ngày; không: cookie phiên (hết khi đóng browser). */
+export function getRefreshTokenCookieOptions(rememberMe = false): CookieOptions {
+  if (rememberMe) {
+    return getAuthCookieOptions(30 * 24 * 60 * 60 * 1000);
+  }
+  return getAuthCookieOptions();
 }
 
 export function getClearAuthCookieOptions(): CookieOptions {

@@ -24,10 +24,9 @@ export type RegisterPayload = {
 export type LoginPayload = {
   email: string;
   password: string;
+  rememberMe?: boolean;
 };
 
 export type ForgotPasswordResponse = {
   message: string;
-  resetToken?: string;
-  resetPath?: string;
 };

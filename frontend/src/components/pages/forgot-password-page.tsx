@@ -9,13 +9,13 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { forgotPassword } from "@/lib/auth/api";
 import { formatError } from "@/lib/errors/format-error";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
+import { SOCIAL_LINKS } from "@/lib/social-links";
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [devResetPath, setDevResetPath] = useState("");
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -24,14 +24,10 @@ export function ForgotPasswordPage() {
     setLoading(true);
     setError("");
     setMessage("");
-    setDevResetPath("");
 
     try {
       const response = await forgotPassword(email.trim());
       setMessage(response.message);
-      if (response.resetPath) {
-        setDevResetPath(response.resetPath);
-      }
     } catch (err) {
       setError(formatError(err));
     } finally {
@@ -43,7 +39,7 @@ export function ForgotPasswordPage() {
     <AuthShell
       tab="login"
       title="Quên mật khẩu"
-      description="Nhập email để nhận hướng dẫn đặt lại mật khẩu"
+      description="Nhập email để nhận hướng dẫn liên hệ trung tâm cấp lại mật khẩu"
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate aria-busy={loading}>
         <AuthInputField
@@ -67,17 +63,20 @@ export function ForgotPasswordPage() {
         {message ? (
           <div
             role="status"
-            className="rounded-[10px] bg-green-100 p-3 text-sm font-semibold text-green-800"
+            className="space-y-2 rounded-[10px] bg-green-100 p-3 text-sm font-semibold text-green-800"
           >
-            {message}
-            {devResetPath ? (
-              <p className="mt-2 text-xs font-normal">
-                (Dev) Link reset:{" "}
-                <Link href={devResetPath} className="underline">
-                  {devResetPath}
-                </Link>
-              </p>
-            ) : null}
+            <p>{message}</p>
+            <p className="text-xs font-normal">
+              Hoặc nhắn Zalo ngay:{" "}
+              <a
+                href={SOCIAL_LINKS.zalo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold underline"
+              >
+                DKS English Center (0834513456)
+              </a>
+            </p>
           </div>
         ) : null}
 
