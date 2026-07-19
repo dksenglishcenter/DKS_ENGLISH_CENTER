@@ -38,78 +38,93 @@ function formatDateTime(value: Date) {
   }).format(value);
 }
 
+function parseMailFrom(raw: string): { name: string; email: string } {
+  const match = raw.match(/^(.*)<([^>]+)>$/);
+  if (match) {
+    return {
+      name: match[1].trim().replace(/^["']|["']$/g, '') || 'DKS English Center',
+      email: match[2].trim(),
+    };
+  }
+  return { name: 'DKS English Center', email: raw.trim() };
+}
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private readonly transporter: Transporter | null;
+  private readonly brevoApiKey: string | null;
   private readonly notifyEmails: string[];
   private readonly mailFrom: string;
+  private readonly sender: { name: string; email: string };
 
   constructor() {
+    const enabled = process.env.MAIL_ENABLED !== 'false';
     const host = process.env.SMTP_HOST?.trim();
     const port = Number(process.env.SMTP_PORT ?? '587');
     const user = process.env.SMTP_USER?.trim();
-    // App password Gmail thường có khoảng trắng — bỏ hết trước khi auth
     const pass = process.env.SMTP_PASS?.replace(/\s+/g, '').trim();
+    const brevoKey = process.env.BREVO_API_KEY?.trim() || null;
     const notifyRaw = process.env.NOTIFY_EMAIL?.trim() ?? '';
+
     this.mailFrom = (
       process.env.MAIL_FROM?.trim() ||
       (user ? `DKS English Center <${user}>` : '') ||
       'DKS English Center <noreply@dks.local>'
     ).replace(/^["']|["']$/g, '');
+    this.sender = parseMailFrom(this.mailFrom);
     this.notifyEmails = notifyRaw
       .split(',')
       .map((email) => email.trim())
       .filter(Boolean);
+    this.brevoApiKey = enabled ? brevoKey : null;
 
-    const enabled = process.env.MAIL_ENABLED !== 'false';
     const secure =
       process.env.SMTP_SECURE === 'true' ||
       process.env.SMTP_SECURE === '1' ||
       port === 465;
 
-    // Gmail (service) chỉ cần USER + PASS; host chỉ bắt buộc nếu dùng SMTP generic
-    if (!enabled || !user || !pass) {
+    // SMTP (local / paid Render). Render Free chặn port 25/465/587 → dùng BREVO_API_KEY (HTTPS).
+    if (enabled && user && pass) {
+      this.transporter = host
+        ? nodemailer.createTransport({
+            host,
+            port: Number.isFinite(port) ? port : 587,
+            secure,
+            auth: { user, pass },
+          })
+        : nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user, pass },
+          });
+    } else {
       this.transporter = null;
+    }
+
+    if (!this.isConfigured()) {
       this.logger.warn(
-        'Mail tắt hoặc thiếu SMTP_USER/SMTP_PASS. Form vẫn lưu DB bình thường.',
+        'Mail tắt hoặc thiếu BREVO_API_KEY / SMTP_USER+SMTP_PASS. Form vẫn lưu DB.',
       );
       return;
     }
 
     if (this.notifyEmails.length === 0) {
       this.logger.warn(
-        'NOTIFY_EMAIL trống — sẽ không gửi notify admin, vẫn gửi xác nhận cho người nộp form nếu có email.',
+        'NOTIFY_EMAIL trống — không gửi notify admin; vẫn gửi xác nhận nếu người nộp có email.',
       );
     }
 
-    this.transporter = host
-      ? nodemailer.createTransport({
-          host,
-          port: Number.isFinite(port) ? port : 587,
-          secure,
-          auth: { user, pass },
-        })
-      : nodemailer.createTransport({
-          service: 'gmail',
-          auth: { user, pass },
-        });
-
     this.logger.log(
-      `Mail ready — from=${this.mailFrom}; user=${user}; notify=${this.notifyEmails.length}`,
+      `Mail ready — mode=${this.brevoApiKey ? 'brevo-api' : 'smtp'}; from=${this.mailFrom}; notify=${this.notifyEmails.length}`,
     );
   }
 
   isConfigured() {
-    return this.transporter !== null;
+    return this.brevoApiKey !== null || this.transporter !== null;
   }
 
-  /**
-   * 1) Notify admin (NOTIFY_EMAIL)
-   * 2) Xác nhận tới email người nộp form (nếu có)
-   */
   async notifyContactSubmission(payload: ContactNotifyPayload) {
-    if (!this.isConfigured() || !this.transporter) return;
+    if (!this.isConfigured()) return;
 
     const adminRows = [
       ['Họ tên', payload.fullName],
@@ -164,7 +179,7 @@ export class MailService {
   }
 
   async notifyCareerApplication(payload: CareerNotifyPayload) {
-    if (!this.isConfigured() || !this.transporter) return;
+    if (!this.isConfigured()) return;
 
     const adminRows = [
       ['Họ tên', payload.fullName],
@@ -216,6 +231,81 @@ export class MailService {
     });
   }
 
+  async sendForgotPasswordHelp(
+    to: string,
+    fullName: string | null | undefined,
+    tempPassword: string,
+  ) {
+    if (!this.isConfigured()) return;
+
+    const { zaloUrl, zaloPhone } = this.zaloContact();
+    const name = fullName?.trim() || 'bạn';
+
+    await this.sendSafe({
+      to,
+      subject: 'DKS — Mật khẩu tạm của bạn',
+      text: [
+        `Xin chào ${name},`,
+        '',
+        'Hệ thống đã cấp mật khẩu tạm cho tài khoản DKS English Center của bạn.',
+        '',
+        `Email đăng nhập: ${to}`,
+        `Mật khẩu tạm: ${tempPassword}`,
+        '',
+        'Vui lòng đăng nhập ngay. Nếu cần hỗ trợ, liên hệ Zalo:',
+        `- Zalo: DKS English Center`,
+        `- SĐT / Zalo: ${zaloPhone}`,
+        `- Link: ${zaloUrl}`,
+        '',
+        'Trân trọng,',
+        'DKS English Center',
+      ].join('\n'),
+      html: `
+        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
+          <p style="color:#000000">Xin chào <strong>${escapeHtml(name)}</strong>,</p>
+          <p style="color:#000000">Hệ thống đã cấp <strong>mật khẩu tạm</strong> cho tài khoản của bạn.</p>
+          <p style="color:#000000">
+            Email đăng nhập: <strong>${escapeHtml(to)}</strong><br/>
+            Mật khẩu tạm: <strong style="font-size:16px;letter-spacing:0.04em">${escapeHtml(tempPassword)}</strong>
+          </p>
+          <p style="color:#000000">Liên hệ Zalo nếu cần hỗ trợ: <a href="${escapeHtml(zaloUrl)}" style="color:#000000">${escapeHtml(zaloPhone)}</a></p>
+          <p style="color:#000000">Trân trọng,<br/>DKS English Center</p>
+        </div>
+      `,
+    });
+  }
+
+  async sendForgotPasswordNotFound(to: string) {
+    if (!this.isConfigured()) return;
+
+    const { zaloUrl, zaloPhone } = this.zaloContact();
+
+    await this.sendSafe({
+      to,
+      subject: 'DKS — Email không tồn tại trong hệ thống',
+      text: [
+        'Xin chào,',
+        '',
+        `Email ${to} không tồn tại trong hệ thống DKS English Center.`,
+        '',
+        'Vui lòng liên hệ Zalo trung tâm:',
+        `- DKS English Center — ${zaloPhone}`,
+        `- ${zaloUrl}`,
+        '',
+        'Trân trọng,',
+        'DKS English Center',
+      ].join('\n'),
+      html: `
+        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
+          <p style="color:#000000">Xin chào,</p>
+          <p style="color:#000000">Email <strong>${escapeHtml(to)}</strong> không tồn tại trong hệ thống.</p>
+          <p style="color:#000000">Liên hệ Zalo: <strong>DKS English Center (${escapeHtml(zaloPhone)})</strong> — <a href="${escapeHtml(zaloUrl)}" style="color:#000000">${escapeHtml(zaloUrl)}</a></p>
+          <p style="color:#000000">Trân trọng,<br/>DKS English Center</p>
+        </div>
+      `,
+    });
+  }
+
   private toAdminText(
     title: string,
     rows: ReadonlyArray<readonly [string, string]>,
@@ -258,111 +348,59 @@ export class MailService {
     html: string;
   }) {
     try {
-      await this.transporter!.sendMail({
-        from: this.mailFrom,
-        to: options.to,
-        subject: options.subject,
-        text: options.text,
-        html: options.html,
-      });
+      if (this.brevoApiKey) {
+        await this.sendViaBrevoApi(options);
+      } else if (this.transporter) {
+        await this.transporter.sendMail({
+          from: this.mailFrom,
+          to: options.to,
+          subject: options.subject,
+          text: options.text,
+          html: options.html,
+        });
+      } else {
+        return;
+      }
       this.logger.log(`Đã gửi mail → ${options.to}: ${options.subject}`);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(
-        `Gửi email thất bại → ${options.to}: ${message}`,
-      );
+      this.logger.error(`Gửi email thất bại → ${options.to}: ${message}`);
     }
   }
 
-  /** Cấp mật khẩu tạm dễ nhớ + hướng dẫn đổi sau khi đăng nhập. */
-  async sendForgotPasswordHelp(
-    to: string,
-    fullName: string | null | undefined,
-    tempPassword: string,
-  ) {
-    if (!this.isConfigured() || !this.transporter) return;
+  /** HTTPS :443 — Render Free không chặn (SMTP 587 bị chặn). */
+  private async sendViaBrevoApi(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+  }) {
+    const toList = options.to
+      .split(',')
+      .map((email) => email.trim())
+      .filter(Boolean)
+      .map((email) => ({ email }));
 
-    const { zaloUrl, zaloPhone } = this.zaloContact();
-    const name = fullName?.trim() || 'bạn';
-
-    await this.sendSafe({
-      to,
-      subject: 'DKS — Mật khẩu tạm của bạn',
-      text: [
-        `Xin chào ${name},`,
-        '',
-        'Hệ thống đã cấp mật khẩu tạm cho tài khoản DKS English Center của bạn.',
-        '',
-        `Email đăng nhập: ${to}`,
-        `Mật khẩu tạm: ${tempPassword}`,
-        '',
-        'Vui lòng đăng nhập ngay và đổi mật khẩu trong tài khoản (nếu có) hoặc liên hệ Zalo nếu cần hỗ trợ:',
-        `- Zalo: DKS English Center`,
-        `- SĐT / Zalo: ${zaloPhone}`,
-        `- Link: ${zaloUrl}`,
-        '',
-        'Nếu bạn không yêu cầu, hãy đổi mật khẩu và liên hệ trung tâm ngay.',
-        '',
-        'Trân trọng,',
-        'DKS English Center',
-      ].join('\n'),
-      html: `
-        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
-          <p style="color:#000000">Xin chào <strong>${escapeHtml(name)}</strong>,</p>
-          <p style="color:#000000">Hệ thống đã cấp <strong>mật khẩu tạm</strong> cho tài khoản DKS English Center của bạn.</p>
-          <p style="color:#000000">
-            Email đăng nhập: <strong>${escapeHtml(to)}</strong><br/>
-            Mật khẩu tạm: <strong style="font-size:16px;letter-spacing:0.04em">${escapeHtml(tempPassword)}</strong>
-          </p>
-          <p style="color:#000000">Vui lòng đăng nhập ngay. Nếu cần hỗ trợ, liên hệ Zalo trung tâm:</p>
-          <ul style="color:#000000">
-            <li>Zalo: <strong>DKS English Center</strong></li>
-            <li>SĐT / Zalo: <strong>${escapeHtml(zaloPhone)}</strong></li>
-            <li>Link: <a href="${escapeHtml(zaloUrl)}" style="color:#000000">${escapeHtml(zaloUrl)}</a></li>
-          </ul>
-          <p style="color:#000000">Nếu bạn không yêu cầu, hãy đổi mật khẩu và liên hệ trung tâm ngay.</p>
-          <p style="color:#000000">Trân trọng,<br/>DKS English Center</p>
-        </div>
-      `,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        'api-key': this.brevoApiKey!,
+      },
+      body: JSON.stringify({
+        sender: this.sender,
+        to: toList,
+        subject: options.subject,
+        htmlContent: options.html,
+        textContent: options.text,
+      }),
     });
-  }
 
-  /** Email không có trong hệ thống — vẫn gửi để người dùng biết và liên hệ Zalo. */
-  async sendForgotPasswordNotFound(to: string) {
-    if (!this.isConfigured() || !this.transporter) return;
-
-    const { zaloUrl, zaloPhone } = this.zaloContact();
-
-    await this.sendSafe({
-      to,
-      subject: 'DKS — Email không tồn tại trong hệ thống',
-      text: [
-        'Xin chào,',
-        '',
-        `Email ${to} không tồn tại trong hệ thống DKS English Center.`,
-        '',
-        'Nếu bạn cần hỗ trợ tạo tài khoản hoặc lấy lại mật khẩu, vui lòng liên hệ Zalo trung tâm:',
-        `- Zalo: DKS English Center`,
-        `- SĐT / Zalo: ${zaloPhone}`,
-        `- Link: ${zaloUrl}`,
-        '',
-        'Trân trọng,',
-        'DKS English Center',
-      ].join('\n'),
-      html: `
-        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
-          <p style="color:#000000">Xin chào,</p>
-          <p style="color:#000000">Email <strong>${escapeHtml(to)}</strong> không tồn tại trong hệ thống DKS English Center.</p>
-          <p style="color:#000000"><strong>Vui lòng liên hệ Zalo trung tâm để được hỗ trợ:</strong></p>
-          <ul style="color:#000000">
-            <li>Zalo: <strong>DKS English Center</strong></li>
-            <li>SĐT / Zalo: <strong>${escapeHtml(zaloPhone)}</strong></li>
-            <li>Link: <a href="${escapeHtml(zaloUrl)}" style="color:#000000">${escapeHtml(zaloUrl)}</a></li>
-          </ul>
-          <p style="color:#000000">Trân trọng,<br/>DKS English Center</p>
-        </div>
-      `,
-    });
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Brevo API ${response.status}: ${body}`);
+    }
   }
 
   private zaloContact() {
