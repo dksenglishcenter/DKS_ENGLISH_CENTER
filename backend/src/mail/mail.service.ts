@@ -52,10 +52,11 @@ export class MailService {
     // App password Gmail thường có khoảng trắng — bỏ hết trước khi auth
     const pass = process.env.SMTP_PASS?.replace(/\s+/g, '').trim();
     const notifyRaw = process.env.NOTIFY_EMAIL?.trim() ?? '';
-    this.mailFrom =
+    this.mailFrom = (
       process.env.MAIL_FROM?.trim() ||
       (user ? `DKS English Center <${user}>` : '') ||
-      'DKS English Center <noreply@dks.local>';
+      'DKS English Center <noreply@dks.local>'
+    ).replace(/^["']|["']$/g, '');
     this.notifyEmails = notifyRaw
       .split(',')
       .map((email) => email.trim())
@@ -67,10 +68,11 @@ export class MailService {
       process.env.SMTP_SECURE === '1' ||
       port === 465;
 
-    if (!enabled || !host || !user || !pass) {
+    // Gmail (service) chỉ cần USER + PASS; host chỉ bắt buộc nếu dùng SMTP generic
+    if (!enabled || !user || !pass) {
       this.transporter = null;
       this.logger.warn(
-        'Mail tắt hoặc thiếu SMTP_HOST/USER/PASS. Form vẫn lưu DB bình thường.',
+        'Mail tắt hoặc thiếu SMTP_USER/SMTP_PASS. Form vẫn lưu DB bình thường.',
       );
       return;
     }
@@ -81,10 +83,21 @@ export class MailService {
       );
     }
 
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user, pass },
-    });
+    this.transporter = host
+      ? nodemailer.createTransport({
+          host,
+          port: Number.isFinite(port) ? port : 587,
+          secure,
+          auth: { user, pass },
+        })
+      : nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user, pass },
+        });
+
+    this.logger.log(
+      `Mail ready — from=${this.mailFrom}; user=${user}; notify=${this.notifyEmails.length}`,
+    );
   }
 
   isConfigured() {
