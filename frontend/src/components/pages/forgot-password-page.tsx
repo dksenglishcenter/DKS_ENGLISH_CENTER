@@ -39,7 +39,7 @@ export function ForgotPasswordPage() {
     <AuthShell
       tab="login"
       title="Quên mật khẩu"
-      description="Nhập email để nhận hướng dẫn liên hệ trung tâm cấp lại mật khẩu"
+      description="Nhập email — nếu tài khoản tồn tại, mật khẩu tạm sẽ được gửi về hộp thư"
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate aria-busy={loading}>
         <AuthInputField

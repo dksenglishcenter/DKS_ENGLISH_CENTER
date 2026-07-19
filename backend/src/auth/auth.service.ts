@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { createHash } from 'crypto';
+import { createHash, randomInt } from 'crypto';
 import type { Response } from 'express';
 import { Role } from '../../generated/prisma/client';
 import { MailService } from '../mail/mail.service';
@@ -134,17 +134,29 @@ export class AuthService {
       select: { id: true, email: true, fullName: true },
     });
 
-    // Không lộ email có tồn tại hay không
-    const generic = {
-      message:
-        'Nếu email tồn tại trong hệ thống, bạn sẽ nhận hướng dẫn liên hệ Zalo trung tâm để được cấp lại mật khẩu.',
-    };
-
     if (user) {
-      void this.mailService.sendForgotPasswordHelp(user.email, user.fullName);
+      // Mật khẩu dễ: dks + 5 số (đủ MinLength 8), ví dụ dks48217
+      const tempPassword = `dks${randomInt(10000, 100000)}`;
+      const passwordHash = await bcrypt.hash(tempPassword, BCRYPT_ROUNDS);
+
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash },
+      });
+
+      void this.mailService.sendForgotPasswordHelp(
+        user.email,
+        user.fullName,
+        tempPassword,
+      );
+    } else {
+      void this.mailService.sendForgotPasswordNotFound(email);
     }
 
-    return generic;
+    return {
+      message:
+        'Đã gửi email tới địa chỉ bạn vừa nhập. Vui lòng kiểm tra hộp thư (và mục Spam).',
+    };
   }
 
   async resetPassword(dto: ResetPasswordDto) {

@@ -261,32 +261,34 @@ export class MailService {
     }
   }
 
-  /** Hướng dẫn quên mật khẩu: liên hệ Zalo trung tâm để được cấp lại. */
-  async sendForgotPasswordHelp(to: string, fullName?: string | null) {
+  /** Cấp mật khẩu tạm dễ nhớ + hướng dẫn đổi sau khi đăng nhập. */
+  async sendForgotPasswordHelp(
+    to: string,
+    fullName: string | null | undefined,
+    tempPassword: string,
+  ) {
     if (!this.isConfigured() || !this.transporter) return;
 
-    const zaloUrl =
-      process.env.ZALO_CONTACT_URL?.trim() || 'https://zalo.me/0834513456';
-    const zaloPhone =
-      process.env.ZALO_CONTACT_PHONE?.trim() || '0834513456';
+    const { zaloUrl, zaloPhone } = this.zaloContact();
     const name = fullName?.trim() || 'bạn';
 
     await this.sendSafe({
       to,
-      subject: 'DKS — Hướng dẫn lấy lại mật khẩu',
+      subject: 'DKS — Mật khẩu tạm của bạn',
       text: [
         `Xin chào ${name},`,
         '',
-        'Bạn (hoặc ai đó) vừa yêu cầu lấy lại mật khẩu tài khoản DKS English Center.',
+        'Hệ thống đã cấp mật khẩu tạm cho tài khoản DKS English Center của bạn.',
         '',
-        'Để được cấp lại mật khẩu, vui lòng liên hệ Zalo trung tâm:',
+        `Email đăng nhập: ${to}`,
+        `Mật khẩu tạm: ${tempPassword}`,
+        '',
+        'Vui lòng đăng nhập ngay và đổi mật khẩu trong tài khoản (nếu có) hoặc liên hệ Zalo nếu cần hỗ trợ:',
         `- Zalo: DKS English Center`,
         `- SĐT / Zalo: ${zaloPhone}`,
         `- Link: ${zaloUrl}`,
         '',
-        'Nhắn tin kèm email tài khoản của bạn để được hỗ trợ.',
-        '',
-        'Nếu bạn không yêu cầu, hãy bỏ qua email này.',
+        'Nếu bạn không yêu cầu, hãy đổi mật khẩu và liên hệ trung tâm ngay.',
         '',
         'Trân trọng,',
         'DKS English Center',
@@ -294,18 +296,67 @@ export class MailService {
       html: `
         <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
           <p style="color:#000000">Xin chào <strong>${escapeHtml(name)}</strong>,</p>
-          <p style="color:#000000">Bạn (hoặc ai đó) vừa yêu cầu lấy lại mật khẩu tài khoản DKS English Center.</p>
-          <p style="color:#000000"><strong>Để được cấp lại mật khẩu, vui lòng liên hệ Zalo trung tâm:</strong></p>
+          <p style="color:#000000">Hệ thống đã cấp <strong>mật khẩu tạm</strong> cho tài khoản DKS English Center của bạn.</p>
+          <p style="color:#000000">
+            Email đăng nhập: <strong>${escapeHtml(to)}</strong><br/>
+            Mật khẩu tạm: <strong style="font-size:16px;letter-spacing:0.04em">${escapeHtml(tempPassword)}</strong>
+          </p>
+          <p style="color:#000000">Vui lòng đăng nhập ngay. Nếu cần hỗ trợ, liên hệ Zalo trung tâm:</p>
           <ul style="color:#000000">
             <li>Zalo: <strong>DKS English Center</strong></li>
             <li>SĐT / Zalo: <strong>${escapeHtml(zaloPhone)}</strong></li>
             <li>Link: <a href="${escapeHtml(zaloUrl)}" style="color:#000000">${escapeHtml(zaloUrl)}</a></li>
           </ul>
-          <p style="color:#000000">Nhắn tin kèm <strong>email tài khoản</strong> của bạn để được hỗ trợ.</p>
-          <p style="color:#000000">Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+          <p style="color:#000000">Nếu bạn không yêu cầu, hãy đổi mật khẩu và liên hệ trung tâm ngay.</p>
           <p style="color:#000000">Trân trọng,<br/>DKS English Center</p>
         </div>
       `,
     });
+  }
+
+  /** Email không có trong hệ thống — vẫn gửi để người dùng biết và liên hệ Zalo. */
+  async sendForgotPasswordNotFound(to: string) {
+    if (!this.isConfigured() || !this.transporter) return;
+
+    const { zaloUrl, zaloPhone } = this.zaloContact();
+
+    await this.sendSafe({
+      to,
+      subject: 'DKS — Email không tồn tại trong hệ thống',
+      text: [
+        'Xin chào,',
+        '',
+        `Email ${to} không tồn tại trong hệ thống DKS English Center.`,
+        '',
+        'Nếu bạn cần hỗ trợ tạo tài khoản hoặc lấy lại mật khẩu, vui lòng liên hệ Zalo trung tâm:',
+        `- Zalo: DKS English Center`,
+        `- SĐT / Zalo: ${zaloPhone}`,
+        `- Link: ${zaloUrl}`,
+        '',
+        'Trân trọng,',
+        'DKS English Center',
+      ].join('\n'),
+      html: `
+        <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#000000">
+          <p style="color:#000000">Xin chào,</p>
+          <p style="color:#000000">Email <strong>${escapeHtml(to)}</strong> không tồn tại trong hệ thống DKS English Center.</p>
+          <p style="color:#000000"><strong>Vui lòng liên hệ Zalo trung tâm để được hỗ trợ:</strong></p>
+          <ul style="color:#000000">
+            <li>Zalo: <strong>DKS English Center</strong></li>
+            <li>SĐT / Zalo: <strong>${escapeHtml(zaloPhone)}</strong></li>
+            <li>Link: <a href="${escapeHtml(zaloUrl)}" style="color:#000000">${escapeHtml(zaloUrl)}</a></li>
+          </ul>
+          <p style="color:#000000">Trân trọng,<br/>DKS English Center</p>
+        </div>
+      `,
+    });
+  }
+
+  private zaloContact() {
+    return {
+      zaloUrl:
+        process.env.ZALO_CONTACT_URL?.trim() || 'https://zalo.me/0834513456',
+      zaloPhone: process.env.ZALO_CONTACT_PHONE?.trim() || '0834513456',
+    };
   }
 }
