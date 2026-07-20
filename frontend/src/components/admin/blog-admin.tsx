@@ -116,11 +116,11 @@ export function BlogAdmin() {
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-[800px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 font-semibold">Bài viết</th>
-              <th className="px-4 py-3 font-semibold">Chuyên mục</th>
+              <th className="w-60 min-w-60 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Bài viết</th>
+              <th className="w-44 min-w-44 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Chuyên mục</th>
               <th className="px-4 py-3 font-semibold">Ngày</th>
               <th className="px-4 py-3 font-semibold">Published</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
@@ -129,15 +129,29 @@ export function BlogAdmin() {
           <tbody>
             {posts.map((post) => (
               <tr key={post.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-foreground">{post.title}</div>
-                  <div className="text-xs text-muted-foreground">/{post.slug}</div>
+                <td className="w-60 min-w-60 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div
+                    className="line-clamp-2 font-semibold leading-snug text-foreground lg:line-clamp-none"
+                    title={post.title}
+                  >
+                    {post.title}
+                  </div>
+                  <div
+                    className="mt-0.5 line-clamp-2 break-all text-xs leading-snug text-muted-foreground lg:line-clamp-none lg:break-normal"
+                    title={`/${post.slug}`}
+                  >
+                    /{post.slug}
+                  </div>
                 </td>
-                <td className="px-4 py-3">{post.category}</td>
-                <td className="px-4 py-3">
+                <td className="w-44 min-w-44 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div className="line-clamp-2 leading-snug lg:line-clamp-none" title={post.category}>
+                    {post.category}
+                  </div>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">
                   {formatAdminDate(`${post.publishedAt}T00:00:00Z`)}
                 </td>
-                <td className="px-4 py-3">
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">
                   {post.isPublished ? "Có" : "Ẩn"}
                   {post.featured ? " · Hot" : ""}
                 </td>

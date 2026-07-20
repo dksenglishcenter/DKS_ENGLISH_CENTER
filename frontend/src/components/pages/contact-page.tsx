@@ -13,12 +13,12 @@ import { getPhoneHref } from "@/lib/contact/validation";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const SOCIAL_CHANNELS = [
-  { name: "Zalo", network: "zalo", href: SOCIAL_LINKS.zalo, className: "bg-[#0068FF]" },
+  { name: "Zalo", network: "zalo", href: SOCIAL_LINKS.zalo, className: "bg-[#2878C7]" },
   {
     name: "Facebook",
     network: "facebook",
     href: SOCIAL_LINKS.facebook,
-    className: "bg-[#1877F2]",
+    className: "bg-[#3267B1]",
   },
   {
     name: "YouTube",
@@ -30,7 +30,7 @@ const SOCIAL_CHANNELS = [
     name: "TikTok",
     network: "tiktok",
     href: SOCIAL_LINKS.tiktok,
-    className: "bg-[#1E1E1E]",
+    className: "bg-[#252525]",
   },
 ] as const satisfies ReadonlyArray<{
   name: string;
@@ -163,7 +163,7 @@ export function ContactPage({
                       rel="noopener noreferrer"
                       className={`inline-flex min-h-11 w-full items-center justify-center gap-1 whitespace-nowrap rounded-xl px-1 py-2.5 text-[10px] font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transform-none sm:w-auto sm:gap-2 sm:px-4 sm:text-sm ${channel.className}`}
                     >
-                      <SocialIcon network={channel.network} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <SocialIcon network={channel.network} className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
                       {channel.name}
                     </a>
                   </li>

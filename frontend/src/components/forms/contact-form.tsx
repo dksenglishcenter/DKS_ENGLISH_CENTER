@@ -310,7 +310,7 @@ export function ContactForm({ courseOptions }: { courseOptions: string[] }) {
         >
           <option value="" disabled>
             {courseOptions.length > 0
-              ? "-- Chọn khóa học quan tâm --"
+              ? "Chọn khóa học quan tâm"
               : "Chưa có khóa học đang mở"}
           </option>
           {courseOptions.map((course) => (

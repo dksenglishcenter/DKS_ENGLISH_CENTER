@@ -252,12 +252,12 @@ export function TeachersAdmin() {
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-[800px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 font-semibold">Ảnh</th>
-              <th className="px-4 py-3 font-semibold">Tên</th>
-              <th className="px-4 py-3 font-semibold">Chức danh</th>
+              <th className="w-24 min-w-24 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Ảnh</th>
+              <th className="w-52 min-w-52 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Tên</th>
+              <th className="w-52 min-w-52 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Chức danh</th>
               <th className="px-4 py-3 font-semibold">Order</th>
               <th className="px-4 py-3 font-semibold">Published</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
@@ -266,7 +266,7 @@ export function TeachersAdmin() {
           <tbody>
             {teachers.map((teacher) => (
               <tr key={teacher.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3">
+                <td className="w-24 min-w-24 px-4 py-3 lg:w-auto lg:min-w-0">
                   <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border bg-muted">
                     {teacher.imageUrl ? (
                       <Image
@@ -279,13 +279,27 @@ export function TeachersAdmin() {
                     ) : null}
                   </div>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-foreground">{teacher.name}</div>
-                  <div className="text-xs text-muted-foreground">{teacher.cred}</div>
+                <td className="w-52 min-w-52 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div
+                    className="line-clamp-2 font-semibold leading-snug text-foreground lg:line-clamp-none"
+                    title={teacher.name}
+                  >
+                    {teacher.name}
+                  </div>
+                  <div
+                    className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted-foreground lg:line-clamp-none"
+                    title={teacher.cred}
+                  >
+                    {teacher.cred}
+                  </div>
                 </td>
-                <td className="px-4 py-3">{teacher.title}</td>
-                <td className="px-4 py-3">{teacher.sortOrder}</td>
-                <td className="px-4 py-3">{teacher.isPublished ? "Có" : "Ẩn"}</td>
+                <td className="w-52 min-w-52 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div className="line-clamp-2 leading-snug lg:line-clamp-none" title={teacher.title}>
+                    {teacher.title}
+                  </div>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{teacher.sortOrder}</td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{teacher.isPublished ? "Có" : "Ẩn"}</td>
                 <td className="px-4 py-3">
                   <RowActions
                     onEdit={() => void openEdit(teacher)}

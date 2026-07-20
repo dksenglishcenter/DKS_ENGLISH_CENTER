@@ -247,7 +247,7 @@ export function UsersAdmin() {
                   <th className="px-4 py-3 font-semibold">Người dùng</th>
                   <th className="px-4 py-3 font-semibold">Điện thoại</th>
                   <th className="px-4 py-3 font-semibold">Quyền</th>
-                  <th className="px-4 py-3 font-semibold">Ngày tạo</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-semibold">Ngày tạo</th>
                   <th className="px-4 py-3 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
@@ -269,7 +269,7 @@ export function UsersAdmin() {
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                         {formatAdminDateTime(user.createdAt)}
                       </td>
                       <td className="px-4 py-3">

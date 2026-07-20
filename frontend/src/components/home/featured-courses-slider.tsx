@@ -71,7 +71,7 @@ export function FeaturedCoursesSlider({ courses }: FeaturedCoursesSliderProps) {
               <span className="text-sm font-black text-foreground font-[family-name:var(--font-nunito)]">
                 {course.tuition}
               </span>
-              <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-secondary transition-colors group-hover:bg-primary">
+              <span className="hidden h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-secondary transition-colors group-hover:bg-primary lg:flex">
                 <ArrowRight
                   className="h-3.5 w-3.5 text-primary transition-colors group-hover:text-white"
                   aria-hidden="true"

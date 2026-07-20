@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
+  Clock3,
   Mail,
   Phone,
   RefreshCw,
@@ -18,6 +19,34 @@ import { formatAdminDateTime } from "@/lib/admin/format";
 import { ApiError, formatError } from "@/lib/errors/format-error";
 
 const PAGE_SIZE = 10;
+
+const CARD_TIME_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const CARD_DATE_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+function SubmissionCardDateTime({ value }: { value: string }) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return <span>Không rõ</span>;
+  }
+
+  return (
+    <time dateTime={value} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <Clock3 className="size-4 shrink-0 text-primary" aria-hidden="true" />
+      <span>{CARD_TIME_FORMATTER.format(date)}</span>
+      <span className="size-1 rounded-full bg-current opacity-50" aria-hidden="true" />
+      <span>{CARD_DATE_FORMATTER.format(date)}</span>
+    </time>
+  );
+}
 
 /** Link gọi điện — icon căn theo dòng đầu để thẳng hàng với các cột bên cạnh. */
 export function PhoneLink({ phone }: { phone: string }) {
@@ -399,8 +428,8 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
                       <h2 className="break-words font-bold text-foreground">
                         {item.fullName}
                       </h2>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {formatAdminDateTime(item.createdAt)}
+                      <p className="mt-2 text-sm font-medium leading-5 text-muted-foreground">
+                        <SubmissionCardDateTime value={item.createdAt} />
                       </p>
                     </div>
                     {renderDeleteButton(item)}

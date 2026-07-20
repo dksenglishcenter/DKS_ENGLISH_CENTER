@@ -378,7 +378,7 @@ export function BlogForm({
         <label className="block text-sm" data-invalid={fieldErrors.category ? "true" : undefined}>
           <span className="mb-1 block font-semibold text-foreground">Chuyên mục</span>
           <select
-            className={`w-full rounded-lg border bg-card px-3 py-2 ${
+            className={`h-12 w-full rounded-lg border bg-card px-4 py-3 lg:h-auto lg:px-3 lg:py-2 ${
               fieldErrors.category ? "border-red-500" : "border-border"
             }`}
             value={form.category}

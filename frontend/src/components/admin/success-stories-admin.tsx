@@ -207,12 +207,12 @@ export function SuccessStoriesAdmin() {
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-[820px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 font-semibold">Học viên</th>
-              <th className="px-4 py-3 font-semibold">Khóa</th>
-              <th className="px-4 py-3 font-semibold">Badge</th>
+              <th className="w-44 min-w-44 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Học viên</th>
+              <th className="w-52 min-w-52 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Khóa</th>
+              <th className="w-56 min-w-56 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Badge</th>
               <th className="px-4 py-3 font-semibold">Order</th>
               <th className="px-4 py-3 font-semibold">Published</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
@@ -221,14 +221,29 @@ export function SuccessStoriesAdmin() {
           <tbody>
             {stories.map((story) => (
               <tr key={story.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-foreground">{story.name}</div>
-                  <div className="text-xs text-muted-foreground">{story.avatar}</div>
+                <td className="w-44 min-w-44 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div
+                    className="line-clamp-2 font-semibold leading-snug text-foreground lg:line-clamp-none"
+                    title={story.name}
+                  >
+                    {story.name}
+                  </div>
+                  <div className="truncate text-xs text-muted-foreground lg:overflow-visible lg:whitespace-normal">
+                    {story.avatar}
+                  </div>
                 </td>
-                <td className="px-4 py-3">{story.course}</td>
-                <td className="px-4 py-3">{story.badge}</td>
-                <td className="px-4 py-3">{story.sortOrder}</td>
-                <td className="px-4 py-3">{story.isPublished ? "Có" : "Ẩn"}</td>
+                <td className="w-52 min-w-52 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div className="line-clamp-2 lg:line-clamp-none" title={story.course}>
+                    {story.course}
+                  </div>
+                </td>
+                <td className="w-56 min-w-56 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div className="line-clamp-2 leading-snug lg:line-clamp-none" title={story.badge}>
+                    {story.badge}
+                  </div>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{story.sortOrder}</td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{story.isPublished ? "Có" : "Ẩn"}</td>
                 <td className="px-4 py-3">
                   <RowActions
                     onEdit={() => openEdit(story)}
@@ -255,7 +270,7 @@ export function SuccessStoriesAdmin() {
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Tên học viên</span>
               <input
-                className="w-full rounded-lg border border-border px-3 py-2"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
                 value={form.name}
                 onChange={(event) => {
                   const name = event.target.value;
@@ -274,7 +289,7 @@ export function SuccessStoriesAdmin() {
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Khóa học</span>
               <select
-                className="w-full rounded-lg border border-border bg-card px-3 py-2"
+                className="h-11 w-full rounded-lg border border-border bg-card px-3 py-2 lg:h-auto"
                 value={form.course}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, course: event.target.value }))
@@ -297,7 +312,7 @@ export function SuccessStoriesAdmin() {
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Badge thành tích</span>
               <input
-                className="w-full rounded-lg border border-border px-3 py-2"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
                 value={form.badge}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, badge: event.target.value }))
@@ -308,7 +323,7 @@ export function SuccessStoriesAdmin() {
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Chữ trên avatar</span>
               <input
-                className="w-full rounded-lg border border-border px-3 py-2"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
                 value={form.avatar}
                 maxLength={4}
                 onChange={(event) =>
@@ -326,7 +341,7 @@ export function SuccessStoriesAdmin() {
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Số sao</span>
               <select
-                className="w-full rounded-lg border border-border bg-card px-3 py-2"
+                className="h-11 w-full rounded-lg border border-border bg-card px-3 py-2 lg:h-auto"
                 value={form.stars}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, stars: Number(event.target.value) }))
@@ -345,7 +360,7 @@ export function SuccessStoriesAdmin() {
               <input
                 type="number"
                 min={0}
-                className="w-full rounded-lg border border-border px-3 py-2"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
                 value={form.sortOrder}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, sortOrder: Number(event.target.value) }))

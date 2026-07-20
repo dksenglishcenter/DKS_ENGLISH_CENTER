@@ -102,10 +102,10 @@ export function CoursesAdmin() {
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-[760px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 font-semibold">Khóa</th>
+              <th className="w-56 min-w-56 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Khóa</th>
               <th className="px-4 py-3 font-semibold">Category</th>
               <th className="px-4 py-3 font-semibold">Featured</th>
               <th className="px-4 py-3 font-semibold">Published</th>
@@ -116,14 +116,18 @@ export function CoursesAdmin() {
           <tbody>
             {courses.map((course) => (
               <tr key={course.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-foreground">{course.title}</div>
-                  <div className="text-xs text-muted-foreground">{course.slug}</div>
+                <td className="w-56 min-w-56 px-4 py-3 lg:w-auto lg:min-w-0">
+                  <div className="line-clamp-2 font-semibold leading-snug text-foreground lg:line-clamp-none">
+                    {course.title}
+                  </div>
+                  <div className="truncate text-xs text-muted-foreground lg:overflow-visible lg:whitespace-normal" title={course.slug}>
+                    {course.slug}
+                  </div>
                 </td>
-                <td className="px-4 py-3">{course.category}</td>
-                <td className="px-4 py-3">{course.featured ? "Có" : "Không"}</td>
-                <td className="px-4 py-3">{course.isPublished ? "Có" : "Ẩn"}</td>
-                <td className="px-4 py-3">{course.sortOrder}</td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{course.category}</td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{course.featured ? "Có" : "Không"}</td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{course.isPublished ? "Có" : "Ẩn"}</td>
+                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{course.sortOrder}</td>
                 <td className="px-4 py-3">
                   <RowActions
                     onEdit={() => openForm(course)}
