@@ -87,7 +87,10 @@ export function AnimatedHeroStats() {
         const finalValue = `${formatValue(stat.target, stat.decimals)}${stat.suffix}`;
 
         return (
-          <div key={stat.label} className="flex min-w-0 flex-col">
+          <div
+            key={stat.label}
+            className="flex min-w-0 flex-col items-center text-center lg:items-start lg:text-left"
+          >
             <dt className="order-2 text-[11px] font-medium leading-tight text-muted-foreground lg:text-sm lg:leading-normal">
               {stat.label}
             </dt>

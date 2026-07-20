@@ -84,9 +84,9 @@ function FloatingWidgetsContent() {
           rel="noopener noreferrer"
           title="Zalo"
           aria-label="Mở Zalo"
-          className={`${widgetClass} bg-[#0068FF] text-white`}
+          className={`${widgetClass} bg-[#2878C7] text-white`}
         >
-          <SocialIcon network="zalo" />
+          <SocialIcon network="zalo" className="h-6 w-6" />
         </a>
         <a
           href={SOCIAL_LINKS.facebook}
@@ -94,9 +94,9 @@ function FloatingWidgetsContent() {
           rel="noopener noreferrer"
           title="Facebook"
           aria-label="Mở Facebook của DKS English Center"
-          className={`${widgetClass} bg-[#1877F2] text-white`}
+          className={`${widgetClass} bg-[#3267B1] text-white`}
         >
-          <SocialIcon network="facebook" />
+          <SocialIcon network="facebook" className="h-6 w-6" />
         </a>
         <a
           href="tel:0834513456"

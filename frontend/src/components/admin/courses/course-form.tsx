@@ -205,7 +205,7 @@ function SelectField({
     <label className="block text-sm">
       <span className="mb-1 block font-semibold text-foreground">{label}</span>
       <select
-        className={`w-full rounded-lg border bg-card px-3 py-2 ${
+        className={`h-11 w-full rounded-lg border bg-card px-3 py-2 lg:h-auto ${
           error ? "border-red-500" : "border-border"
         }`}
         value={value}
@@ -436,7 +436,7 @@ export function CourseForm({
           <label key={key} className="block text-sm">
             <span className="mb-1 block font-semibold text-foreground">{label}</span>
             <input
-              className={`w-full rounded-lg border px-3 py-2 ${
+              className={`h-11 w-full rounded-lg border px-3 py-2 lg:h-auto ${
                 fieldErrors[key] ? "border-red-500" : "border-border"
               }`}
               value={String(form[key] ?? "")}
@@ -478,7 +478,7 @@ export function CourseForm({
         <label className="block text-sm">
           <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>
           <select
-            className={`w-full rounded-lg border bg-card px-3 py-2 ${
+            className={`h-11 w-full rounded-lg border bg-card px-3 py-2 lg:h-auto ${
               fieldErrors.sortOrder ? "border-red-500" : "border-border"
             }`}
             value={String(form.sortOrder ?? "")}
@@ -500,7 +500,7 @@ export function CourseForm({
         <label className="block text-sm md:col-span-2">
           <span className="mb-1 block font-semibold text-foreground">Category (lọc sidebar)</span>
           <select
-            className={`w-full rounded-lg border bg-card px-3 py-2 ${
+            className={`h-11 w-full rounded-lg border bg-card px-3 py-2 lg:h-auto ${
               fieldErrors.category ? "border-red-500" : "border-border"
             }`}
             value={normalizeCategory(form.category)}

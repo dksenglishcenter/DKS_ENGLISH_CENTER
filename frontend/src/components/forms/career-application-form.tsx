@@ -337,7 +337,7 @@ export function CareerApplicationForm({
           )}
         >
           <option value="" disabled>
-            -- Chọn vị trí ứng tuyển --
+            Chọn vị trí ứng tuyển
           </option>
           {positions.map((position) => (
             <option key={position.id} value={position.id}>
