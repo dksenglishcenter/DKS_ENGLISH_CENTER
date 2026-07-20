@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AdminImageField } from "@/components/admin/admin-image-field";
+import { TuitionField } from "./tuition-field";
 import { Button } from "@/components/ui/button";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
@@ -29,14 +30,6 @@ const TARGET_OPTIONS = [
   "IELTS 6.5 – 8.0+",
   "Phát triển toàn diện 4 kỹ năng",
   "Giao tiếp thực tế",
-] as const;
-
-const TUITION_OPTIONS = [
-  "120.000 ₫/buổi",
-  "150.000 ₫/buổi",
-  "200.000 ₫/buổi",
-  "300.000 – 500.000 ₫/buổi",
-  "Liên hệ tư vấn",
 ] as const;
 
 const DURATION_OPTIONS = [
@@ -88,7 +81,7 @@ const EMPTY_FORM: CoursePayload = {
   description: "",
   level: LEVEL_OPTIONS[0],
   target: TARGET_OPTIONS[0],
-  tuition: TUITION_OPTIONS[0],
+  tuition: "",
   duration: DURATION_OPTIONS[1],
   perks: [""],
   category: "",
@@ -339,6 +332,8 @@ export function CourseForm({
       errors.description = "Mô tả cần tối thiểu 10 ký tự";
     }
     if (!payload.perks.length) errors.perks = "Nhập ít nhất 1 điểm nổi bật";
+    if (payload.tuition.trim().length < 2)
+      errors.tuition = "Vui lòng nhập học phí (hoặc chọn Liên hệ tư vấn)";
     if (!normalizeCategory(payload.category)) errors.category = "Vui lòng chọn category";
     if (!isHttpUrl(payload.coverImageUrl)) {
       errors.coverImageUrl = "Chưa có ảnh cover — vui lòng chọn ảnh rồi lưu";
@@ -460,10 +455,8 @@ export function CourseForm({
           error={fieldErrors.target}
           onChange={(value) => updateField("target", value)}
         />
-        <SelectField
-          label="Học phí"
+        <TuitionField
           value={form.tuition}
-          options={TUITION_OPTIONS}
           error={fieldErrors.tuition}
           onChange={(value) => updateField("tuition", value)}
         />

@@ -4,9 +4,15 @@ import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 
 import { AdminImageField } from "@/components/admin/admin-image-field";
+import {
+  BulkActionsBar,
+  SelectAllHeaderCell,
+  SelectRowCell,
+} from "@/components/admin/bulk-actions-bar";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { useAdminResourceList } from "@/hooks/use-admin-resource-list";
+import { useBulkSelection } from "@/hooks/use-bulk-selection";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { nextSortOrder } from "@/lib/admin/sort-order";
@@ -56,6 +62,8 @@ export function AboutFacilitiesAdmin() {
     load,
     resetFormChrome,
   } = useAdminResourceList<FacilityImage>({ loadItems });
+
+  const bulk = useBulkSelection(images.map((item) => item.id));
 
   const editingIdRef = useRef<string | null>(null);
   editingIdRef.current = editingId;
@@ -165,6 +173,18 @@ export function AboutFacilitiesAdmin() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    setListError(null);
+    try {
+      await bulk.runOnSelected(deleteFacilityImage);
+      await load();
+    } catch (err) {
+      setListError(formatError(err));
+      bulk.closeConfirm();
+    }
+  };
+
+
   const handleFacilityDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -205,10 +225,21 @@ export function AboutFacilitiesAdmin() {
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
+      <BulkActionsBar
+        count={bulk.count}
+        busy={bulk.busy}
+        onDelete={bulk.openConfirm}
+        onClear={bulk.clear}
+      />
+
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
+              <SelectAllHeaderCell
+                allSelected={bulk.allSelected}
+                onToggle={bulk.toggleAll}
+              />
               <th className="px-4 py-3 font-semibold">Ảnh</th>
               <th className="px-4 py-3 font-semibold">Tiêu đề</th>
               <th className="px-4 py-3 font-semibold">Order</th>
@@ -219,6 +250,11 @@ export function AboutFacilitiesAdmin() {
           <tbody>
             {images.map((image) => (
               <tr key={image.id} className="border-b border-border last:border-0">
+                <SelectRowCell
+                  checked={bulk.isSelected(image.id)}
+                  onToggle={() => bulk.toggle(image.id)}
+                  label={image.title}
+                />
                 <td className="px-4 py-3">
                   <div className="relative h-14 w-20 overflow-hidden rounded-lg border border-border bg-muted">
                     <Image
@@ -357,6 +393,17 @@ export function AboutFacilitiesAdmin() {
           if (!deleting) setDeleteTarget(null);
         }}
         onConfirm={() => void handleFacilityDelete()}
+      />
+
+      <ConfirmDialog
+        open={bulk.confirmOpen}
+        title="Xóa các mục đã chọn?"
+        description={`Bạn chắc muốn xóa ${bulk.count} ảnh đã chọn? Thao tác này không hoàn tác được.`}
+        busy={bulk.busy}
+        onCancel={() => {
+          if (!bulk.busy) bulk.closeConfirm();
+        }}
+        onConfirm={() => void handleBulkDelete()}
       />
     </section>
   );

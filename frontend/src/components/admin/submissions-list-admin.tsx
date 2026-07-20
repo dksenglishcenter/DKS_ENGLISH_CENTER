@@ -12,9 +12,15 @@ import {
 } from "lucide-react";
 
 import { AdminPagination } from "@/components/admin/admin-pagination";
+import {
+  BulkActionsBar,
+  SelectAllHeaderCell,
+  SelectRowCell,
+} from "@/components/admin/bulk-actions-bar";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useBulkSelection } from "@/hooks/use-bulk-selection";
 import { formatAdminDateTime } from "@/lib/admin/format";
 import { ApiError, formatError } from "@/lib/errors/format-error";
 
@@ -149,6 +155,9 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
 
   const { list, remove } = config;
 
+  const bulk = useBulkSelection(items.map((item) => item.id));
+
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -211,6 +220,17 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
 
   function closeDeleteDialog() {
     if (!deleting) setDeleteTarget(null);
+  }
+
+  async function handleBulkDelete() {
+    setListError(null);
+    try {
+      await bulk.runOnSelected(remove);
+      setReloadKey((current) => current + 1);
+    } catch (error) {
+      setListError(formatError(error));
+      bulk.closeConfirm();
+    }
   }
 
   async function handleDelete() {
@@ -362,12 +382,23 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
           </div>
         ) : null}
 
+        <BulkActionsBar
+          count={bulk.count}
+          busy={bulk.busy}
+          onDelete={bulk.openConfirm}
+          onClear={bulk.clear}
+        />
+
         {items.length > 0 ? (
           <>
             <div className="hidden overflow-x-auto xl:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <table className="w-full table-fixed text-left text-sm">
                 <thead className="border-b border-border bg-[#FFF4EC] text-[#9B6B50] dark:bg-muted dark:text-muted-foreground">
                   <tr>
+                    <SelectAllHeaderCell
+                      allSelected={bulk.allSelected}
+                      onToggle={bulk.toggleAll}
+                    />
                     <th scope="col" className="w-[15%] px-4 py-3 font-semibold">
                       {config.nameHeader}
                     </th>
@@ -397,6 +428,11 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
                       key={item.id}
                       className="align-top transition-colors hover:bg-muted/70"
                     >
+                      <SelectRowCell
+                        checked={bulk.isSelected(item.id)}
+                        onToggle={() => bulk.toggle(item.id)}
+                        label={item.fullName}
+                      />
                       <td className="break-words px-4 py-4 font-semibold text-foreground">
                         {item.fullName}
                       </td>
@@ -470,6 +506,17 @@ export function SubmissionsListAdmin<T extends SubmissionItem>({
         returnFocusRef={deleteTriggerRef}
         onCancel={closeDeleteDialog}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        open={bulk.confirmOpen}
+        title="Xóa các mục đã chọn?"
+        description={`Bạn chắc muốn xóa ${bulk.count} mục đã chọn? Thao tác này không hoàn tác được.`}
+        busy={bulk.busy}
+        onCancel={() => {
+          if (!bulk.busy) bulk.closeConfirm();
+        }}
+        onConfirm={() => void handleBulkDelete()}
       />
     </section>
   );

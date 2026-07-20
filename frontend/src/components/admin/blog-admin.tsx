@@ -4,12 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { BlogForm } from "@/components/admin/blog/blog-form";
+import {
+  BulkActionsBar,
+  SelectAllHeaderCell,
+  SelectRowCell,
+} from "@/components/admin/bulk-actions-bar";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { RowActions } from "./row-actions";
 import { formatAdminDate } from "@/lib/admin/format";
 import { deleteBlogPost, listBlogPosts } from "@/lib/blog/api";
 import type { BlogPost } from "@/lib/blog/types";
+import { useBulkSelection } from "@/hooks/use-bulk-selection";
 import { formatError } from "@/lib/errors/format-error";
 
 export function BlogAdmin() {
@@ -21,6 +27,8 @@ export function BlogAdmin() {
   const [formSession, setFormSession] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<BlogPost | null>(null);
   const formSectionRef = useRef<HTMLDivElement>(null);
+
+  const bulk = useBulkSelection(posts.map((item) => item.id));
 
   const load = async () => {
     setLoading(true);
@@ -70,6 +78,18 @@ export function BlogAdmin() {
     openForm(null);
   }
 
+  const handleBulkDelete = async () => {
+    setListError(null);
+    try {
+      await bulk.runOnSelected(deleteBlogPost);
+      await load();
+    } catch (err) {
+      setListError(formatError(err));
+      bulk.closeConfirm();
+    }
+  };
+
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -115,10 +135,21 @@ export function BlogAdmin() {
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
+      <BulkActionsBar
+        count={bulk.count}
+        busy={bulk.busy}
+        onDelete={bulk.openConfirm}
+        onClear={bulk.clear}
+      />
+
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-[800px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
+              <SelectAllHeaderCell
+                allSelected={bulk.allSelected}
+                onToggle={bulk.toggleAll}
+              />
               <th className="w-60 min-w-60 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Bài viết</th>
               <th className="w-44 min-w-44 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Chuyên mục</th>
               <th className="px-4 py-3 font-semibold">Ngày</th>
@@ -129,6 +160,11 @@ export function BlogAdmin() {
           <tbody>
             {posts.map((post) => (
               <tr key={post.id} className="border-b border-border last:border-0">
+                <SelectRowCell
+                  checked={bulk.isSelected(post.id)}
+                  onToggle={() => bulk.toggle(post.id)}
+                  label={post.title}
+                />
                 <td className="w-60 min-w-60 px-4 py-3 lg:w-auto lg:min-w-0">
                   <div
                     className="line-clamp-2 font-semibold leading-snug text-foreground lg:line-clamp-none"
@@ -195,6 +231,17 @@ export function BlogAdmin() {
           if (!deleting) setDeleteTarget(null);
         }}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        open={bulk.confirmOpen}
+        title="Xóa các mục đã chọn?"
+        description={`Bạn chắc muốn xóa ${bulk.count} bài viết đã chọn? Thao tác này không hoàn tác được.`}
+        busy={bulk.busy}
+        onCancel={() => {
+          if (!bulk.busy) bulk.closeConfirm();
+        }}
+        onConfirm={() => void handleBulkDelete()}
       />
     </section>
   );

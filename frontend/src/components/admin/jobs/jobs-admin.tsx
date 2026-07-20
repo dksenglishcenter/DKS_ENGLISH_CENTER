@@ -13,11 +13,17 @@ import {
 } from "lucide-react";
 
 import { AdminPagination } from "@/components/admin/admin-pagination";
+import {
+  BulkActionsBar,
+  SelectAllHeaderCell,
+  SelectRowCell,
+} from "@/components/admin/bulk-actions-bar";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { JobForm } from "./job-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatAdminDateTime } from "@/lib/admin/format";
+import { useBulkSelection } from "@/hooks/use-bulk-selection";
 import { deleteJob, listAdminJobs, updateJob } from "@/lib/jobs/api";
 import { formatJobSalary } from "@/lib/jobs/salary";
 import type { Job, JobsPagination, JobStatusFilter } from "@/lib/jobs/types";
@@ -82,6 +88,29 @@ export function JobsAdmin() {
   }, [page, reloadKey, search, status]);
 
   const nextSortOrder = pagination?.nextSortOrder ?? 1;
+
+  const bulk = useBulkSelection(jobs.map((job) => job.id));
+
+  async function handleBulkDelete() {
+    setListError(null);
+    try {
+      await bulk.runOnSelected(deleteJob);
+      reloadList("Đã xóa các vị trí đã chọn");
+    } catch (error) {
+      setListError(formatError(error));
+      bulk.closeConfirm();
+    }
+  }
+
+  async function handleBulkVisibility(isPublished: boolean) {
+    setListError(null);
+    try {
+      await bulk.runOnSelected((id) => updateJob(id, { isPublished }));
+      reloadList(isPublished ? "Đã hiện các vị trí đã chọn" : "Đã ẩn các vị trí đã chọn");
+    } catch (error) {
+      setListError(formatError(error));
+    }
+  }
 
   function reloadList(successMessage?: string) {
     setLoading(true);
@@ -347,10 +376,25 @@ export function JobsAdmin() {
 
         {jobs.length > 0 ? (
           <>
+            <div className="p-3 pb-0">
+              <BulkActionsBar
+                count={bulk.count}
+                busy={bulk.busy}
+                onDelete={bulk.openConfirm}
+                onClear={bulk.clear}
+                onShow={() => void handleBulkVisibility(true)}
+                onHide={() => void handleBulkVisibility(false)}
+              />
+            </div>
+
             <div className="hidden overflow-x-auto xl:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <table className="w-full table-fixed text-left text-sm">
                 <thead className="border-b border-border bg-[#FFF4EC] text-[#9B6B50] dark:bg-muted dark:text-muted-foreground">
                   <tr>
+                    <SelectAllHeaderCell
+                      allSelected={bulk.allSelected}
+                      onToggle={bulk.toggleAll}
+                    />
                     <th scope="col" className="w-[25%] px-4 py-3 font-semibold">
                       Vị trí
                     </th>
@@ -379,6 +423,8 @@ export function JobsAdmin() {
                     <JobTableRow
                       key={job.id}
                       job={job}
+                      selected={bulk.isSelected(job.id)}
+                      onToggleSelect={() => bulk.toggle(job.id)}
                       busy={deleting || togglingId === job.id}
                       onEdit={() => openForm(job)}
                       onToggle={() => void togglePublished(job)}
@@ -443,6 +489,17 @@ export function JobsAdmin() {
         }}
         onConfirm={() => void handleDelete()}
       />
+
+      <ConfirmDialog
+        open={bulk.confirmOpen}
+        title="Xóa các vị trí đã chọn?"
+        description={`Bạn chắc muốn xóa ${bulk.count} vị trí đã chọn? Thao tác này không hoàn tác được.`}
+        busy={bulk.busy}
+        onCancel={() => {
+          if (!bulk.busy) bulk.closeConfirm();
+        }}
+        onConfirm={() => void handleBulkDelete()}
+      />
     </section>
   );
 }
@@ -450,6 +507,8 @@ export function JobsAdmin() {
 type JobItemProps = {
   job: Job;
   busy: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
   onEdit: () => void;
   onToggle: () => void;
   onDelete: (trigger: HTMLButtonElement) => void;
@@ -516,6 +575,11 @@ function JobTableRow(props: JobItemProps) {
   const { job } = props;
   return (
     <tr className="align-top transition-colors hover:bg-muted/70">
+      <SelectRowCell
+        checked={props.selected ?? false}
+        onToggle={() => props.onToggleSelect?.()}
+        label={job.title}
+      />
       <td className="px-4 py-4">
         <p className="font-bold text-foreground">{job.title}</p>
         <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">

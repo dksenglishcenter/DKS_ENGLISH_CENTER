@@ -4,6 +4,11 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Pencil, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 
 import { useAdminUser } from "@/components/admin/admin-shell";
+import {
+  BulkActionsBar,
+  SelectAllHeaderCell,
+  SelectRowCell,
+} from "@/components/admin/bulk-actions-bar";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { UsersForm } from "@/components/admin/users/users-form";
 import { Button } from "@/components/ui/button";
@@ -11,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { formatAdminDateTime } from "@/lib/admin/format";
 import { scrollToElement } from "@/lib/admin/scroll";
 import { formatError } from "@/lib/errors/format-error";
+import { useBulkSelection } from "@/hooks/use-bulk-selection";
 import { deleteUser, listUsers } from "@/lib/users/api";
 import type { ManagedUser, UserRole, UsersMeta } from "@/lib/users/types";
 
@@ -70,6 +76,21 @@ export function UsersAdmin() {
   useEffect(() => {
     if (formUser !== undefined) scrollToElement(formSectionRef.current);
   }, [formUser, formSession]);
+
+  const bulk = useBulkSelection(
+    users.filter((user) => user.id !== currentUser.id).map((user) => user.id),
+  );
+
+  async function handleBulkDelete() {
+    setListError(null);
+    try {
+      await bulk.runOnSelected(deleteUser);
+      reload();
+    } catch (error) {
+      setListError(formatError(error));
+      bulk.closeConfirm();
+    }
+  }
 
   function reload() {
     setReloadKey((current) => current + 1);
@@ -240,10 +261,22 @@ export function UsersAdmin() {
             Không tìm thấy tài khoản phù hợp.
           </p>
         ) : (
+          <>
+          <BulkActionsBar
+            count={bulk.count}
+            busy={bulk.busy}
+            onDelete={bulk.openConfirm}
+            onClear={bulk.clear}
+          />
+
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-border bg-muted text-muted-foreground">
                 <tr>
+                  <SelectAllHeaderCell
+                    allSelected={bulk.allSelected}
+                    onToggle={bulk.toggleAll}
+                  />
                   <th className="px-4 py-3 font-semibold">Người dùng</th>
                   <th className="px-4 py-3 font-semibold">Điện thoại</th>
                   <th className="px-4 py-3 font-semibold">Quyền</th>
@@ -256,6 +289,13 @@ export function UsersAdmin() {
                   const isSelf = user.id === currentUser.id;
                   return (
                     <tr key={user.id} className="border-b border-border last:border-0">
+                      <SelectRowCell
+                        checked={bulk.isSelected(user.id)}
+                        onToggle={() => bulk.toggle(user.id)}
+                        label={user.fullName}
+                        disabled={isSelf}
+                        disabledTitle="Không thể tự xóa tài khoản"
+                      />
                       <td className="px-4 py-3">
                         <div className="font-semibold text-foreground">
                           {user.fullName}
@@ -304,6 +344,7 @@ export function UsersAdmin() {
               </tbody>
             </table>
           </div>
+          </>
         )}
 
         {meta && meta.totalPages > 1 ? (
@@ -346,6 +387,17 @@ export function UsersAdmin() {
           if (!deleting) setDeleteTarget(null);
         }}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        open={bulk.confirmOpen}
+        title="Xóa các tài khoản đã chọn?"
+        description={`Bạn chắc muốn xóa ${bulk.count} tài khoản đã chọn? Thao tác này không hoàn tác được.`}
+        busy={bulk.busy}
+        onCancel={() => {
+          if (!bulk.busy) bulk.closeConfirm();
+        }}
+        onConfirm={() => void handleBulkDelete()}
       />
     </section>
   );

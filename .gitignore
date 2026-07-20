@@ -40,3 +40,5 @@ backend/generated/
 /docs/
 #Tài liệu hướng dẫn 
 /document
+.vercel
+.env*

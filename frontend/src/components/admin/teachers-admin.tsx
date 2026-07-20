@@ -4,10 +4,16 @@ import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 
 import { AdminImageField } from "@/components/admin/admin-image-field";
+import {
+  BulkActionsBar,
+  SelectAllHeaderCell,
+  SelectRowCell,
+} from "@/components/admin/bulk-actions-bar";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { RowActions } from "./row-actions";
 import { useAdminResourceList } from "@/hooks/use-admin-resource-list";
+import { useBulkSelection } from "@/hooks/use-bulk-selection";
 import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { nextSortOrder } from "@/lib/admin/sort-order";
@@ -63,6 +69,8 @@ export function TeachersAdmin() {
     load,
     resetFormChrome,
   } = useAdminResourceList<Teacher>({ loadItems });
+
+  const bulk = useBulkSelection(teachers.map((item) => item.id));
 
   const editingIdRef = useRef<string | null>(null);
   editingIdRef.current = editingId;
@@ -185,6 +193,18 @@ export function TeachersAdmin() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    setListError(null);
+    try {
+      await bulk.runOnSelected(deleteTeacher);
+      await load();
+    } catch (err) {
+      setListError(formatError(err));
+      bulk.closeConfirm();
+    }
+  };
+
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -251,10 +271,21 @@ export function TeachersAdmin() {
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
+      <BulkActionsBar
+        count={bulk.count}
+        busy={bulk.busy}
+        onDelete={bulk.openConfirm}
+        onClear={bulk.clear}
+      />
+
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-[800px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
+              <SelectAllHeaderCell
+                allSelected={bulk.allSelected}
+                onToggle={bulk.toggleAll}
+              />
               <th className="w-24 min-w-24 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Ảnh</th>
               <th className="w-52 min-w-52 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Tên</th>
               <th className="w-52 min-w-52 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Chức danh</th>
@@ -266,6 +297,11 @@ export function TeachersAdmin() {
           <tbody>
             {teachers.map((teacher) => (
               <tr key={teacher.id} className="border-b border-border last:border-0">
+                <SelectRowCell
+                  checked={bulk.isSelected(teacher.id)}
+                  onToggle={() => bulk.toggle(teacher.id)}
+                  label={teacher.name}
+                />
                 <td className="w-24 min-w-24 px-4 py-3 lg:w-auto lg:min-w-0">
                   <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border bg-muted">
                     {teacher.imageUrl ? (
@@ -394,6 +430,17 @@ export function TeachersAdmin() {
           if (!deleting) setDeleteTarget(null);
         }}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        open={bulk.confirmOpen}
+        title="Xóa các mục đã chọn?"
+        description={`Bạn chắc muốn xóa ${bulk.count} giáo viên đã chọn? Thao tác này không hoàn tác được.`}
+        busy={bulk.busy}
+        onCancel={() => {
+          if (!bulk.busy) bulk.closeConfirm();
+        }}
+        onConfirm={() => void handleBulkDelete()}
       />
     </div>
   );

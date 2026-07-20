@@ -2,12 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import {
+  BulkActionsBar,
+  SelectAllHeaderCell,
+  SelectRowCell,
+} from "@/components/admin/bulk-actions-bar";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { CourseForm } from "@/components/admin/courses/course-form";
 import { Button } from "@/components/ui/button";
 import { RowActions } from "./row-actions";
 import { deleteCourse, listCourses } from "@/lib/courses/api";
 import type { Course } from "@/lib/courses/types";
+import { useBulkSelection } from "@/hooks/use-bulk-selection";
 import { formatError } from "@/lib/errors/format-error";
 
 export function CoursesAdmin() {
@@ -19,6 +25,8 @@ export function CoursesAdmin() {
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
   const [deleting, setDeleting] = useState(false);
   const formSectionRef = useRef<HTMLDivElement>(null);
+
+  const bulk = useBulkSelection(courses.map((item) => item.id));
 
   const load = async () => {
     setLoading(true);
@@ -65,6 +73,18 @@ export function CoursesAdmin() {
     openForm(null);
   }
 
+  const handleBulkDelete = async () => {
+    setListError(null);
+    try {
+      await bulk.runOnSelected(deleteCourse);
+      await load();
+    } catch (err) {
+      setListError(formatError(err));
+      bulk.closeConfirm();
+    }
+  };
+
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -101,10 +121,21 @@ export function CoursesAdmin() {
       {listError ? <p className="text-sm text-red-600">{listError}</p> : null}
       {loading ? <p className="text-sm text-muted-foreground">Đang tải...</p> : null}
 
+      <BulkActionsBar
+        count={bulk.count}
+        busy={bulk.busy}
+        onDelete={bulk.openConfirm}
+        onClear={bulk.clear}
+      />
+
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="min-w-[760px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
+              <SelectAllHeaderCell
+                allSelected={bulk.allSelected}
+                onToggle={bulk.toggleAll}
+              />
               <th className="w-56 min-w-56 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Khóa</th>
               <th className="px-4 py-3 font-semibold">Category</th>
               <th className="px-4 py-3 font-semibold">Featured</th>
@@ -116,6 +147,11 @@ export function CoursesAdmin() {
           <tbody>
             {courses.map((course) => (
               <tr key={course.id} className="border-b border-border last:border-0">
+                <SelectRowCell
+                  checked={bulk.isSelected(course.id)}
+                  onToggle={() => bulk.toggle(course.id)}
+                  label={course.title}
+                />
                 <td className="w-56 min-w-56 px-4 py-3 lg:w-auto lg:min-w-0">
                   <div className="line-clamp-2 font-semibold leading-snug text-foreground lg:line-clamp-none">
                     {course.title}
@@ -165,6 +201,17 @@ export function CoursesAdmin() {
           if (!deleting) setDeleteTarget(null);
         }}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        open={bulk.confirmOpen}
+        title="Xóa các mục đã chọn?"
+        description={`Bạn chắc muốn xóa ${bulk.count} khóa học đã chọn? Thao tác này không hoàn tác được.`}
+        busy={bulk.busy}
+        onCancel={() => {
+          if (!bulk.busy) bulk.closeConfirm();
+        }}
+        onConfirm={() => void handleBulkDelete()}
       />
     </div>
   );
