@@ -3,14 +3,16 @@ export const siteConfig = {
   legalName: "DKS English Center",
   tagline: "Học đúng cách – Tiến xa mỗi ngày",
   description:
-    "Trung tâm tiếng Anh DKS — luyện thi IELTS, giao tiếp, gia sư 1-1. Giáo viên chuẩn quốc tế, lộ trình cá nhân hóa tại TP. Hồ Chí Minh.",
+    "Trung tâm tiếng Anh DKS tại Vĩnh Tuy, Hai Bà Trưng, Hà Nội — dạy tiếng Anh cho học sinh lớp 1 đến lớp 9 theo chương trình Global Success, luyện thi vào lớp 10. Lớp sĩ số nhỏ, giáo viên tận tâm.",
   locale: "vi_VN",
   language: "vi",
-  email: "contact@dksenglish.vn",
-  phone: "+84-xxx-xxx-xxxx",
+  email: "dksenglishcenter@gmail.com",
+  phone: "+84-83-451-3456",
   address: {
-    streetAddress: "TP. Hồ Chí Minh",
-    addressLocality: "Ho Chi Minh City",
+    streetAddress: "63 Ngõ 120 Dương Văn Bé, Vĩnh Tuy",
+    addressLocality: "Hai Bà Trưng, Hà Nội",
+    addressRegion: "Hà Nội",
+    postalCode: "11622",
     addressCountry: "VN",
   },
 } as const;

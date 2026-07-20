@@ -15,14 +15,18 @@ export function organizationSchema() {
     url: siteUrl,
     description: siteConfig.description,
     email: siteConfig.email,
+    telephone: siteConfig.phone,
     address: {
       "@type": "PostalAddress",
+      streetAddress: siteConfig.address.streetAddress,
       addressLocality: siteConfig.address.addressLocality,
+      addressRegion: siteConfig.address.addressRegion,
+      postalCode: siteConfig.address.postalCode,
       addressCountry: siteConfig.address.addressCountry,
     },
     areaServed: {
-      "@type": "Country",
-      name: "Vietnam",
+      "@type": "City",
+      name: "Hà Nội",
     },
     knowsAbout: [
       "English entrance exam preparation for grade 10",
