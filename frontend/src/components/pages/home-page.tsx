@@ -104,7 +104,7 @@ function Hero() {
               Hơn 2.000 học viên đã thay đổi cuộc đời
             </div>
             <h1
-              className="mb-6 animate-hero-enter text-4xl font-black leading-[1.15] text-foreground font-[family-name:var(--font-nunito)] sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl"
+              className="mb-6 animate-hero-enter text-4xl font-black leading-[1.26] text-foreground font-[family-name:var(--font-nunito)] sm:text-5xl md:text-4xl md:leading-[1.22] lg:text-5xl xl:text-6xl"
               style={{ animationDelay: "100ms" }}
             >
               HỌC ĐÚNG CÁCH

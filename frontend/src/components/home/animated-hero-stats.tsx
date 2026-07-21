@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const ANIMATION_DURATION = 1600;
 
 const HERO_STATS = [
-  { target: 2000, suffix: "+", label: "Học viên", decimals: 0 },
+  { target: 2000, suffix: "+", label: "Lượt truy cập", decimals: 0 },
   { target: 95, suffix: "%", label: "Đạt mục tiêu", decimals: 0 },
   { target: 8, suffix: "+", label: "Năm kinh nghiệm", decimals: 0 },
   { target: 4.9, suffix: "★", label: "Đánh giá", decimals: 1 },
