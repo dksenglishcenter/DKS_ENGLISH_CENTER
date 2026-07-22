@@ -41,6 +41,12 @@ export function LoginForm() {
     setError("");
     setSuccess("");
 
+    if (password.length < 8) {
+      setError("Mật khẩu phải có ít nhất 8 ký tự.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const trimmedEmail = email.trim();
       const response = await loginUser({
@@ -84,6 +90,7 @@ export function LoginForm() {
         value={email}
         onChange={setEmail}
         autoComplete="email"
+        maxLength={255}
         required
       />
       <AuthInputField
@@ -95,6 +102,8 @@ export function LoginForm() {
         value={password}
         onChange={setPassword}
         autoComplete="current-password"
+        minLength={8}
+        maxLength={72}
         required
       />
 

@@ -46,8 +46,8 @@ export class CreateContactDto {
 
   @TrimOptional()
   @IsOptional()
-  @IsEmail()
-  @MaxLength(255)
+  @IsEmail({}, { message: 'Email không đúng định dạng.' })
+  @MaxLength(255, { message: 'Email không được vượt quá 255 ký tự.' })
   email?: string;
 
   @Trim()

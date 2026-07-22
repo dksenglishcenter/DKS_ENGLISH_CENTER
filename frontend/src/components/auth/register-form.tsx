@@ -9,6 +9,14 @@ import { AuthInputField } from "@/components/auth/auth-input-field";
 import { registerUser } from "@/lib/auth/api";
 import { formatError } from "@/lib/errors/format-error";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
+import {
+  getNameValidationError,
+  getPasswordValidationError,
+} from "@/lib/validation/person";
+import {
+  getPhoneValidationError,
+  sanitizePhoneInput,
+} from "@/lib/validation/phone";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -28,12 +36,36 @@ export function RegisterForm() {
     setError("");
     setSuccess("");
 
+    const nameError = getNameValidationError(fullName, { min: 2, max: 100 });
+    if (nameError) {
+      setError(nameError);
+      setLoading(false);
+      return;
+    }
+
+    const phoneTrimmed = phone.trim();
+    if (phoneTrimmed) {
+      const phoneError = getPhoneValidationError(phoneTrimmed);
+      if (phoneError) {
+        setError(phoneError);
+        setLoading(false);
+        return;
+      }
+    }
+
+    const passwordError = getPasswordValidationError(password);
+    if (passwordError) {
+      setError(passwordError);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await registerUser({
         fullName: fullName.trim(),
         email: email.trim(),
         password,
-        ...(phone.trim() ? { phone: phone.trim() } : {}),
+        ...(phoneTrimmed ? { phone: phoneTrimmed } : {}),
       });
 
       setSuccess(response.message);
@@ -55,6 +87,8 @@ export function RegisterForm() {
         value={fullName}
         onChange={setFullName}
         autoComplete="name"
+        minLength={2}
+        maxLength={100}
         required
       />
 
@@ -63,11 +97,13 @@ export function RegisterForm() {
           label="Số điện thoại"
           name="phone"
           type="tel"
+          inputMode="tel"
           placeholder="0912 345 678"
           icon={Phone}
           value={phone}
-          onChange={setPhone}
+          onChange={(value) => setPhone(sanitizePhoneInput(value))}
           autoComplete="tel"
+          maxLength={20}
         />
         <AuthInputField
           label="Email"
@@ -78,6 +114,7 @@ export function RegisterForm() {
           value={email}
           onChange={setEmail}
           autoComplete="email"
+          maxLength={255}
           required
         />
       </div>
@@ -86,11 +123,13 @@ export function RegisterForm() {
         label="Mật khẩu"
         name="password"
         type="password"
-        placeholder="Tối thiểu 8 ký tự, có chữ và số"
+        placeholder="Tối thiểu 8 ký tự, có chữ và số, không khoảng trắng"
         icon={Lock}
         value={password}
         onChange={setPassword}
         autoComplete="new-password"
+        minLength={8}
+        maxLength={72}
         required
       />
 

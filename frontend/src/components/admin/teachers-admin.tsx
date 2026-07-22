@@ -221,7 +221,12 @@ export function TeachersAdmin() {
     }
   };
 
-  const field = (key: FieldKey, label: string, multiline = false) => (
+  const field = (
+    key: FieldKey,
+    label: string,
+    multiline = false,
+    limits?: { minLength?: number; maxLength?: number },
+  ) => (
     <label className="block text-sm" data-invalid={fieldErrors[key] ? "true" : undefined}>
       <span className="mb-1 block font-semibold text-foreground">{label}</span>
       {multiline ? (
@@ -230,6 +235,8 @@ export function TeachersAdmin() {
             fieldErrors[key] ? "border-red-500" : "border-border"
           }`}
           value={form[key]}
+          minLength={limits?.minLength}
+          maxLength={limits?.maxLength}
           onChange={(event) => {
             setForm((prev) => ({ ...prev, [key]: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -241,6 +248,8 @@ export function TeachersAdmin() {
             fieldErrors[key] ? "border-red-500" : "border-border"
           }`}
           value={form[key]}
+          minLength={limits?.minLength}
+          maxLength={limits?.maxLength}
           onChange={(event) => {
             setForm((prev) => ({ ...prev, [key]: event.target.value }));
             setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -359,10 +368,10 @@ export function TeachersAdmin() {
           {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
 
           <div className="grid gap-4 md:grid-cols-2">
-            {field("name", "Tên")}
-            {field("title", "Chức danh")}
-            {field("cred", "Bằng cấp / chứng chỉ")}
-            {field("exp", "Kinh nghiệm")}
+            {field("name", "Tên", false, { minLength: 2, maxLength: 80 })}
+            {field("title", "Chức danh", false, { maxLength: 120 })}
+            {field("cred", "Bằng cấp / chứng chỉ", false, { maxLength: 200 })}
+            {field("exp", "Kinh nghiệm", false, { maxLength: 120 })}
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>
               <input
@@ -380,7 +389,7 @@ export function TeachersAdmin() {
             </label>
           </div>
 
-          {field("bio", "Bio", true)}
+          {field("bio", "Bio", true, { maxLength: 2000 })}
 
           <AdminImageField
             url={form.imageUrl}

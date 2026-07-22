@@ -14,9 +14,11 @@ import {
 } from 'class-validator';
 import { Role } from '../../../generated/prisma/client';
 
-import { PHONE_PATTERN } from '../../common/validation/person';
-
-const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+import {
+  PASSWORD_MESSAGE,
+  PASSWORD_PATTERN,
+  PHONE_PATTERN,
+} from '../../common/validation/person';
 
 const Trim = () =>
   Transform(({ value }: { value: unknown }) =>
@@ -76,8 +78,8 @@ export class CreateUserDto {
   fullName!: string;
 
   @NormalizeEmail()
-  @IsEmail()
-  @MaxLength(255)
+  @IsEmail({}, { message: 'Email không đúng định dạng.' })
+  @MaxLength(255, { message: 'Email không được vượt quá 255 ký tự.' })
   email!: string;
 
   @OptionalTrim()
@@ -92,7 +94,7 @@ export class CreateUserDto {
   @MinLength(8)
   @MaxLength(72)
   @Matches(PASSWORD_PATTERN, {
-    message: 'Mật khẩu phải có ít nhất 1 chữ cái và 1 chữ số.',
+    message: PASSWORD_MESSAGE,
   })
   password!: string;
 
@@ -111,8 +113,8 @@ export class UpdateUserDto {
 
   @IsOptional()
   @NormalizeEmail()
-  @IsEmail()
-  @MaxLength(255)
+  @IsEmail({}, { message: 'Email không đúng định dạng.' })
+  @MaxLength(255, { message: 'Email không được vượt quá 255 ký tự.' })
   email?: string;
 
   @IsOptional()
@@ -130,7 +132,7 @@ export class UpdateUserDto {
   @MinLength(8)
   @MaxLength(72)
   @Matches(PASSWORD_PATTERN, {
-    message: 'Mật khẩu phải có ít nhất 1 chữ cái và 1 chữ số.',
+    message: PASSWORD_MESSAGE,
   })
   password?: string;
 

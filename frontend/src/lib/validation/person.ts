@@ -2,9 +2,30 @@
 
 export const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}\s.'’-]*$/u;
 export const EMAIL_PATTERN = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+/** Có chữ + số, không khoảng trắng. */
+export const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)\S{8,72}$/;
 
 export function containsHtmlCharacters(value: string) {
   return /[<>]/.test(value);
+}
+
+export function getPasswordValidationError(value: string): string | undefined {
+  if (!value) {
+    return "Vui lòng nhập mật khẩu.";
+  }
+  if (/\s/.test(value)) {
+    return "Mật khẩu không được chứa khoảng trắng.";
+  }
+  if (value.length < 8) {
+    return "Mật khẩu phải có ít nhất 8 ký tự.";
+  }
+  if (value.length > 72) {
+    return "Mật khẩu không được vượt quá 72 ký tự.";
+  }
+  if (!PASSWORD_PATTERN.test(value)) {
+    return "Mật khẩu phải có 8–72 ký tự, gồm chữ và số, không chứa khoảng trắng.";
+  }
+  return undefined;
 }
 
 export function getNameValidationError(

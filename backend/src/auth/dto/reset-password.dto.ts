@@ -1,15 +1,24 @@
-import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+
+import {
+  PASSWORD_MESSAGE,
+  PASSWORD_PATTERN,
+} from '../../common/validation/person';
 
 export class ResetPasswordDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Mã xác nhận phải là chuỗi ký tự.' })
+  @IsNotEmpty({ message: 'Thiếu mã xác nhận đặt lại mật khẩu.' })
   token!: string;
 
-  @IsString()
-  @MinLength(8)
-  @MaxLength(72)
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, {
-    message: 'Mật khẩu phải có ít nhất 1 chữ cái và 1 chữ số',
-  })
+  @IsString({ message: 'Mật khẩu phải là chuỗi ký tự.' })
+  @MinLength(8, { message: 'Mật khẩu phải có ít nhất 8 ký tự.' })
+  @MaxLength(72, { message: 'Mật khẩu không được vượt quá 72 ký tự.' })
+  @Matches(PASSWORD_PATTERN, { message: PASSWORD_MESSAGE })
   password!: string;
 }

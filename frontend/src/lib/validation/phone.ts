@@ -3,16 +3,26 @@ export const PHONE_LIMITS = {
   maxDigits: 15,
 } as const;
 
+/** Chỉ giữ số (và + ở đầu nếu có). Chữ cái / ký tự lạ bị loại khi gõ. */
 export function sanitizePhoneInput(value: string) {
   const trimmed = value.trimStart();
   const hasPlus = trimmed.startsWith("+");
   const digits = value.replace(/\D/g, "").slice(0, PHONE_LIMITS.maxDigits);
-
   return hasPlus ? `+${digits}` : digits;
 }
 
 export function getPhoneValidationError(value: string): string | undefined {
-  const digits = value.replace(/\D/g, "");
+  const raw = value.trim();
+
+  if (/[a-zA-Z]/.test(raw)) {
+    return "Số điện thoại chỉ được chứa chữ số (và dấu + ở đầu nếu có).";
+  }
+
+  if (/[^+\d\s().-]/.test(raw)) {
+    return "Số điện thoại chứa ký tự không hợp lệ.";
+  }
+
+  const digits = raw.replace(/\D/g, "");
 
   if (!digits) {
     return "Vui lòng nhập số điện thoại.";

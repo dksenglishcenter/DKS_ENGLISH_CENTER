@@ -308,6 +308,8 @@ export function SuccessStoriesAdmin() {
               <input
                 className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
                 value={form.name}
+                minLength={2}
+                maxLength={80}
                 onChange={(event) => {
                   const name = event.target.value;
                   setForm((prev) => ({

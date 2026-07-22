@@ -8,6 +8,7 @@ import { cn } from "@/components/ui/utils";
 type AuthInputFieldProps = {
   label: string;
   type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   placeholder: string;
   icon: LucideIcon;
   value: string;
@@ -16,11 +17,14 @@ type AuthInputFieldProps = {
   autoComplete?: string;
   name?: string;
   required?: boolean;
+  minLength?: number;
+  maxLength?: number;
 };
 
 export function AuthInputField({
   label,
   type = "text",
+  inputMode,
   placeholder,
   icon: Icon,
   value,
@@ -29,6 +33,8 @@ export function AuthInputField({
   autoComplete,
   name,
   required,
+  minLength,
+  maxLength,
 }: AuthInputFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
@@ -44,10 +50,13 @@ export function AuthInputField({
         <input
           name={name}
           type={isPassword && showPassword ? "text" : type}
+          inputMode={inputMode}
           placeholder={placeholder}
           value={value}
           autoComplete={autoComplete}
           required={required}
+          minLength={minLength}
+          maxLength={maxLength}
           onChange={(event) => onChange(event.target.value)}
           aria-invalid={Boolean(error)}
           className={cn(

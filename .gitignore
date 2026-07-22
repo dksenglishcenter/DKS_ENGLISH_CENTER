@@ -11,6 +11,7 @@ build/
 .env
 .env.local
 .env.*.local
+.env*
 
 # Logs
 *.log
@@ -31,6 +32,7 @@ coverage/
 # Misc
 *.tsbuildinfo
 next-env.d.ts
+.vercel
 
 # Prisma generated client
 backend/generated/
@@ -40,5 +42,10 @@ backend/generated/
 /docs/
 #Tài liệu hướng dẫn 
 /document
-.vercel
-.env*
+
+# Báo giá / đề xuất (local docs + generator scripts)
+scripts/bao_gia_*.py
+scripts/bao_cao_*.py
+scripts/*.docx
+scripts/Báo giá*
+scripts/Đề xuất*

@@ -59,9 +59,9 @@ export class CreateCareerApplicationDto {
   fullName!: string;
 
   @NormalizeEmail()
-  @IsEmail()
-  @IsNotEmpty()
-  @MaxLength(255)
+  @IsEmail({}, { message: 'Email không đúng định dạng.' })
+  @IsNotEmpty({ message: 'Vui lòng nhập email.' })
+  @MaxLength(255, { message: 'Email không được vượt quá 255 ký tự.' })
   email!: string;
 
   @Trim()

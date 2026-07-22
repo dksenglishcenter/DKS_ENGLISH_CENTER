@@ -1,12 +1,13 @@
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
-import { RequestMethod, ValidationPipe } from '@nestjs/common';
+import { RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
   ExpressAdapter,
   type NestExpressApplication,
 } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { createVietnameseValidationPipe } from './common/validation/vietnamese-validation.pipe';
 
 async function bootstrap() {
   // Truyền ExpressAdapter tường minh — tránh Nest PackageLoader
@@ -21,13 +22,7 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   app.use(cookieParser());
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(createVietnameseValidationPipe());
   // /health ngoài prefix — Render health check không bị 404 vì mọi route nằm dưới /api.
   app.setGlobalPrefix('api', {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
