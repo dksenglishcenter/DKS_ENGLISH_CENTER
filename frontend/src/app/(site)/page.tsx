@@ -1,7 +1,9 @@
 import { HomePage } from "@/components/pages/home-page";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
-export const dynamic = "force-dynamic";
+/** Static HTML rebuilt in the background at most once an hour, so page loads
+ *  don't wait on the backend (and survive it being asleep). */
+export const revalidate = 3600;
 
 export const metadata = createPageMetadata({
   title: "Trang chủ",

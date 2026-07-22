@@ -1,0 +1,28 @@
+# Pings the backend every ~14 minutes so Render's free tier never idles
+# (a cold start makes the first request wait ~30-60s). Runs only during
+# Vietnam daytime to stay well under Render's 750 free instance-hours/month.
+#
+# Times are UTC. Vietnam is UTC+7, so UTC 23:00 + 00:00-16:00 covers ~06:00-23:59 ICT.
+name: Keep backend awake
+
+on:
+  schedule:
+    - cron: "*/14 0-16,23 * * *"
+  workflow_dispatch: # lets you run it by hand from the Actions tab
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend through the site
+        # /api/* is proxied to Render, so this reaches (and wakes) the backend.
+        # A cold wake can take ~40s, hence the generous timeout and retries.
+        run: |
+          curl --fail --show-error --silent \
+            --max-time 90 --retry 3 --retry-all-errors --retry-delay 5 \
+            "https://tienganhhanoi.com/api/courses" -o /dev/null
+          echo "Pinged at $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
