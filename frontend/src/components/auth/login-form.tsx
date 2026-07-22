@@ -9,6 +9,7 @@ import { AuthInputField } from "@/components/auth/auth-input-field";
 import { loginUser } from "@/lib/auth/api";
 import { formatError } from "@/lib/errors/format-error";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
+import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const REMEMBER_EMAIL_KEY = "dks_remember_email";
 
@@ -119,12 +120,14 @@ export function LoginForm() {
             Ghi nhớ đăng nhập
           </span>
         </label>
-        <Link
-          href={PAGE_PATHS.forgotPassword}
+        <a
+          href={SOCIAL_LINKS.zalo}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-sm font-semibold text-primary hover:underline font-[family-name:var(--font-body)]"
         >
-          Quên mật khẩu?
-        </Link>
+          Quên mật khẩu? Liên hệ Zalo
+        </a>
       </div>
 
       {error ? (

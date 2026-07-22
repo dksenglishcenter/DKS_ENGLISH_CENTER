@@ -6,6 +6,12 @@ import {
   DEFAULT_ZALO_URL,
 } from '../common/contact-defaults';
 
+/**
+ * TODO(email): bật lại khi SMTP ổn định (không đổi pass trước khi gửi mail;
+ * ưu tiên reset-token). Form contact/career vẫn lưu DB khi tắt.
+ */
+const EMAIL_FEATURES_ENABLED = false;
+
 export type ContactNotifyPayload = {
   id: string;
   fullName: string;
@@ -73,6 +79,14 @@ export class MailService {
       process.env.SMTP_SECURE === '1' ||
       port === 465;
 
+    if (!EMAIL_FEATURES_ENABLED) {
+      this.transporter = null;
+      this.logger.warn(
+        'EMAIL_FEATURES_ENABLED=false — toàn bộ gửi mail tạm tắt (code giữ để bật lại).',
+      );
+      return;
+    }
+
     if (enabled && user && pass) {
       this.transporter = host
         ? nodemailer.createTransport({
@@ -112,7 +126,7 @@ export class MailService {
   }
 
   async notifyContactSubmission(payload: ContactNotifyPayload) {
-    if (!this.isConfigured()) return;
+    if (!EMAIL_FEATURES_ENABLED || !this.isConfigured()) return;
 
     const adminRows = [
       ['Họ tên', payload.fullName],
@@ -167,7 +181,7 @@ export class MailService {
   }
 
   async notifyCareerApplication(payload: CareerNotifyPayload) {
-    if (!this.isConfigured()) return;
+    if (!EMAIL_FEATURES_ENABLED || !this.isConfigured()) return;
 
     const adminRows = [
       ['Họ tên', payload.fullName],
@@ -224,7 +238,7 @@ export class MailService {
     fullName: string | null | undefined,
     tempPassword: string,
   ) {
-    if (!this.isConfigured()) return;
+    if (!EMAIL_FEATURES_ENABLED || !this.isConfigured()) return;
 
     const { zaloUrl, zaloPhone } = this.zaloContact();
     const name = fullName?.trim() || 'bạn';
@@ -264,7 +278,7 @@ export class MailService {
   }
 
   async sendForgotPasswordNotFound(to: string) {
-    if (!this.isConfigured()) return;
+    if (!EMAIL_FEATURES_ENABLED || !this.isConfigured()) return;
 
     const { zaloUrl, zaloPhone } = this.zaloContact();
 
@@ -335,7 +349,7 @@ export class MailService {
     text: string;
     html: string;
   }) {
-    if (!this.transporter) return;
+    if (!EMAIL_FEATURES_ENABLED || !this.transporter) return;
 
     try {
       await this.transporter.sendMail({

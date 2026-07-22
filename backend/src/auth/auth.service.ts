@@ -1,14 +1,15 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomInt } from 'crypto';
+// import { createHash, randomInt } from 'crypto';
 import type { Response } from 'express';
 import { Role } from '../../generated/prisma/client';
-import { MailService } from '../mail/mail.service';
+// TODO(email): bật lại cùng AUTH_EMAIL_FLOWS_ENABLED
+// import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   AUTH_COOKIE_NAMES,
@@ -24,12 +25,15 @@ import { TokenService } from './token.service';
 
 const BCRYPT_ROUNDS = 12;
 
+/** TODO(email): tắt quên/reset mật khẩu qua mail — bật lại khi SMTP + reset-token ổn. */
+const AUTH_EMAIL_FLOWS_ENABLED = false;
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
-    private readonly mailService: MailService,
+    // private readonly mailService: MailService,
   ) {}
 
   async register(dto: RegisterDto, res: Response) {
@@ -128,6 +132,15 @@ export class AuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
+    // TODO(email): khi bật lại — KHÔNG đổi password trước khi mail gửi OK;
+    // nên dùng PasswordResetToken + link, không gửi plaintext pass tạm.
+    void AUTH_EMAIL_FLOWS_ENABLED;
+    void dto;
+    throw new ServiceUnavailableException(
+      'Tính năng quên mật khẩu đang tạm khóa. Vui lòng liên hệ trung tâm qua Zalo để được hỗ trợ.',
+    );
+
+    /*
     const email = dto.email.trim().toLowerCase();
     const user = await this.prisma.user.findUnique({
       where: { email },
@@ -135,7 +148,6 @@ export class AuthService {
     });
 
     if (user) {
-      // Mật khẩu dễ: dks + 5 số (đủ MinLength 8), ví dụ dks48217
       const tempPassword = `dks${randomInt(10000, 100000)}`;
       const passwordHash = await bcrypt.hash(tempPassword, BCRYPT_ROUNDS);
 
@@ -157,9 +169,17 @@ export class AuthService {
       message:
         'Đã gửi email tới địa chỉ bạn vừa nhập. Vui lòng kiểm tra hộp thư (và mục Spam).',
     };
+    */
   }
 
   async resetPassword(dto: ResetPasswordDto) {
+    void AUTH_EMAIL_FLOWS_ENABLED;
+    void dto;
+    throw new ServiceUnavailableException(
+      'Tính năng đặt lại mật khẩu đang tạm khóa. Vui lòng liên hệ trung tâm qua Zalo để được hỗ trợ.',
+    );
+
+    /*
     const tokenHash = this.hashToken(dto.token.trim());
     const record = await this.prisma.passwordResetToken.findFirst({
       where: {
@@ -190,6 +210,7 @@ export class AuthService {
     ]);
 
     return { message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập lại.' };
+    */
   }
 
   private setAuthCookies(
@@ -212,9 +233,9 @@ export class AuthService {
     );
   }
 
-  private hashToken(token: string) {
-    return createHash('sha256').update(token).digest('hex');
-  }
+  // private hashToken(token: string) {
+  //   return createHash('sha256').update(token).digest('hex');
+  // }
 
   private readonly userSelect = {
     id: true,

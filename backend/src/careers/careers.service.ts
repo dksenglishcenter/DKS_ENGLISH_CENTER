@@ -5,7 +5,8 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 
-import { MailService } from '../mail/mail.service';
+// TODO(email): bật lại cùng notifyCareerApplication bên dưới
+// import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCareerApplicationDto } from './dto/create-career-application.dto';
 import { ListCareerApplicationsQueryDto } from './dto/list-career-applications-query.dto';
@@ -32,7 +33,7 @@ const CAREER_APPLICATION_SELECT = {
 export class CareersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mailService: MailService,
+    // private readonly mailService: MailService,
   ) {}
 
   async listApplications(query: ListCareerApplicationsQueryDto) {
@@ -135,15 +136,16 @@ export class CareersService {
       },
     });
 
-    void this.mailService.notifyCareerApplication({
-      id: application.id,
-      fullName: application.fullName,
-      email: application.email,
-      phone: application.phone,
-      position: application.position,
-      introduction: application.introduction,
-      createdAt: application.createdAt,
-    });
+    // TODO(email): bật lại khi EMAIL_FEATURES_ENABLED=true trong mail.service
+    // void this.mailService.notifyCareerApplication({
+    //   id: application.id,
+    //   fullName: application.fullName,
+    //   email: application.email,
+    //   phone: application.phone,
+    //   position: application.position,
+    //   introduction: application.introduction,
+    //   createdAt: application.createdAt,
+    // });
 
     return {
       id: application.id,

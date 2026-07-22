@@ -5,7 +5,8 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 
-import { MailService } from '../mail/mail.service';
+// TODO(email): bật lại cùng notifyContactSubmission bên dưới
+// import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { ListContactSubmissionsQueryDto } from './dto/list-contact-submissions-query.dto';
@@ -24,7 +25,7 @@ const CONTACT_SUBMISSION_SELECT = {
 export class ContactService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mailService: MailService,
+    // private readonly mailService: MailService,
   ) {}
 
   async listSubmissions(query: ListContactSubmissionsQueryDto) {
@@ -116,15 +117,16 @@ export class ContactService {
       select: CONTACT_SUBMISSION_SELECT,
     });
 
-    void this.mailService.notifyContactSubmission({
-      id: submission.id,
-      fullName: submission.fullName,
-      phone: submission.phone,
-      email: submission.email,
-      courseInterest: submission.courseInterest,
-      learningNeeds: submission.learningNeeds,
-      createdAt: submission.createdAt,
-    });
+    // TODO(email): bật lại khi EMAIL_FEATURES_ENABLED=true trong mail.service
+    // void this.mailService.notifyContactSubmission({
+    //   id: submission.id,
+    //   fullName: submission.fullName,
+    //   phone: submission.phone,
+    //   email: submission.email,
+    //   courseInterest: submission.courseInterest,
+    //   learningNeeds: submission.learningNeeds,
+    //   createdAt: submission.createdAt,
+    // });
 
     return {
       id: submission.id,
