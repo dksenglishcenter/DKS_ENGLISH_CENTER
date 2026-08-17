@@ -54,6 +54,24 @@ export function getAttemptState(attemptId: string) {
   );
 }
 
+export async function submitWriting(attemptId: string, responseText: string) {
+  const { result } = await apiFetch<{ result: AttemptResult }>(
+    `/mock-tests/attempts/${attemptId}/submit-writing`,
+    { method: "POST", json: { responseText } },
+  );
+  return result;
+}
+
+export async function submitSpeaking(attemptId: string, file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  const { result } = await apiFetch<{ result: AttemptResult }>(
+    `/mock-tests/attempts/${attemptId}/submit-speaking`,
+    { method: "POST", body: form },
+  );
+  return result;
+}
+
 export async function getAttemptResult(attemptId: string) {
   const { result } = await apiFetch<{ result: AttemptResult }>(
     `/mock-tests/attempts/${attemptId}/result`,

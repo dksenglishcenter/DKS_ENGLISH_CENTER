@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
 import { ExamRunner } from "@/components/exam/exam-runner";
+import { WsRunner } from "@/components/exam/ws-runner";
 import {
   getAttemptState,
   getExamTest,
@@ -89,8 +90,12 @@ export default function Page() {
     );
   }
 
+  const isWs =
+    data.test.skill === "WRITING" || data.test.skill === "SPEAKING";
+  const Runner = isWs ? WsRunner : ExamRunner;
+
   return (
-    <ExamRunner
+    <Runner
       test={data.test}
       attempt={data.attempt}
       initialAnswers={data.initialAnswers}

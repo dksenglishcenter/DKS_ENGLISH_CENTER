@@ -52,6 +52,11 @@ const ADMIN_NAV = [
   { href: `${PAGE_PATHS.admin}/courses`, label: "Khóa học", icon: BookOpen },
   { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText },
   {
+    href: `${PAGE_PATHS.admin}/exam-grading`,
+    label: "Chấm bài",
+    icon: ClipboardCheck,
+  },
+  {
     href: `${PAGE_PATHS.admin}/success-stories`,
     label: "Câu chuyện",
     icon: MessageSquareQuote,
@@ -82,6 +87,11 @@ const TEACHER_NAV = [
   { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School },
   { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
   { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText },
+  {
+    href: `${PAGE_PATHS.admin}/exam-grading`,
+    label: "Chấm bài",
+    icon: ClipboardCheck,
+  },
 ] as const;
 
 function teacherCanAccess(pathname: string) {
@@ -91,7 +101,9 @@ function teacherCanAccess(pathname: string) {
     pathname === `${PAGE_PATHS.admin}/attendance` ||
     pathname.startsWith(`${PAGE_PATHS.admin}/attendance/`) ||
     pathname === `${PAGE_PATHS.admin}/exams` ||
-    pathname.startsWith(`${PAGE_PATHS.admin}/exams/`)
+    pathname.startsWith(`${PAGE_PATHS.admin}/exams/`) ||
+    pathname === `${PAGE_PATHS.admin}/exam-grading` ||
+    pathname.startsWith(`${PAGE_PATHS.admin}/exam-grading/`)
   );
 }
 

@@ -85,6 +85,23 @@ export type AttemptState = {
   answers: { questionId: string; value: string | null }[];
 };
 
+export type WritingSubmission = {
+  id: string;
+  responseText: string;
+  status: "PENDING" | "GRADED";
+  band: string | null;
+  feedback: string | null;
+  sampleAnswer: string | null;
+} | null;
+
+export type SpeakingSubmission = {
+  id: string;
+  audioUrl: string;
+  status: "PENDING" | "GRADED";
+  band: string | null;
+  feedback: string | null;
+} | null;
+
 export type AttemptResult = {
   attempt: {
     id: string;
@@ -97,4 +114,6 @@ export type AttemptResult = {
   };
   test: ExamTest;
   answers: AttemptAnswer[];
+  writing: WritingSubmission;
+  speaking: SpeakingSubmission;
 };

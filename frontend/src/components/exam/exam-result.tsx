@@ -32,6 +32,7 @@ export function ExamResult({ result }: { result: AttemptResult }) {
   };
 
   const score = attempt.rawScore ?? 0;
+  const isWs = test.skill === "WRITING" || test.skill === "SPEAKING";
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,6 +46,13 @@ export function ExamResult({ result }: { result: AttemptResult }) {
       </header>
 
       <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
+        {isWs ? (
+          <WsResultCard
+            result={result}
+            onRetry={() => router.push(`/exam/${test.id}`)}
+          />
+        ) : (
+        <>
         {/* Score summary */}
         <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-border bg-card p-6">
           <div>
@@ -139,7 +147,89 @@ export function ExamResult({ result }: { result: AttemptResult }) {
             ))}
           </div>
         ))}
+        </>
+        )}
       </div>
+    </div>
+  );
+}
+
+function WsResultCard({
+  result,
+  onRetry,
+}: {
+  result: AttemptResult;
+  onRetry: () => void;
+}) {
+  const { writing, speaking } = result;
+  const sub = writing ?? speaking;
+  const graded = sub?.status === "GRADED";
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-6">
+        {!graded ? (
+          <>
+            <p className="text-lg font-bold text-foreground">Đã nộp bài ✅</p>
+            <p className="mt-1 text-muted-foreground">
+              Bài đang chờ giáo viên chấm. Điểm và nhận xét sẽ hiện ở đây khi có.
+            </p>
+          </>
+        ) : (
+          <div className="flex flex-wrap items-center gap-6">
+            {sub?.band ? (
+              <div>
+                <p className="text-sm text-muted-foreground">Band</p>
+                <p className="text-4xl font-bold text-primary">{sub.band}</p>
+              </div>
+            ) : (
+              <p className="text-lg font-bold text-foreground">Đã chấm ✅</p>
+            )}
+            <div className="ml-auto">
+              <Button onClick={onRetry}>Làm lại</Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {graded && sub?.feedback ? (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="mb-1 font-semibold text-foreground">
+            Nhận xét của giáo viên
+          </p>
+          <p className="whitespace-pre-line text-foreground">{sub.feedback}</p>
+        </div>
+      ) : null}
+
+      {writing ? (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="mb-1 font-semibold text-foreground">Bài làm của bạn</p>
+          <p className="whitespace-pre-line text-foreground">
+            {writing.responseText}
+          </p>
+        </div>
+      ) : null}
+
+      {writing?.sampleAnswer ? (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="mb-1 font-semibold text-foreground">
+            Bài mẫu tham khảo
+          </p>
+          <p className="whitespace-pre-line text-foreground">
+            {writing.sampleAnswer}
+          </p>
+        </div>
+      ) : null}
+
+      {speaking ? (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="mb-2 font-semibold text-foreground">
+            Bài ghi âm của bạn
+          </p>
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <audio src={speaking.audioUrl} controls className="w-full" />
+        </div>
+      ) : null}
     </div>
   );
 }

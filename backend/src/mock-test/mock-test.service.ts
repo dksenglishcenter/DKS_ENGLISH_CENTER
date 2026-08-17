@@ -11,6 +11,7 @@ import {
   ExamSkill,
   Prisma,
 } from '../../generated/prisma/client';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ImportTestDto } from './dto/import-test.dto';
 import { AnswerKeyItem, QuestionType, gradeTest } from './grading/grading';
@@ -25,7 +26,10 @@ const TAKING_QUESTION_SELECT = {
 
 @Injectable()
 export class MockTestService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudinary: CloudinaryService,
+  ) {}
 
   /** Published tests, summary only, for the library screen. */
   listTests() {
@@ -120,6 +124,139 @@ export class MockTestService {
       select: { id: true },
     });
     if (!test) throw new NotFoundException('Không tìm thấy đề thi.');
+  }
+
+  // ── Grading queue (teacher / admin) ──────────────────────────────────
+
+  /** Writing + Speaking submissions still waiting for a teacher. */
+  async listPendingSubmissions() {
+    const include = {
+      attempt: {
+        include: {
+          test: { select: { title: true } },
+          user: { select: { fullName: true } },
+        },
+      },
+    } as const;
+    const [writing, speaking] = await Promise.all([
+      this.prisma.writingSubmission.findMany({
+        where: { status: 'PENDING' },
+        orderBy: { createdAt: 'asc' },
+        include,
+      }),
+      this.prisma.speakingSubmission.findMany({
+        where: { status: 'PENDING' },
+        orderBy: { createdAt: 'asc' },
+        include,
+      }),
+    ]);
+    const row = (
+      s: { id: string; createdAt: Date; attempt: { test: { title: string }; user: { fullName: string } | null } },
+      kind: 'writing' | 'speaking',
+    ) => ({
+      id: s.id,
+      kind,
+      title: s.attempt.test.title,
+      student: s.attempt.user?.fullName ?? 'Ẩn danh',
+      createdAt: s.createdAt,
+    });
+    return {
+      writing: writing.map((s) => row(s, 'writing')),
+      speaking: speaking.map((s) => row(s, 'speaking')),
+    };
+  }
+
+  private taskInclude = {
+    attempt: {
+      include: {
+        test: {
+          include: {
+            sections: {
+              orderBy: { order: 'asc' as const },
+              include: {
+                groups: {
+                  orderBy: { order: 'asc' as const },
+                  include: { questions: { orderBy: { no: 'asc' as const } } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  async getWritingSubmission(id: string) {
+    const sub = await this.prisma.writingSubmission.findUnique({
+      where: { id },
+      include: this.taskInclude,
+    });
+    if (!sub) throw new NotFoundException('Không tìm thấy bài Writing.');
+    return sub;
+  }
+
+  async getSpeakingSubmission(id: string) {
+    const sub = await this.prisma.speakingSubmission.findUnique({
+      where: { id },
+      include: this.taskInclude,
+    });
+    if (!sub) throw new NotFoundException('Không tìm thấy bài Speaking.');
+    return sub;
+  }
+
+  async gradeWriting(
+    id: string,
+    dto: { band?: string; feedback?: string; sampleAnswer?: string },
+    graderId: string,
+  ) {
+    const sub = await this.prisma.writingSubmission.findUnique({
+      where: { id },
+      select: { attemptId: true },
+    });
+    if (!sub) throw new NotFoundException('Không tìm thấy bài Writing.');
+    const updated = await this.prisma.writingSubmission.update({
+      where: { id },
+      data: {
+        band: dto.band || null,
+        feedback: dto.feedback || null,
+        sampleAnswer: dto.sampleAnswer || null,
+        status: 'GRADED',
+        gradedById: graderId,
+        gradedAt: new Date(),
+      },
+    });
+    await this.prisma.examAttempt.update({
+      where: { id: sub.attemptId },
+      data: { status: 'GRADED', band: dto.band || null },
+    });
+    return updated;
+  }
+
+  async gradeSpeaking(
+    id: string,
+    dto: { band?: string; feedback?: string },
+    graderId: string,
+  ) {
+    const sub = await this.prisma.speakingSubmission.findUnique({
+      where: { id },
+      select: { attemptId: true },
+    });
+    if (!sub) throw new NotFoundException('Không tìm thấy bài Speaking.');
+    const updated = await this.prisma.speakingSubmission.update({
+      where: { id },
+      data: {
+        band: dto.band || null,
+        feedback: dto.feedback || null,
+        status: 'GRADED',
+        gradedById: graderId,
+        gradedAt: new Date(),
+      },
+    });
+    await this.prisma.examAttempt.update({
+      where: { id: sub.attemptId },
+      data: { status: 'GRADED', band: dto.band || null },
+    });
+    return updated;
   }
 
   // ── Student flow ──────────────────────────────────────────────────────
@@ -276,6 +413,59 @@ export class MockTestService {
     return this.getResult(attemptId, userId);
   }
 
+  /** Submit a Writing paper: save the essay text, queue it for a teacher. */
+  async submitWriting(
+    attemptId: string,
+    userId: string | null,
+    responseText: string,
+  ) {
+    const attempt = await this.getOwnedAttempt(attemptId, userId);
+    const test = await this.prisma.examTest.findUnique({
+      where: { id: attempt.testId },
+      select: { skill: true },
+    });
+    if (test?.skill !== ExamSkill.WRITING) {
+      throw new BadRequestException('Đề này không phải Writing.');
+    }
+    await this.prisma.writingSubmission.upsert({
+      where: { attemptId },
+      create: { attemptId, responseText },
+      update: { responseText, status: 'PENDING' },
+    });
+    await this.prisma.examAttempt.update({
+      where: { id: attemptId },
+      data: { status: 'SUBMITTED', submittedAt: new Date() },
+    });
+    return this.getResult(attemptId, userId);
+  }
+
+  /** Submit a Speaking paper: upload the recording, queue it for a teacher. */
+  async submitSpeaking(
+    attemptId: string,
+    userId: string | null,
+    file: Express.Multer.File,
+  ) {
+    const attempt = await this.getOwnedAttempt(attemptId, userId);
+    const test = await this.prisma.examTest.findUnique({
+      where: { id: attempt.testId },
+      select: { skill: true },
+    });
+    if (test?.skill !== ExamSkill.SPEAKING) {
+      throw new BadRequestException('Đề này không phải Speaking.');
+    }
+    const uploaded = await this.cloudinary.uploadAudio(file);
+    await this.prisma.speakingSubmission.upsert({
+      where: { attemptId },
+      create: { attemptId, audioUrl: uploaded.secure_url },
+      update: { audioUrl: uploaded.secure_url, status: 'PENDING' },
+    });
+    await this.prisma.examAttempt.update({
+      where: { id: attemptId },
+      data: { status: 'SUBMITTED', submittedAt: new Date() },
+    });
+    return this.getResult(attemptId, userId);
+  }
+
   /** Result + review: the paper with answers revealed and the student's marks. */
   async getResult(attemptId: string, userId: string | null) {
     const attempt = await this.getOwnedAttempt(attemptId, userId);
@@ -304,6 +494,12 @@ export class MockTestService {
       0,
     );
 
+    // Writing/Speaking submissions (null for Listening/Reading).
+    const [writing, speaking] = await Promise.all([
+      this.prisma.writingSubmission.findUnique({ where: { attemptId } }),
+      this.prisma.speakingSubmission.findUnique({ where: { attemptId } }),
+    ]);
+
     return {
       attempt: {
         id: attempt.id,
@@ -320,6 +516,8 @@ export class MockTestService {
         value: a.value,
         isCorrect: a.isCorrect,
       })),
+      writing,
+      speaking,
     };
   }
 
