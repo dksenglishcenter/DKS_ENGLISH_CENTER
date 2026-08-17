@@ -28,6 +28,8 @@ type Kpi = {
   hint: string;
   href: string;
   icon: LucideIcon;
+  /** TEMP GĐ3 — ẩn bằng display:none đến khi khách thanh toán */
+  phase3Hidden?: boolean;
 };
 
 function KpiTile({ kpi }: { kpi: Kpi }) {
@@ -36,6 +38,7 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
     <Link
       href={kpi.href}
       className="rounded-2xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
+      style={kpi.phase3Hidden ? { display: "none" } : undefined}
     >
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-muted-foreground">{kpi.title}</p>
@@ -192,6 +195,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
     stats.gallery.total +
     stats.facilities.total;
 
+  // TEMP: phase3Hidden = true → display:none; bỏ flag khi khách thanh toán.
   const kpis: Kpi[] = [
     {
       title: "HV đang học",
@@ -199,6 +203,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Học viên trạng thái đang học",
       href: `${admin}/students`,
       icon: UsersRound,
+      phase3Hidden: true,
     },
     {
       title: "Lớp đang mở",
@@ -206,6 +211,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Lớp OPEN",
       href: `${admin}/classes`,
       icon: School,
+      phase3Hidden: true,
     },
     {
       title: "Buổi 7 ngày",
@@ -213,6 +219,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Buổi điểm danh gần đây",
       href: `${admin}/attendance`,
       icon: ClipboardCheck,
+      phase3Hidden: true,
     },
     {
       title: "Học phí chưa đóng",
@@ -220,6 +227,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Invoice UNPAID",
       href: `${admin}/tuition`,
       icon: Wallet,
+      phase3Hidden: true,
     },
     {
       title: "Tổng nội dung",
