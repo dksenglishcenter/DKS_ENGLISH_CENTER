@@ -80,6 +80,11 @@ export type AttemptAnswer = {
   isCorrect: boolean | null;
 };
 
+export type AttemptState = {
+  attempt: ExamAttempt & { testId: string };
+  answers: { questionId: string; value: string | null }[];
+};
+
 export type AttemptResult = {
   attempt: {
     id: string;

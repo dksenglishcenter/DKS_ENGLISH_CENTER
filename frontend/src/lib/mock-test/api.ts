@@ -1,6 +1,7 @@
 import { apiFetch } from "@/lib/api/client";
 import type {
   AttemptResult,
+  AttemptState,
   ExamAttempt,
   ExamTest,
   ExamTestSummary,
@@ -44,6 +45,13 @@ export async function submitAttempt(attemptId: string) {
     { method: "POST" },
   );
   return result;
+}
+
+export function getAttemptState(attemptId: string) {
+  return apiFetch<AttemptState>(
+    `/mock-tests/attempts/${attemptId}/state`,
+    { method: "GET" },
+  );
 }
 
 export async function getAttemptResult(attemptId: string) {

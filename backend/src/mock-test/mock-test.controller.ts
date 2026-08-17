@@ -52,6 +52,11 @@ export class MockTestController {
     return { result };
   }
 
+  @Get('attempts/:attemptId/state')
+  async state(@Param('attemptId') attemptId: string) {
+    return this.service.getAttemptState(attemptId);
+  }
+
   @Get('attempts/:attemptId/result')
   async result(@Param('attemptId') attemptId: string) {
     const result = await this.service.getResult(attemptId, null);

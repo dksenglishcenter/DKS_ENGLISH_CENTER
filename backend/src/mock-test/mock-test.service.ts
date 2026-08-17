@@ -239,6 +239,32 @@ export class MockTestService {
     };
   }
 
+  /**
+   * State of an in-progress attempt so the client can resume after a refresh:
+   * the timer (from the original startedAt) and the saved answers. The answer
+   * key is NOT included — that would leak answers before submitting.
+   */
+  async getAttemptState(attemptId: string) {
+    const attempt = await this.prisma.examAttempt.findUnique({
+      where: { id: attemptId },
+      include: { test: { select: { durationMinutes: true } } },
+    });
+    if (!attempt) throw new NotFoundException('Không tìm thấy lượt thi.');
+
+    const answers = await this.prisma.examAttemptAnswer.findMany({
+      where: { attemptId },
+      select: { questionId: true, value: true },
+    });
+
+    return {
+      attempt: {
+        ...this.withTiming(attempt, attempt.test.durationMinutes),
+        testId: attempt.testId,
+      },
+      answers,
+    };
+  }
+
   private withTiming(attempt: ExamAttempt, durationMinutes: number) {
     const endsAt = new Date(
       attempt.startedAt.getTime() + durationMinutes * 60_000,

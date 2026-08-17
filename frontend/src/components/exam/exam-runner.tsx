@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { saveAnswers, submitAttempt } from "@/lib/mock-test/api";
+import { attemptStorageKey } from "@/lib/mock-test/storage";
 import type {
   ExamAttempt,
   ExamQuestionGroup,
@@ -17,12 +18,16 @@ import { QuestionNavigator, type NavState } from "./question-navigator";
 export function ExamRunner({
   test,
   attempt,
+  initialAnswers,
 }: {
   test: ExamTest;
   attempt: ExamAttempt;
+  initialAnswers?: Record<string, string>;
 }) {
   const router = useRouter();
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>(
+    () => initialAnswers ?? {},
+  );
   const [active, setActive] = useState(0);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -82,6 +87,7 @@ export function ExamRunner({
     await flush();
     try {
       const result = await submitAttempt(attempt.id);
+      localStorage.removeItem(attemptStorageKey(test.id));
       router.replace(`/exam/result/${result.attempt.id}`);
     } catch {
       setSubmitting(false);

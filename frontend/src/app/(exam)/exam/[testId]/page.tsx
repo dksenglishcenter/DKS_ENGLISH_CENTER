@@ -2,18 +2,28 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import { ExamRunner } from "@/components/exam/exam-runner";
-import { getExamTest, startAttempt } from "@/lib/mock-test/api";
+import {
+  getAttemptState,
+  getExamTest,
+  startAttempt,
+} from "@/lib/mock-test/api";
+import { attemptStorageKey } from "@/lib/mock-test/storage";
 import type { ExamAttempt, ExamTest } from "@/lib/mock-test/types";
+
+type Loaded = {
+  test: ExamTest;
+  attempt: ExamAttempt;
+  initialAnswers: Record<string, string>;
+};
 
 export default function Page() {
   const params = useParams<{ testId: string }>();
+  const router = useRouter();
   const testId = params.testId;
-  const [data, setData] = useState<{ test: ExamTest; attempt: ExamAttempt } | null>(
-    null,
-  );
+  const [data, setData] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
   const started = useRef(false);
 
@@ -23,18 +33,42 @@ export default function Page() {
 
     (async () => {
       try {
-        const [test, attempt] = await Promise.all([
-          getExamTest(testId),
-          startAttempt(testId),
-        ]);
-        setData({ test, attempt });
+        const test = await getExamTest(testId);
+        const key = attemptStorageKey(testId);
+        const storedId =
+          typeof window !== "undefined" ? localStorage.getItem(key) : null;
+
+        // Resume an in-progress attempt if we have one saved locally.
+        if (storedId) {
+          try {
+            const state = await getAttemptState(storedId);
+            if (state.attempt.status === "IN_PROGRESS") {
+              setData({
+                test,
+                attempt: state.attempt,
+                initialAnswers: Object.fromEntries(
+                  state.answers.map((a) => [a.questionId, a.value ?? ""]),
+                ),
+              });
+              return;
+            }
+            // Already submitted → go straight to the result.
+            localStorage.removeItem(key);
+            router.replace(`/exam/result/${storedId}`);
+            return;
+          } catch {
+            localStorage.removeItem(key); // stale id → start fresh
+          }
+        }
+
+        const attempt = await startAttempt(testId);
+        localStorage.setItem(key, attempt.id);
+        setData({ test, attempt, initialAnswers: {} });
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Không mở được đề thi.",
-        );
+        setError(err instanceof Error ? err.message : "Không mở được đề thi.");
       }
     })();
-  }, [testId]);
+  }, [router, testId]);
 
   if (error) {
     return (
@@ -55,5 +89,11 @@ export default function Page() {
     );
   }
 
-  return <ExamRunner test={data.test} attempt={data.attempt} />;
+  return (
+    <ExamRunner
+      test={data.test}
+      attempt={data.attempt}
+      initialAnswers={data.initialAnswers}
+    />
+  );
 }
