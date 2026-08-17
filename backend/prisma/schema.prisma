@@ -28,6 +28,9 @@ model User {
   passwordResetTokens PasswordResetToken[]
   taughtClasses       ClassGroup[]         @relation("TaughtClasses")
   parentLinks         StudentParent[]
+  examAttempts        ExamAttempt[]
+  gradedWritings      WritingSubmission[]  @relation("WritingGrader")
+  gradedSpeakings     SpeakingSubmission[] @relation("SpeakingGrader")
 
   @@map("users")
 }
@@ -87,9 +90,9 @@ model CareerApplication {
 }
 
 model Job {
-  id              String   @id @default(cuid())
+  id              String     @id @default(cuid())
   title           String
-  normalizedTitle String   @unique @map("normalized_title")
+  normalizedTitle String     @unique @map("normalized_title")
   type            String
   location        String
   salaryType      SalaryType @default(NEGOTIABLE) @map("salary_type")
@@ -99,10 +102,10 @@ model Job {
   duties          String[]
   benefits        String[]
   req             String
-  sortOrder       Int      @unique @default(1) @map("sort_order")
-  isPublished     Boolean  @default(true) @map("is_published")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  sortOrder       Int        @unique @default(1) @map("sort_order")
+  isPublished     Boolean    @default(true) @map("is_published")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
 
   careerApplications CareerApplication[]
 
@@ -117,28 +120,28 @@ enum SalaryType {
 }
 
 model Course {
-  id             String   @id @default(cuid())
-  slug           String   @unique
-  title          String
-  subtitle       String
-  description    String
-  level          String
-  target         String
-  tuition        String
-  duration       String    @default("90 phút/buổi")
-  startDate      DateTime? @map("start_date") @db.Date
-  endDate        DateTime? @map("end_date") @db.Date
-  perks          String[]
-  category       String
-  coverImageUrl  String   @map("cover_image_url")
-  accent         String   @default("#F16522")
-  bg             String   @default("#FFF4EC")
-  icon           String   @default("📚")
-  featured       Boolean  @default(true)
-  sortOrder      Int      @default(0) @map("sort_order")
-  isPublished    Boolean  @default(true) @map("is_published")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  subtitle      String
+  description   String
+  level         String
+  target        String
+  tuition       String
+  duration      String    @default("90 phút/buổi")
+  startDate     DateTime? @map("start_date") @db.Date
+  endDate       DateTime? @map("end_date") @db.Date
+  perks         String[]
+  category      String
+  coverImageUrl String    @map("cover_image_url")
+  accent        String    @default("#F16522")
+  bg            String    @default("#FFF4EC")
+  icon          String    @default("📚")
+  featured      Boolean   @default(true)
+  sortOrder     Int       @default(0) @map("sort_order")
+  isPublished   Boolean   @default(true) @map("is_published")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   classGroups ClassGroup[]
 
@@ -302,8 +305,8 @@ model ClassGroup {
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
 
-  course      Course?         @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  teacher     User?           @relation("TaughtClasses", fields: [teacherId], references: [id], onDelete: SetNull)
+  course      Course?        @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  teacher     User?          @relation("TaughtClasses", fields: [teacherId], references: [id], onDelete: SetNull)
   enrollments Enrollment[]
   sessions    ClassSession[]
 
@@ -373,16 +376,16 @@ model StudentParent {
 }
 
 model TuitionInvoice {
-  id        String        @id @default(cuid())
-  studentId String        @map("student_id")
-  period    String
-  amount    Int
-  dueDate   DateTime      @map("due_date") @db.Date
-  status    InvoiceStatus @default(UNPAID)
-  note      String?
-  paymentProofUrl String? @map("payment_proof_url")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
+  id              String        @id @default(cuid())
+  studentId       String        @map("student_id")
+  period          String
+  amount          Int
+  dueDate         DateTime      @map("due_date") @db.Date
+  status          InvoiceStatus @default(UNPAID)
+  note            String?
+  paymentProofUrl String?       @map("payment_proof_url")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
 
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
@@ -390,4 +393,198 @@ model TuitionInvoice {
   @@index([status])
   @@index([dueDate])
   @@map("tuition_invoices")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Thi thử IELTS (Giai đoạn 4)
+// L/R chấm tự động; W/S vào hàng chờ giáo viên chấm tay.
+// ─────────────────────────────────────────────────────────────
+
+enum ExamSkill {
+  LISTENING
+  READING
+  WRITING
+  SPEAKING
+}
+
+enum ExamQuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE_NOTGIVEN
+  YES_NO_NOTGIVEN
+  MATCHING
+  CLASSIFICATION
+  MATCHING_PARAGRAPH
+  NOTE_COMPLETION
+  TABLE_COMPLETION
+  SUMMARY_COMPLETION
+  SENTENCE_COMPLETION
+}
+
+enum ExamAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+}
+
+enum ExamGradingStatus {
+  PENDING
+  GRADED
+}
+
+/// Một đề thi thử theo 1 kỹ năng (hoặc gói nhiều đề ghép ở tầng ứng dụng).
+model ExamTest {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  title           String
+  skill           ExamSkill
+  module          String? // "academic" | "general" (Reading)
+  durationMinutes Int       @map("duration_minutes")
+  audioUrl        String?   @map("audio_url") // Listening: 1 file / đề
+  playOnce        Boolean   @default(true) @map("play_once")
+  source          String?
+  bandScale       Json?     @map("band_scale") // bảng quy đổi raw(0-40) -> band
+  isPublished     Boolean   @default(false) @map("is_published")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  sections ExamSection[]
+  attempts ExamAttempt[]
+
+  @@index([skill])
+  @@map("exam_tests")
+}
+
+/// Reading: 1 đoạn văn. Listening: 1 section (bối cảnh + transcript).
+model ExamSection {
+  id          String   @id @default(cuid())
+  testId      String   @map("test_id")
+  order       Int
+  heading     String?
+  passageText String?  @map("passage_text") // Reading: nội dung đoạn văn
+  transcript  String? // Listening: lời thoại (hiện sau khi nộp)
+  context     String? // Listening: audio nói về gì
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  test   ExamTest            @relation(fields: [testId], references: [id], onDelete: Cascade)
+  groups ExamQuestionGroup[]
+
+  @@index([testId])
+  @@map("exam_sections")
+}
+
+/// Nhóm câu hỏi cùng dạng (chia sẻ câu lệnh + danh sách lựa chọn nếu có).
+model ExamQuestionGroup {
+  id          String           @id @default(cuid())
+  sectionId   String           @map("section_id")
+  order       Int
+  type        ExamQuestionType
+  instruction String
+  options     Json? // danh sách A/B/C dùng chung (matching, classification…)
+  maxWords    Int?             @map("max_words") // giới hạn số từ cho câu điền
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  section   ExamSection    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  questions ExamQuestion[]
+
+  @@index([sectionId])
+  @@map("exam_question_groups")
+}
+
+/// Một câu hỏi. correctAnswers: các biến thể chấp nhận (rỗng với đề W/S).
+model ExamQuestion {
+  id             String   @id @default(cuid())
+  groupId        String   @map("group_id")
+  no             Int // số câu 1..40 trong đề
+  prompt         String
+  options        Json? // lựa chọn riêng của câu (MCQ A-D)
+  correctAnswers String[] @map("correct_answers")
+  explanation    String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  group   ExamQuestionGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  answers ExamAttemptAnswer[]
+
+  @@index([groupId])
+  @@map("exam_questions")
+}
+
+/// Một lượt làm bài của học viên. startedAt là mốc giờ chuẩn ở server.
+model ExamAttempt {
+  id          String            @id @default(cuid())
+  testId      String            @map("test_id")
+  userId      String            @map("user_id")
+  status      ExamAttemptStatus @default(IN_PROGRESS)
+  startedAt   DateTime          @default(now()) @map("started_at") // nguồn đồng hồ đếm giờ
+  submittedAt DateTime?         @map("submitted_at")
+  rawScore    Int?              @map("raw_score") // số câu đúng (L/R)
+  band        String? // band quy đổi
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  test     ExamTest            @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers  ExamAttemptAnswer[]
+  writing  WritingSubmission?
+  speaking SpeakingSubmission?
+
+  @@index([userId])
+  @@index([testId])
+  @@map("exam_attempts")
+}
+
+/// Đáp án học viên cho từng câu — autosave liên tục, chấm khi nộp (L/R).
+model ExamAttemptAnswer {
+  id         String   @id @default(cuid())
+  attemptId  String   @map("attempt_id")
+  questionId String   @map("question_id")
+  value      String? // đáp án đã chọn/gõ
+  isCorrect  Boolean? @map("is_correct") // set lúc nộp
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  attempt  ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@map("exam_attempt_answers")
+}
+
+/// Bài Writing của học viên — giáo viên chấm tay + đính bài mẫu.
+model WritingSubmission {
+  id           String            @id @default(cuid())
+  attemptId    String            @unique @map("attempt_id")
+  responseText String            @map("response_text")
+  status       ExamGradingStatus @default(PENDING)
+  band         String?
+  feedback     String?
+  sampleAnswer String?           @map("sample_answer")
+  gradedById   String?           @map("graded_by_id")
+  gradedAt     DateTime?         @map("graded_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  attempt  ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  gradedBy User?       @relation("WritingGrader", fields: [gradedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("exam_writing_submissions")
+}
+
+/// Bài Speaking — audio upload thẳng lên Cloudinary; giáo viên nghe & chấm.
+model SpeakingSubmission {
+  id         String            @id @default(cuid())
+  attemptId  String            @unique @map("attempt_id")
+  audioUrl   String            @map("audio_url")
+  status     ExamGradingStatus @default(PENDING)
+  band       String?
+  feedback   String?
+  gradedById String?           @map("graded_by_id")
+  gradedAt   DateTime?         @map("graded_at")
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @updatedAt @map("updated_at")
+
+  attempt  ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  gradedBy User?       @relation("SpeakingGrader", fields: [gradedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("exam_speaking_submissions")
 }
