@@ -173,6 +173,8 @@ export function UsersForm({
         >
           <option value="USER">USER</option>
           <option value="ADMIN">ADMIN</option>
+          <option value="TEACHER">TEACHER</option>
+          <option value="PARENT">PARENT</option>
         </select>
       </label>
 

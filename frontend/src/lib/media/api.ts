@@ -9,7 +9,8 @@ export type MediaCategory =
   | "about-teacher"
   | "course-cover"
   | "blog-cover"
-  | "blog-section";
+  | "blog-section"
+  | "tuition-proof";
 
 export type UploadMediaResponse = {
   message: string;

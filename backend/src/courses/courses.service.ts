@@ -5,6 +5,11 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { deleteReplacedMedia } from '../common/media-replace';
+import {
+  assertDateRange,
+  optionalDateOnly,
+  parseOptionalDateOnly,
+} from '../common/validation/date-only';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -21,6 +26,8 @@ const COURSE_SELECT = {
   target: true,
   tuition: true,
   duration: true,
+  startDate: true,
+  endDate: true,
   perks: true,
   category: true,
   coverImageUrl: true,
@@ -41,7 +48,7 @@ export class CoursesService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  list(query: ListCoursesQueryDto) {
+  async list(query: ListCoursesQueryDto) {
     const where: Prisma.CourseWhereInput = {};
 
     const publishedOnly = query.publishedOnly !== false;
@@ -57,11 +64,12 @@ export class CoursesService {
       where.category = query.category;
     }
 
-    return this.prisma.course.findMany({
+    const rows = await this.prisma.course.findMany({
       where,
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
       select: COURSE_SELECT,
     });
+    return rows.map((row) => this.serialize(row));
   }
 
   async findBySlug(slug: string, publishedOnly = true) {
@@ -74,12 +82,16 @@ export class CoursesService {
       throw new NotFoundException('Không tìm thấy khóa học');
     }
 
-    return course;
+    return this.serialize(course);
   }
 
   async create(dto: CreateCourseDto) {
+    const startDate = parseOptionalDateOnly(dto.startDate) ?? null;
+    const endDate = parseOptionalDateOnly(dto.endDate) ?? null;
+    assertDateRange(startDate, endDate);
+
     try {
-      return await this.prisma.course.create({
+      const course = await this.prisma.course.create({
         data: {
           slug: dto.slug,
           title: dto.title,
@@ -89,6 +101,8 @@ export class CoursesService {
           target: dto.target,
           tuition: dto.tuition,
           duration: dto.duration,
+          startDate,
+          endDate,
           perks: dto.perks,
           category: dto.category,
           coverImageUrl: dto.coverImageUrl,
@@ -101,6 +115,7 @@ export class CoursesService {
         },
         select: COURSE_SELECT,
       });
+      return this.serialize(course);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -115,10 +130,22 @@ export class CoursesService {
   async update(id: string, dto: UpdateCourseDto) {
     const existing = await this.prisma.course.findUnique({
       where: { id },
-      select: { id: true, coverImageUrl: true },
+      select: { id: true, coverImageUrl: true, startDate: true, endDate: true },
     });
     if (!existing) {
       throw new NotFoundException('Không tìm thấy khóa học');
+    }
+
+    if (dto.startDate !== undefined || dto.endDate !== undefined) {
+      const startDate =
+        dto.startDate !== undefined
+          ? (parseOptionalDateOnly(dto.startDate) ?? null)
+          : existing.startDate;
+      const endDate =
+        dto.endDate !== undefined
+          ? (parseOptionalDateOnly(dto.endDate) ?? null)
+          : existing.endDate;
+      assertDateRange(startDate, endDate);
     }
 
     const nextCoverUrl = dto.coverImageUrl;
@@ -137,6 +164,12 @@ export class CoursesService {
           ...(dto.target !== undefined ? { target: dto.target } : {}),
           ...(dto.tuition !== undefined ? { tuition: dto.tuition } : {}),
           ...(dto.duration !== undefined ? { duration: dto.duration } : {}),
+          ...(dto.startDate !== undefined
+            ? { startDate: parseOptionalDateOnly(dto.startDate) ?? null }
+            : {}),
+          ...(dto.endDate !== undefined
+            ? { endDate: parseOptionalDateOnly(dto.endDate) ?? null }
+            : {}),
           ...(dto.perks !== undefined ? { perks: dto.perks } : {}),
           ...(dto.category !== undefined ? { category: dto.category } : {}),
           ...(dto.coverImageUrl !== undefined
@@ -160,7 +193,7 @@ export class CoursesService {
         nextCoverUrl,
       );
 
-      return course;
+      return this.serialize(course);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -185,5 +218,15 @@ export class CoursesService {
     await this.cloudinaryService.deleteImageByUrl(existing.coverImageUrl);
 
     return { message: 'Đã xóa khóa học và ảnh Cloudinary (nếu có)' };
+  }
+
+  private serialize(
+    course: Prisma.CourseGetPayload<{ select: typeof COURSE_SELECT }>,
+  ) {
+    return {
+      ...course,
+      startDate: optionalDateOnly(course.startDate),
+      endDate: optionalDateOnly(course.endDate),
+    };
   }
 }

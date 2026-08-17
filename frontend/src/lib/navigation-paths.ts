@@ -9,7 +9,8 @@ export type Page =
   | "register"
   | "forgotPassword"
   | "resetPassword"
-  | "admin";
+  | "admin"
+  | "parent";
 
 export const PAGE_PATHS: Record<Page, string> = {
   home: "/",
@@ -23,6 +24,7 @@ export const PAGE_PATHS: Record<Page, string> = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   admin: "/admin",
+  parent: "/parent",
 };
 
 const PATH_PAGES: Record<string, Page> = {

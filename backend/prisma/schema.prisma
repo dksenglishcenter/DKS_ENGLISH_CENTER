@@ -11,6 +11,8 @@ datasource db {
 enum Role {
   USER
   ADMIN
+  TEACHER
+  PARENT
 }
 
 model User {
@@ -24,6 +26,8 @@ model User {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   passwordResetTokens PasswordResetToken[]
+  taughtClasses       ClassGroup[]         @relation("TaughtClasses")
+  parentLinks         StudentParent[]
 
   @@map("users")
 }
@@ -121,7 +125,9 @@ model Course {
   level          String
   target         String
   tuition        String
-  duration       String   @default("90 phút/buổi")
+  duration       String    @default("90 phút/buổi")
+  startDate      DateTime? @map("start_date") @db.Date
+  endDate        DateTime? @map("end_date") @db.Date
   perks          String[]
   category       String
   coverImageUrl  String   @map("cover_image_url")
@@ -133,6 +139,8 @@ model Course {
   isPublished    Boolean  @default(true) @map("is_published")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
+
+  classGroups ClassGroup[]
 
   @@index([category])
   @@index([featured, isPublished, sortOrder])
@@ -230,4 +238,156 @@ model BlogPost {
   @@index([category])
   @@index([featured, isPublished, sortOrder])
   @@map("blog_posts")
+}
+
+enum StudentStatus {
+  STUDYING
+  PAUSED
+  FINISHED
+}
+
+enum ClassStatus {
+  OPEN
+  CLOSED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PENDING
+  PAID
+}
+
+model Student {
+  id          String        @id @default(cuid())
+  fullName    String        @map("full_name")
+  phone       String?
+  email       String?
+  parentName  String?       @map("parent_name")
+  parentPhone String?       @map("parent_phone")
+  status      StudentStatus @default(STUDYING)
+  note        String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  enrollments Enrollment[]
+  attendances AttendanceRecord[]
+  parents     StudentParent[]
+  invoices    TuitionInvoice[]
+
+  @@index([status])
+  @@index([fullName])
+  @@map("students")
+}
+
+model ClassGroup {
+  id           String      @id @default(cuid())
+  name         String
+  courseId     String?     @map("course_id")
+  level        String?
+  teacherId    String?     @map("teacher_id")
+  scheduleDays Int[]       @map("schedule_days")
+  startTime    String?     @map("start_time")
+  endTime      String?     @map("end_time")
+  startsOn     DateTime?   @map("starts_on") @db.Date
+  endsOn       DateTime?   @map("ends_on") @db.Date
+  room         String?
+  capacity     Int?
+  status       ClassStatus @default(OPEN)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  course      Course?         @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  teacher     User?           @relation("TaughtClasses", fields: [teacherId], references: [id], onDelete: SetNull)
+  enrollments Enrollment[]
+  sessions    ClassSession[]
+
+  @@index([status])
+  @@index([teacherId])
+  @@map("classes")
+}
+
+model Enrollment {
+  id        String    @id @default(cuid())
+  studentId String    @map("student_id")
+  classId   String    @map("class_id")
+  joinedAt  DateTime  @default(now()) @map("joined_at")
+  leftAt    DateTime? @map("left_at")
+
+  student Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class   ClassGroup @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, classId])
+  @@index([classId])
+  @@map("enrollments")
+}
+
+model ClassSession {
+  id        String   @id @default(cuid())
+  classId   String   @map("class_id")
+  date      DateTime @db.Date
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  class       ClassGroup         @relation(fields: [classId], references: [id], onDelete: Cascade)
+  attendances AttendanceRecord[]
+
+  @@unique([classId, date])
+  @@index([date])
+  @@map("class_sessions")
+}
+
+model AttendanceRecord {
+  id        String           @id @default(cuid())
+  sessionId String           @map("session_id")
+  studentId String           @map("student_id")
+  status    AttendanceStatus @default(PRESENT)
+  note      String?
+  markedAt  DateTime         @default(now()) @map("marked_at")
+
+  session ClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+  @@map("attendance_records")
+}
+
+model StudentParent {
+  id           String   @id @default(cuid())
+  parentUserId String   @map("parent_user_id")
+  studentId    String   @map("student_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  parent  User    @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([parentUserId, studentId])
+  @@index([studentId])
+  @@map("student_parents")
+}
+
+model TuitionInvoice {
+  id        String        @id @default(cuid())
+  studentId String        @map("student_id")
+  period    String
+  amount    Int
+  dueDate   DateTime      @map("due_date") @db.Date
+  status    InvoiceStatus @default(UNPAID)
+  note      String?
+  paymentProofUrl String? @map("payment_proof_url")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, period])
+  @@index([status])
+  @@index([dueDate])
+  @@map("tuition_invoices")
 }

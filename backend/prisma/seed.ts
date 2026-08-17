@@ -1,7 +1,14 @@
 import 'dotenv/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, Role } from '../generated/prisma/client';
+import {
+  AttendanceStatus,
+  ClassStatus,
+  InvoiceStatus,
+  PrismaClient,
+  Role,
+  StudentStatus,
+} from '../generated/prisma/client';
 
 const ADMIN_SEED = {
   email: 'admin@dks.vn',
@@ -566,7 +573,215 @@ async function main() {
   }
   console.log(`Blog posts seed OK: ${BLOG_POSTS_SEED.length} bài`);
 
+  await seedPhase3Ops(prisma);
+
   await prisma.$disconnect();
+}
+
+async function seedPhase3Ops(prisma: PrismaClient) {
+  const teacherHash = await bcrypt.hash('Teacher@123456', 12);
+  const parentHash = await bcrypt.hash('Parent@123456', 12);
+
+  const teacherA = await prisma.user.upsert({
+    where: { email: 'gv.a@dks.vn' },
+    update: { passwordHash: teacherHash, fullName: 'Giáo viên A', role: Role.TEACHER },
+    create: {
+      email: 'gv.a@dks.vn',
+      passwordHash: teacherHash,
+      fullName: 'Giáo viên A',
+      role: Role.TEACHER,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'gv.b@dks.vn' },
+    update: { passwordHash: teacherHash, fullName: 'Giáo viên B', role: Role.TEACHER },
+    create: {
+      email: 'gv.b@dks.vn',
+      passwordHash: teacherHash,
+      fullName: 'Giáo viên B',
+      role: Role.TEACHER,
+    },
+  });
+
+  const parent = await prisma.user.upsert({
+    where: { email: 'ph.mai@dks.vn' },
+    update: {
+      passwordHash: parentHash,
+      fullName: 'Phụ huynh Mai',
+      role: Role.PARENT,
+      phone: '0901234567',
+    },
+    create: {
+      email: 'ph.mai@dks.vn',
+      passwordHash: parentHash,
+      fullName: 'Phụ huynh Mai',
+      phone: '0901234567',
+      role: Role.PARENT,
+    },
+  });
+
+  const studentAn = await prisma.student.upsert({
+    where: { id: 'cphase3studentan000000001' },
+    update: {},
+    create: {
+      id: 'cphase3studentan000000001',
+      fullName: 'Nguyễn An',
+      phone: '0911111111',
+      email: 'an.nguyen@student.dks.vn',
+      parentName: 'Phụ huynh Mai',
+      parentPhone: '0901234567',
+      status: StudentStatus.STUDYING,
+    },
+  });
+
+  const studentBinh = await prisma.student.upsert({
+    where: { id: 'cphase3studentbinh0000001' },
+    update: {},
+    create: {
+      id: 'cphase3studentbinh0000001',
+      fullName: 'Trần Bình',
+      phone: '0922222222',
+      email: 'binh.tran@student.dks.vn',
+      parentName: 'Phụ huynh Mai',
+      parentPhone: '0901234567',
+      status: StudentStatus.STUDYING,
+    },
+  });
+
+  await prisma.studentParent.upsert({
+    where: {
+      parentUserId_studentId: {
+        parentUserId: parent.id,
+        studentId: studentAn.id,
+      },
+    },
+    update: {},
+    create: { parentUserId: parent.id, studentId: studentAn.id },
+  });
+
+  await prisma.studentParent.upsert({
+    where: {
+      parentUserId_studentId: {
+        parentUserId: parent.id,
+        studentId: studentBinh.id,
+      },
+    },
+    update: {},
+    create: { parentUserId: parent.id, studentId: studentBinh.id },
+  });
+
+  const classGroup = await prisma.classGroup.upsert({
+    where: { id: 'cphase3classgroup00000001' },
+    update: { teacherId: teacherA.id, status: ClassStatus.OPEN },
+    create: {
+      id: 'cphase3classgroup00000001',
+      name: 'Lớp A — Giao tiếp tối T2/T5',
+      teacherId: teacherA.id,
+      scheduleDays: [1, 4],
+      startTime: '18:00',
+      endTime: '19:30',
+      room: 'P201',
+      capacity: 12,
+      status: ClassStatus.OPEN,
+    },
+  });
+
+  await prisma.enrollment.upsert({
+    where: {
+      studentId_classId: { studentId: studentAn.id, classId: classGroup.id },
+    },
+    update: { leftAt: null },
+    create: { studentId: studentAn.id, classId: classGroup.id },
+  });
+
+  await prisma.enrollment.upsert({
+    where: {
+      studentId_classId: { studentId: studentBinh.id, classId: classGroup.id },
+    },
+    update: { leftAt: null },
+    create: { studentId: studentBinh.id, classId: classGroup.id },
+  });
+
+  const day1 = new Date('2026-08-10T00:00:00.000Z');
+  const day2 = new Date('2026-08-13T00:00:00.000Z');
+
+  const session1 = await prisma.classSession.upsert({
+    where: { classId_date: { classId: classGroup.id, date: day1 } },
+    update: {},
+    create: { classId: classGroup.id, date: day1 },
+  });
+
+  const session2 = await prisma.classSession.upsert({
+    where: { classId_date: { classId: classGroup.id, date: day2 } },
+    update: {},
+    create: { classId: classGroup.id, date: day2 },
+  });
+
+  await prisma.attendanceRecord.upsert({
+    where: {
+      sessionId_studentId: { sessionId: session1.id, studentId: studentAn.id },
+    },
+    update: { status: AttendanceStatus.PRESENT },
+    create: {
+      sessionId: session1.id,
+      studentId: studentAn.id,
+      status: AttendanceStatus.PRESENT,
+    },
+  });
+  await prisma.attendanceRecord.upsert({
+    where: {
+      sessionId_studentId: { sessionId: session1.id, studentId: studentBinh.id },
+    },
+    update: { status: AttendanceStatus.LATE },
+    create: {
+      sessionId: session1.id,
+      studentId: studentBinh.id,
+      status: AttendanceStatus.LATE,
+    },
+  });
+  await prisma.attendanceRecord.upsert({
+    where: {
+      sessionId_studentId: { sessionId: session2.id, studentId: studentAn.id },
+    },
+    update: { status: AttendanceStatus.PRESENT },
+    create: {
+      sessionId: session2.id,
+      studentId: studentAn.id,
+      status: AttendanceStatus.PRESENT,
+    },
+  });
+  await prisma.attendanceRecord.upsert({
+    where: {
+      sessionId_studentId: { sessionId: session2.id, studentId: studentBinh.id },
+    },
+    update: { status: AttendanceStatus.ABSENT },
+    create: {
+      sessionId: session2.id,
+      studentId: studentBinh.id,
+      status: AttendanceStatus.ABSENT,
+    },
+  });
+
+  await prisma.tuitionInvoice.upsert({
+    where: {
+      studentId_period: { studentId: studentAn.id, period: '2026-08' },
+    },
+    update: {},
+    create: {
+      studentId: studentAn.id,
+      period: '2026-08',
+      amount: 1200000,
+      dueDate: new Date('2026-08-20T00:00:00.000Z'),
+      status: InvoiceStatus.UNPAID,
+      note: 'Học phí tháng 8',
+    },
+  });
+
+  console.log('Phase 3 ops seed OK');
+  console.log('GV A: gv.a@dks.vn / Teacher@123456');
+  console.log('GV B: gv.b@dks.vn / Teacher@123456');
+  console.log('PH:   ph.mai@dks.vn / Parent@123456');
 }
 
 main().catch(async (error) => {

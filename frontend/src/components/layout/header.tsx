@@ -10,6 +10,7 @@ import { DKSLogo } from "@/components/brand/dks-logo";
 import { Container } from "@/components/layout/container";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { homePathForRole } from "@/lib/auth/home-path";
 import { getActivePage, PAGE_PATHS, type Page } from "@/lib/navigation-paths";
 
 export function Header() {
@@ -76,9 +77,9 @@ export function Header() {
             ) : null}
             {ready && user ? (
               <Link
-                href={user.role === "ADMIN" ? PAGE_PATHS.admin : PAGE_PATHS.home}
+                href={homePathForRole(user.role)}
                 className="max-w-[7rem] truncate rounded-lg px-2 py-2 text-sm font-bold text-foreground font-[family-name:var(--font-nunito)]"
-                title={user.role === "ADMIN" ? "Vào trang admin" : user.fullName}
+                title={user.fullName}
               >
                 {user.fullName}
               </Link>

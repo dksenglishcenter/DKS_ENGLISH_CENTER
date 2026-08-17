@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { Role } from '../../generated/prisma/client';
+import {
+  ClassStatus,
+  InvoiceStatus,
+  Role,
+  StudentStatus,
+} from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 const MAX_GALLERY_IMAGES = 6;
@@ -45,6 +50,10 @@ export class DashboardService {
       usersTotal,
       usersAdmin,
       about,
+      studentsStudying,
+      classesOpen,
+      sessionsLast7Days,
+      invoicesUnpaid,
     ] = await Promise.all([
       this.prisma.course.count(),
       this.prisma.course.count({ where: { isPublished: true } }),
@@ -74,6 +83,10 @@ export class DashboardService {
         where: { id: 'about' },
         select: { visionImageUrl: true },
       }),
+      this.prisma.student.count({ where: { status: StudentStatus.STUDYING } }),
+      this.prisma.classGroup.count({ where: { status: ClassStatus.OPEN } }),
+      this.prisma.classSession.count({ where: { date: { gte: weekAgo } } }),
+      this.prisma.tuitionInvoice.count({ where: { status: InvoiceStatus.UNPAID } }),
     ]);
 
     return {
@@ -122,6 +135,12 @@ export class DashboardService {
         total: usersTotal,
         admins: usersAdmin,
         members: usersTotal - usersAdmin,
+      },
+      ops: {
+        studentsStudying,
+        classesOpen,
+        sessionsLast7Days,
+        invoicesUnpaid,
       },
       leadsTrend: await this.getLeadsTrend(),
     };

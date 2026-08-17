@@ -8,6 +8,7 @@ import { Phone } from "lucide-react";
 import { useAuthSession } from "@/components/auth/auth-session";
 import { SocialIcon } from "@/components/brand/social-icon";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
+import { homePathForRole } from "@/lib/auth/home-path";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const widgetClass =
@@ -35,16 +36,15 @@ function FloatingAuth() {
 
   const initial =
     user.fullName.trim().charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase();
-  const isAdmin = user.role === "ADMIN";
-  const accountHref = isAdmin ? PAGE_PATHS.admin : PAGE_PATHS.home;
+  const accountHref = homePathForRole(user.role);
 
   return (
     <div className="flex flex-col items-start gap-2">
       <Link
         href={accountHref}
         className={`${pillClass} bg-primary text-primary-foreground`}
-        title={isAdmin ? `Vào trang admin · ${user.email}` : user.email}
-        aria-label={isAdmin ? "Vào trang quản trị" : `Tài khoản ${user.fullName}`}
+        title={user.email}
+        aria-label={`Tài khoản ${user.fullName}`}
       >
         <span
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#4A2306] text-xs font-black text-white"

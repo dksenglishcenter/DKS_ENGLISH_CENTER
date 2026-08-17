@@ -119,7 +119,11 @@ export class UsersService {
       throw new ForbiddenException('Bạn không thể tự thay đổi quyền của mình.');
     }
 
-    if (existing.role === Role.ADMIN && dto.role === Role.USER) {
+    if (
+      existing.role === Role.ADMIN &&
+      dto.role !== undefined &&
+      dto.role !== Role.ADMIN
+    ) {
       await this.ensureAnotherAdminExists(id);
     }
 

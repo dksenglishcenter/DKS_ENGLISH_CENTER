@@ -1,12 +1,13 @@
 ﻿"use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BookOpen,
   Briefcase,
   Building2,
+  ClipboardCheck,
   FileUser,
   GraduationCap,
   ImageIcon,
@@ -16,7 +17,10 @@ import {
   Menu,
   MessageSquareQuote,
   Newspaper,
+  School,
   Users,
+  UsersRound,
+  Wallet,
   X,
 } from "lucide-react";
 
@@ -27,8 +31,12 @@ import type { AuthUser } from "@/lib/auth/types";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { cn } from "@/components/ui/utils";
 
-const NAV_ITEMS = [
+const ADMIN_NAV = [
   { href: PAGE_PATHS.admin, label: "Tổng quan", icon: LayoutDashboard },
+  { href: `${PAGE_PATHS.admin}/students`, label: "Học viên", icon: UsersRound },
+  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp học", icon: School },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
+  { href: `${PAGE_PATHS.admin}/tuition`, label: "Học phí", icon: Wallet },
   { href: `${PAGE_PATHS.admin}/courses`, label: "Khóa học", icon: BookOpen },
   {
     href: `${PAGE_PATHS.admin}/success-stories`,
@@ -57,9 +65,23 @@ const NAV_ITEMS = [
   { href: `${PAGE_PATHS.admin}/users`, label: "Người dùng", icon: Users },
 ] as const;
 
+const TEACHER_NAV = [
+  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
+] as const;
+
+function teacherCanAccess(pathname: string) {
+  return (
+    pathname === `${PAGE_PATHS.admin}/classes` ||
+    pathname.startsWith(`${PAGE_PATHS.admin}/classes/`) ||
+    pathname === `${PAGE_PATHS.admin}/attendance` ||
+    pathname.startsWith(`${PAGE_PATHS.admin}/attendance/`)
+  );
+}
+
 const AdminUserContext = createContext<AuthUser | null>(null);
 
-/** User ADMIN đã được AdminShell xác thực — tránh gọi /auth/me lần nữa. */
+/** User ADMIN/TEACHER đã được AdminShell xác thực — tránh gọi /auth/me lần nữa. */
 export function useAdminUser() {
   const user = useContext(AdminUserContext);
   if (!user) {
@@ -83,7 +105,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         const response = await getCurrentUser();
         if (cancelled) return;
 
-        if (response.user.role !== "ADMIN") {
+        const role = response.user.role;
+        if (role === "PARENT") {
+          router.replace(PAGE_PATHS.parent);
+          return;
+        }
+        if (role !== "ADMIN" && role !== "TEACHER") {
           router.replace(PAGE_PATHS.home);
           return;
         }
@@ -102,6 +129,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (!user || user.role !== "TEACHER") return;
+    if (!teacherCanAccess(pathname)) {
+      router.replace(`${PAGE_PATHS.admin}/classes`);
+    }
+  }, [user, pathname, router]);
 
   useEffect(() => {
     setMobileSidebarOpen(false);
@@ -125,6 +159,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     };
   }, [mobileSidebarOpen]);
 
+  const navItems = useMemo(
+    () => (user?.role === "TEACHER" ? TEACHER_NAV : ADMIN_NAV),
+    [user?.role],
+  );
+
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -141,8 +180,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (user.role === "TEACHER" && !teacherCanAccess(pathname)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FFF9F5] text-sm text-[#9B6B50] dark:bg-background dark:text-muted-foreground">
+        Đang chuyển tới lớp của bạn...
+      </div>
+    );
+  }
+
   const renderNavigation = (onNavigate?: () => void) =>
-    NAV_ITEMS.map((item) => {
+    navItems.map((item) => {
       const Icon = item.icon;
       const active =
         item.href === PAGE_PATHS.admin
@@ -184,18 +231,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 
+  const brandTitle = user.role === "TEACHER" ? "DKS Giáo viên" : "DKS Admin";
+  const brandSubtitle = user.role === "TEACHER" ? "Lớp & điểm danh" : "Quản trị hệ thống";
+
   return (
     <AdminUserContext.Provider value={user}>
       <div className="flex min-h-screen bg-[#FFF9F5] font-[family-name:var(--font-body)] text-[#4A2306] dark:bg-background dark:text-foreground">
-        {/* Desktop sidebar — chỉ từ lg (1024px), tablet/iPad dùng drawer */}
         <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 flex-col border-r border-border bg-[#4A2306] text-white dark:bg-[#121214] lg:flex">
           <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
             <DKSLogo size="sm" />
             <div>
               <div className="text-sm font-black font-[family-name:var(--font-nunito)]">
-                DKS Admin
+                {brandTitle}
               </div>
-              <div className="text-xs text-white/60">Quản trị hệ thống</div>
+              <div className="text-xs text-white/60">{brandSubtitle}</div>
             </div>
           </div>
 
@@ -206,7 +255,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {renderSidebarFooter()}
         </aside>
 
-        {/* Mobile / tablet drawer */}
         {mobileSidebarOpen ? (
           <div className="fixed inset-0 z-50 lg:hidden">
             <button
@@ -224,9 +272,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   <DKSLogo size="sm" />
                   <div>
                     <div className="text-sm font-black font-[family-name:var(--font-nunito)]">
-                      DKS Admin
+                      {brandTitle}
                     </div>
-                    <div className="text-xs text-white/60">Quản trị hệ thống</div>
+                    <div className="text-xs text-white/60">{brandSubtitle}</div>
                   </div>
                 </div>
                 <button
