@@ -66,21 +66,26 @@ export class MockTestService {
   }
 
   /**
-   * Start (or resume) an attempt. Reuses an in-progress attempt so a refresh
-   * keeps the same server-side clock rather than restarting the timer.
+   * Start (or resume) an attempt. Taking a test needs no login — an anonymous
+   * attempt has no userId and is reached only via its (unguessable) id. A
+   * logged-in user resumes their in-progress attempt so a refresh keeps the
+   * same server-side clock rather than restarting the timer.
    */
-  async startAttempt(testId: string, userId: string) {
+  async startAttempt(testId: string, userId: string | null) {
     const test = await this.prisma.examTest.findFirst({
       where: { id: testId, isPublished: true },
       select: { id: true, durationMinutes: true },
     });
     if (!test) throw new NotFoundException('Không tìm thấy đề thi.');
 
+    const existing = userId
+      ? await this.prisma.examAttempt.findFirst({
+          where: { testId, userId, status: 'IN_PROGRESS' },
+          orderBy: { startedAt: 'desc' },
+        })
+      : null;
     const attempt =
-      (await this.prisma.examAttempt.findFirst({
-        where: { testId, userId, status: 'IN_PROGRESS' },
-        orderBy: { startedAt: 'desc' },
-      })) ??
+      existing ??
       (await this.prisma.examAttempt.create({ data: { testId, userId } }));
 
     return this.withTiming(attempt, test.durationMinutes);
@@ -89,7 +94,7 @@ export class MockTestService {
   /** Autosave: upsert each answer by (attempt, question). */
   async saveAnswers(
     attemptId: string,
-    userId: string,
+    userId: string | null,
     answers: { questionId: string; value?: string }[],
   ) {
     const attempt = await this.getOwnedAttempt(attemptId, userId);
@@ -113,7 +118,7 @@ export class MockTestService {
   }
 
   /** Submit and auto-grade a Listening/Reading paper. Idempotent once graded. */
-  async submit(attemptId: string, userId: string) {
+  async submit(attemptId: string, userId: string | null) {
     const attempt = await this.getOwnedAttempt(attemptId, userId);
     if (attempt.status !== 'IN_PROGRESS') {
       return this.getResult(attemptId, userId);
@@ -188,7 +193,7 @@ export class MockTestService {
   }
 
   /** Result + review: the paper with answers revealed and the student's marks. */
-  async getResult(attemptId: string, userId: string) {
+  async getResult(attemptId: string, userId: string | null) {
     const attempt = await this.getOwnedAttempt(attemptId, userId);
 
     const test = await this.prisma.examTest.findUnique({
@@ -249,13 +254,15 @@ export class MockTestService {
 
   private async getOwnedAttempt(
     attemptId: string,
-    userId: string,
+    userId: string | null,
   ): Promise<ExamAttempt> {
     const attempt = await this.prisma.examAttempt.findUnique({
       where: { id: attemptId },
     });
     if (!attempt) throw new NotFoundException('Không tìm thấy lượt thi.');
-    if (attempt.userId !== userId) {
+    // Anonymous attempts (no owner) are reached by holding the id. Only block
+    // when the attempt has an owner and a different user is asking.
+    if (attempt.userId && userId && attempt.userId !== userId) {
       throw new ForbiddenException('Đây không phải lượt thi của bạn.');
     }
     return attempt;

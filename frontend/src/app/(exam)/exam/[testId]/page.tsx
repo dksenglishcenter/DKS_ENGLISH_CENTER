@@ -40,13 +40,6 @@ export default function Page() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 p-6 text-center">
         <p className="text-red-600">{error}</p>
-        <p className="text-sm text-muted-foreground">
-          Bạn cần{" "}
-          <Link href="/login" className="font-semibold text-primary underline">
-            đăng nhập
-          </Link>{" "}
-          để làm bài, rồi thử lại.
-        </p>
         <Link href="/exam" className="text-sm text-primary underline">
           ← Về thư viện đề
         </Link>

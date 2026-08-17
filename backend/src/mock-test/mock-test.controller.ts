@@ -7,17 +7,15 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import type { AuthRequestUser } from '../auth/guards/jwt-auth.guard';
 import { SaveAnswersDto } from './dto/save-answers.dto';
 import { MockTestService } from './mock-test.service';
 
-/** Student-facing exam flow. Every route requires a logged-in user. */
+/**
+ * Public exam flow — taking a mock test needs no login. An attempt is
+ * anonymous and is reached only via its unguessable id.
+ */
 @Controller('mock-tests')
-@UseGuards(JwtAuthGuard)
 export class MockTestController {
   constructor(private readonly service: MockTestService) {}
 
@@ -35,8 +33,8 @@ export class MockTestController {
 
   @Post(':id/attempts')
   @HttpCode(HttpStatus.CREATED)
-  async start(@Param('id') id: string, @CurrentUser() user: AuthRequestUser) {
-    const attempt = await this.service.startAttempt(id, user.id);
+  async start(@Param('id') id: string) {
+    const attempt = await this.service.startAttempt(id, null);
     return { attempt };
   }
 
@@ -44,26 +42,19 @@ export class MockTestController {
   async save(
     @Param('attemptId') attemptId: string,
     @Body() dto: SaveAnswersDto,
-    @CurrentUser() user: AuthRequestUser,
   ) {
-    return this.service.saveAnswers(attemptId, user.id, dto.answers);
+    return this.service.saveAnswers(attemptId, null, dto.answers);
   }
 
   @Post('attempts/:attemptId/submit')
-  async submit(
-    @Param('attemptId') attemptId: string,
-    @CurrentUser() user: AuthRequestUser,
-  ) {
-    const result = await this.service.submit(attemptId, user.id);
+  async submit(@Param('attemptId') attemptId: string) {
+    const result = await this.service.submit(attemptId, null);
     return { result };
   }
 
   @Get('attempts/:attemptId/result')
-  async result(
-    @Param('attemptId') attemptId: string,
-    @CurrentUser() user: AuthRequestUser,
-  ) {
-    const result = await this.service.getResult(attemptId, user.id);
+  async result(@Param('attemptId') attemptId: string) {
+    const result = await this.service.getResult(attemptId, null);
     return { result };
   }
 }

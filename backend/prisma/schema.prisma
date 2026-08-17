@@ -512,7 +512,7 @@ model ExamQuestion {
 model ExamAttempt {
   id          String            @id @default(cuid())
   testId      String            @map("test_id")
-  userId      String            @map("user_id")
+  userId      String?           @map("user_id") // null = làm bài ẩn danh (không cần đăng nhập)
   status      ExamAttemptStatus @default(IN_PROGRESS)
   startedAt   DateTime          @default(now()) @map("started_at") // nguồn đồng hồ đếm giờ
   submittedAt DateTime?         @map("submitted_at")
@@ -522,7 +522,7 @@ model ExamAttempt {
   updatedAt   DateTime          @updatedAt @map("updated_at")
 
   test     ExamTest            @relation(fields: [testId], references: [id], onDelete: Cascade)
-  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
   answers  ExamAttemptAnswer[]
   writing  WritingSubmission?
   speaking SpeakingSubmission?
