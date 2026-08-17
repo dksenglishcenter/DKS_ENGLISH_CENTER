@@ -239,6 +239,8 @@ export function UsersAdmin() {
             <option value="">Tất cả quyền</option>
             <option value="USER">USER</option>
             <option value="ADMIN">ADMIN</option>
+            <option value="TEACHER">TEACHER</option>
+            <option value="PARENT">PARENT</option>
           </select>
 
           <Button

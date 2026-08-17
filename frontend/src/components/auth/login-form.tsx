@@ -7,6 +7,7 @@ import { Lock, Mail } from "lucide-react";
 
 import { AuthInputField } from "@/components/auth/auth-input-field";
 import { loginUser } from "@/lib/auth/api";
+import { homePathForRole } from "@/lib/auth/home-path";
 import { formatError } from "@/lib/errors/format-error";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { SOCIAL_LINKS } from "@/lib/social-links";
@@ -67,12 +68,7 @@ export function LoginForm() {
       }
 
       setSuccess(response.message);
-
-      if (response.user.role === "ADMIN") {
-        router.replace(PAGE_PATHS.admin);
-      } else {
-        router.replace(PAGE_PATHS.home);
-      }
+      router.replace(homePathForRole(response.user.role));
     } catch (err) {
       setError(formatError(err));
     } finally {

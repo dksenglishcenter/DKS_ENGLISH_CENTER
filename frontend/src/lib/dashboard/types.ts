@@ -36,6 +36,12 @@ export type AdminDashboardStats = {
     admins: number;
     members: number;
   };
+  ops: {
+    studentsStudying: number;
+    classesOpen: number;
+    sessionsLast7Days: number;
+    invoicesUnpaid: number;
+  };
   leadsTrend: LeadsTrendPoint[];
 };
 

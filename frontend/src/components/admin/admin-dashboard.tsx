@@ -5,8 +5,12 @@ import Link from "next/link";
 import {
   BookOpen,
   Briefcase,
+  ClipboardCheck,
   Mail,
+  School,
   Users,
+  UsersRound,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -158,7 +162,7 @@ export function AdminDashboard() {
           Tổng quan
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Thống kê nội dung và đơn gửi từ toàn bộ website.
+          Vận hành lớp học và thống kê nội dung website.
         </p>
       </div>
 
@@ -189,6 +193,34 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
     stats.facilities.total;
 
   const kpis: Kpi[] = [
+    {
+      title: "HV đang học",
+      value: stats.ops.studentsStudying,
+      hint: "Học viên trạng thái đang học",
+      href: `${admin}/students`,
+      icon: UsersRound,
+    },
+    {
+      title: "Lớp đang mở",
+      value: stats.ops.classesOpen,
+      hint: "Lớp OPEN",
+      href: `${admin}/classes`,
+      icon: School,
+    },
+    {
+      title: "Buổi 7 ngày",
+      value: stats.ops.sessionsLast7Days,
+      hint: "Buổi điểm danh gần đây",
+      href: `${admin}/attendance`,
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Học phí chưa đóng",
+      value: stats.ops.invoicesUnpaid,
+      hint: "Invoice UNPAID",
+      href: `${admin}/tuition`,
+      icon: Wallet,
+    },
     {
       title: "Tổng nội dung",
       value: contentTotal,
