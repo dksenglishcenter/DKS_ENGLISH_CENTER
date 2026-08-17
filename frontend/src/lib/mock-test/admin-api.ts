@@ -8,6 +8,7 @@ export type AdminExam = {
   skill: ExamSkill;
   durationMinutes: number;
   isPublished: boolean;
+  audioUrl: string | null;
   createdAt: string;
   questionCount: number;
 };
@@ -36,4 +37,20 @@ export function setExamPublished(id: string, isPublished: boolean) {
 
 export function deleteExam(id: string) {
   return apiFetch(`/mock-tests/admin/${id}`, { method: "DELETE" });
+}
+
+export async function uploadExamAudio(file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  return apiFetch<{ url: string; publicId: string }>("/media/upload-audio", {
+    method: "POST",
+    body: form,
+  });
+}
+
+export function setExamAudio(id: string, audioUrl: string) {
+  return apiFetch(`/mock-tests/admin/${id}/audio`, {
+    method: "PATCH",
+    json: { audioUrl },
+  });
 }

@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ImportTestDto } from './dto/import-test.dto';
 import { SaveAnswersDto } from './dto/save-answers.dto';
+import { SetAudioDto } from './dto/set-audio.dto';
 import { SetPublishedDto } from './dto/set-published.dto';
 import { MockTestService } from './mock-test.service';
 
@@ -54,6 +55,14 @@ export class MockTestController {
     @Body() dto: SetPublishedDto,
   ) {
     const test = await this.service.setPublished(id, dto.isPublished);
+    return { test };
+  }
+
+  @Patch('admin/:id/audio')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  async setAudio(@Param('id') id: string, @Body() dto: SetAudioDto) {
+    const test = await this.service.setAudio(id, dto.audioUrl ?? null);
     return { test };
   }
 

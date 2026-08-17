@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,9 @@ import {
   deleteExam,
   importExam,
   listAllExams,
+  setExamAudio,
   setExamPublished,
+  uploadExamAudio,
   type AdminExam,
 } from "@/lib/mock-test/admin-api";
 import type { ExamSkill } from "@/lib/mock-test/types";
@@ -34,6 +36,9 @@ export function ExamsAdmin() {
   const [importText, setImportText] = useState("");
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+
+  const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const audioForId = useRef<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -74,6 +79,31 @@ export function ExamsAdmin() {
       setListError(formatError(err));
     } finally {
       setDeleting(false);
+    }
+  }
+
+  function pickAudio(examId: string) {
+    audioForId.current = examId;
+    audioInputRef.current?.click();
+  }
+
+  async function handleAudioChange(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = event.target.files?.[0];
+    const examId = audioForId.current;
+    event.target.value = ""; // allow re-picking the same file
+    if (!file || !examId) return;
+
+    setBusyId(examId);
+    try {
+      const { url } = await uploadExamAudio(file);
+      await setExamAudio(examId, url);
+      await load();
+    } catch (err) {
+      setListError(formatError(err));
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -181,7 +211,14 @@ export function ExamsAdmin() {
                     <div className="font-semibold text-foreground">{exam.title}</div>
                     <div className="text-xs text-muted-foreground">{exam.code}</div>
                   </td>
-                  <td className="px-4 py-3">{SKILL_LABEL[exam.skill]}</td>
+                  <td className="px-4 py-3">
+                    {SKILL_LABEL[exam.skill]}
+                    {exam.skill === "LISTENING" && !exam.audioUrl ? (
+                      <span className="block text-xs text-red-600">
+                        chưa có audio
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-3">{exam.questionCount}</td>
                   <td className="px-4 py-3">{exam.durationMinutes} phút</td>
                   <td className="px-4 py-3">
@@ -197,6 +234,20 @@ export function ExamsAdmin() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
+                      {exam.skill === "LISTENING" ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={busyId === exam.id}
+                          onClick={() => pickAudio(exam.id)}
+                        >
+                          {busyId === exam.id
+                            ? "Đang tải…"
+                            : exam.audioUrl
+                              ? "Đổi audio"
+                              : "Tải audio"}
+                        </Button>
+                      ) : null}
                       <Button
                         variant="outline"
                         size="sm"
@@ -220,6 +271,14 @@ export function ExamsAdmin() {
           </tbody>
         </table>
       </div>
+
+      <input
+        ref={audioInputRef}
+        type="file"
+        accept="audio/*"
+        className="hidden"
+        onChange={handleAudioChange}
+      />
 
       <ConfirmDialog
         open={deleteTarget !== null}

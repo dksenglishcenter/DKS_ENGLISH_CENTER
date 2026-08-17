@@ -56,6 +56,7 @@ export class MockTestService {
         skill: true,
         durationMinutes: true,
         isPublished: true,
+        audioUrl: true,
         createdAt: true,
       },
     });
@@ -95,6 +96,15 @@ export class MockTestService {
       where: { id },
       data: { isPublished },
       select: { id: true, isPublished: true },
+    });
+  }
+
+  async setAudio(id: string, audioUrl: string | null) {
+    await this.ensureTestExists(id);
+    return this.prisma.examTest.update({
+      where: { id },
+      data: { audioUrl: audioUrl || null },
+      select: { id: true, audioUrl: true },
     });
   }
 
