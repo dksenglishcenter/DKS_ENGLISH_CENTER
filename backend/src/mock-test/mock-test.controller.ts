@@ -1,23 +1,70 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { Role } from '../../generated/prisma/client';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { ImportTestDto } from './dto/import-test.dto';
 import { SaveAnswersDto } from './dto/save-answers.dto';
+import { SetPublishedDto } from './dto/set-published.dto';
 import { MockTestService } from './mock-test.service';
 
 /**
- * Public exam flow — taking a mock test needs no login. An attempt is
- * anonymous and is reached only via its unguessable id.
+ * Public routes let anyone take a test (no login). The /admin routes are for
+ * authoring and require an ADMIN or TEACHER account.
  */
 @Controller('mock-tests')
 export class MockTestController {
   constructor(private readonly service: MockTestService) {}
+
+  // ── Authoring (teacher / admin) ─────────────────────────────────────
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  async listAll() {
+    const tests = await this.service.listAllForAdmin();
+    return { tests };
+  }
+
+  @Post('admin/import')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @HttpCode(HttpStatus.CREATED)
+  async import(@Body() dto: ImportTestDto) {
+    const test = await this.service.importTest(dto);
+    return { message: 'Đã tạo đề thi.', test };
+  }
+
+  @Patch('admin/:id/publish')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  async setPublished(
+    @Param('id') id: string,
+    @Body() dto: SetPublishedDto,
+  ) {
+    const test = await this.service.setPublished(id, dto.isPublished);
+    return { test };
+  }
+
+  @Delete('admin/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  async remove(@Param('id') id: string) {
+    return this.service.remove(id);
+  }
+
+  // ── Public exam flow (no login) ─────────────────────────────────────
 
   @Get()
   async list() {

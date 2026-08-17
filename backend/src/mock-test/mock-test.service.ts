@@ -1,15 +1,18 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import {
   ExamAttempt,
+  ExamQuestionType,
   ExamSkill,
   Prisma,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ImportTestDto } from './dto/import-test.dto';
 import { AnswerKeyItem, QuestionType, gradeTest } from './grading/grading';
 
 /** Answers are hidden while taking; only these fields go to the client. */
@@ -39,6 +42,77 @@ export class MockTestService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  // ── Authoring (teacher / admin) ───────────────────────────────────────
+
+  /** Every test with a question count, for the admin list. */
+  async listAllForAdmin() {
+    const tests = await this.prisma.examTest.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        code: true,
+        title: true,
+        skill: true,
+        durationMinutes: true,
+        isPublished: true,
+        createdAt: true,
+      },
+    });
+    return Promise.all(
+      tests.map(async (t) => ({
+        ...t,
+        questionCount: await this.prisma.examQuestion.count({
+          where: { group: { section: { testId: t.id } } },
+        }),
+      })),
+    );
+  }
+
+  /** Create a whole test from an imported payload. */
+  async importTest(dto: ImportTestDto) {
+    const data = buildTestCreateInput(dto);
+    try {
+      const created = await this.prisma.examTest.create({
+        data,
+        select: { id: true, code: true, title: true },
+      });
+      return created;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(`Mã đề "${dto.code}" đã tồn tại.`);
+      }
+      throw error;
+    }
+  }
+
+  async setPublished(id: string, isPublished: boolean) {
+    await this.ensureTestExists(id);
+    return this.prisma.examTest.update({
+      where: { id },
+      data: { isPublished },
+      select: { id: true, isPublished: true },
+    });
+  }
+
+  async remove(id: string) {
+    await this.ensureTestExists(id);
+    await this.prisma.examTest.delete({ where: { id } });
+    return { message: 'Đã xóa đề thi.' };
+  }
+
+  private async ensureTestExists(id: string) {
+    const test = await this.prisma.examTest.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!test) throw new NotFoundException('Không tìm thấy đề thi.');
+  }
+
+  // ── Student flow ──────────────────────────────────────────────────────
 
   /** Full test content to render the paper — WITHOUT the answer key. */
   async getTestForTaking(id: string) {
@@ -293,6 +367,123 @@ export class MockTestService {
     }
     return attempt;
   }
+}
+
+// ── Import mapping (payload → Prisma nested create) ─────────────────────
+
+type Dict = Record<string, unknown>;
+
+function asObject(value: unknown, field: string): Dict {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new BadRequestException(`${field} phải là một đối tượng.`);
+  }
+  return value as Dict;
+}
+function asArray(value: unknown, field: string): unknown[] {
+  if (!Array.isArray(value)) {
+    throw new BadRequestException(`${field} phải là một mảng.`);
+  }
+  return value;
+}
+function optText(value: unknown): string | null {
+  return typeof value === 'string' && value.length > 0 ? value : null;
+}
+function reqText(value: unknown, field: string): string {
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new BadRequestException(`${field} là bắt buộc.`);
+  }
+  return value;
+}
+function optJson(value: unknown): Prisma.InputJsonValue | undefined {
+  return value == null ? undefined : (value as Prisma.InputJsonValue);
+}
+function requireEnum<T extends string>(
+  allowed: Record<string, T>,
+  value: unknown,
+  field: string,
+): T {
+  const upper = String(value ?? '').toUpperCase();
+  const values = Object.values(allowed) as string[];
+  if (!values.includes(upper)) {
+    throw new BadRequestException(
+      `${field} không hợp lệ: "${String(value)}". Cho phép: ${values.join(', ')}.`,
+    );
+  }
+  return upper as T;
+}
+
+function buildTestCreateInput(dto: ImportTestDto): Prisma.ExamTestCreateInput {
+  const skill = requireEnum(ExamSkill, dto.skill, 'skill');
+  const sections = asArray(dto.sections, 'sections');
+  if (sections.length === 0) {
+    throw new BadRequestException('Đề cần ít nhất 1 phần (section).');
+  }
+
+  return {
+    code: dto.code.trim(),
+    title: dto.title.trim(),
+    skill,
+    module: optText(dto.module),
+    durationMinutes: dto.durationMinutes,
+    audioUrl: optText(dto.audioUrl),
+    playOnce: dto.playOnce === undefined ? true : Boolean(dto.playOnce),
+    source: optText(dto.source),
+    bandScale: optJson(dto.bandScale),
+    isPublished: false,
+    sections: {
+      create: sections.map((raw, si) => {
+        const s = asObject(raw, `sections[${si}]`);
+        const groups = asArray(s.groups, `sections[${si}].groups`);
+        return {
+          order: typeof s.order === 'number' ? s.order : si,
+          heading: optText(s.heading),
+          passageText: optText(s.passageText),
+          transcript: optText(s.transcript),
+          context: optText(s.context),
+          groups: {
+            create: groups.map((rawGroup, gi) => {
+              const g = asObject(rawGroup, `sections[${si}].groups[${gi}]`);
+              const label = `sections[${si}].groups[${gi}]`;
+              const questions = asArray(g.questions, `${label}.questions`);
+              return {
+                order: typeof g.order === 'number' ? g.order : gi,
+                type: requireEnum(ExamQuestionType, g.type, `${label}.type`),
+                instruction: reqText(g.instruction, `${label}.instruction`),
+                options: optJson(g.options),
+                maxWords:
+                  g.maxWords == null ? null : Number(g.maxWords) || null,
+                questions: {
+                  create: questions.map((rawQ, qi) => {
+                    const q = asObject(rawQ, `${label}.questions[${qi}]`);
+                    const no = Number(q.no);
+                    if (!Number.isInteger(no) || no < 1) {
+                      throw new BadRequestException(
+                        `${label}.questions[${qi}] thiếu số câu "no" hợp lệ.`,
+                      );
+                    }
+                    // Accept "correctAnswers" or the shorter "answer" alias.
+                    const raw = q.correctAnswers ?? q.answer;
+                    const correctAnswers = Array.isArray(raw)
+                      ? raw.map((x) => String(x))
+                      : raw == null || raw === ''
+                        ? []
+                        : [String(raw)];
+                    return {
+                      no,
+                      prompt: optText(q.prompt) ?? '',
+                      options: optJson(q.options),
+                      correctAnswers,
+                      explanation: optText(q.explanation),
+                    };
+                  }),
+                },
+              };
+            }),
+          },
+        };
+      }),
+    },
+  };
 }
 
 /** Map a raw score to a band using the test's { "40": "9.0", ... } table. */

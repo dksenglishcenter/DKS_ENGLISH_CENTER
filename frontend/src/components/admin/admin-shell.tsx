@@ -8,6 +8,7 @@ import {
   Briefcase,
   Building2,
   ClipboardCheck,
+  FileText,
   FileUser,
   GraduationCap,
   ImageIcon,
@@ -49,6 +50,7 @@ const ADMIN_NAV = [
   { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
   { href: `${PAGE_PATHS.admin}/tuition`, label: "Học phí", icon: Wallet },
   { href: `${PAGE_PATHS.admin}/courses`, label: "Khóa học", icon: BookOpen },
+  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText },
   {
     href: `${PAGE_PATHS.admin}/success-stories`,
     label: "Câu chuyện",
@@ -79,6 +81,7 @@ const ADMIN_NAV = [
 const TEACHER_NAV = [
   { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School },
   { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
+  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText },
 ] as const;
 
 function teacherCanAccess(pathname: string) {
@@ -86,7 +89,9 @@ function teacherCanAccess(pathname: string) {
     pathname === `${PAGE_PATHS.admin}/classes` ||
     pathname.startsWith(`${PAGE_PATHS.admin}/classes/`) ||
     pathname === `${PAGE_PATHS.admin}/attendance` ||
-    pathname.startsWith(`${PAGE_PATHS.admin}/attendance/`)
+    pathname.startsWith(`${PAGE_PATHS.admin}/attendance/`) ||
+    pathname === `${PAGE_PATHS.admin}/exams` ||
+    pathname.startsWith(`${PAGE_PATHS.admin}/exams/`)
   );
 }
 
