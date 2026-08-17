@@ -175,21 +175,25 @@ export function ExamRunner({
             ) : null}
 
             <div className="min-h-0 flex-1 overflow-y-auto p-5">
-              {section.context ? (
-                <p className="mb-4 text-sm text-muted-foreground">
-                  {section.context}
-                </p>
-              ) : null}
-              <div className="space-y-6">
-                {section.groups.map((group) => (
-                  <GroupBlock
-                    key={group.id}
-                    group={group}
-                    answers={answers}
-                    onChange={handleChange}
-                    disabled={submitting}
-                  />
-                ))}
+              {/* No passage (Listening) → centre the questions so the pane
+                  doesn't leave a big empty band on the right. */}
+              <div className={section.passageText ? "" : "mx-auto max-w-3xl"}>
+                {section.context ? (
+                  <p className="mb-4 text-sm text-muted-foreground">
+                    {section.context}
+                  </p>
+                ) : null}
+                <div className="space-y-6">
+                  {section.groups.map((group) => (
+                    <GroupBlock
+                      key={group.id}
+                      group={group}
+                      answers={answers}
+                      onChange={handleChange}
+                      disabled={submitting}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>

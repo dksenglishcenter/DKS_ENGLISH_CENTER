@@ -65,18 +65,23 @@ export function QuestionField({
           {no}
         </span>
         <div className="min-w-0 flex-1 space-y-2">
-          {question.prompt ? (
+          {question.prompt && !COMPLETION.has(group.type) ? (
             <p className="leading-relaxed text-foreground">{question.prompt}</p>
           ) : null}
 
           {COMPLETION.has(group.type) ? (
-            <Input
-              className="h-11 max-w-sm"
-              value={value}
-              disabled={disabled}
-              placeholder="Nhập đáp án…"
-              onChange={(e) => onChange(e.target.value)}
-            />
+            <div className="flex items-center gap-3">
+              <p className="min-w-0 flex-1 leading-relaxed text-foreground">
+                {question.prompt}
+              </p>
+              <Input
+                className="h-11 w-40 shrink-0"
+                value={value}
+                disabled={disabled}
+                placeholder="Đáp án…"
+                onChange={(e) => onChange(e.target.value)}
+              />
+            </div>
           ) : LETTER_CHOICE.has(group.type) ? (
             <select
               className="h-11 w-40 rounded-lg border border-border bg-card px-3 text-foreground disabled:opacity-70"
