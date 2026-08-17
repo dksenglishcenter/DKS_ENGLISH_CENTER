@@ -1,33 +1,28 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Pencil, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
+import { Pencil, Plus, RefreshCw, Search, Trash2, Users } from "lucide-react";
 
 import { useAdminUser } from "@/components/admin/admin-shell";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { listCourses } from "@/lib/courses/api";
 import { formatError } from "@/lib/errors/format-error";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { createClass, deleteClass, listClasses, listMyClasses, updateClass } from "@/lib/ops/api";
 import type { ClassGroup, ClassPayload, ClassStatus, ListMeta } from "@/lib/ops/types";
+import { WEEKDAYS } from "@/lib/ops/class-schedule";
+import { validateClassForm } from "@/lib/ops/validate";
 import { listUsers } from "@/lib/users/api";
 import type { ManagedUser } from "@/lib/users/types";
 
 const FILTER_CONTROL =
   "h-11 rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary";
 
-const DAYS = [
-  { value: 1, label: "T2" },
-  { value: 2, label: "T3" },
-  { value: 3, label: "T4" },
-  { value: 4, label: "T5" },
-  { value: 5, label: "T6" },
-  { value: 6, label: "T7" },
-  { value: 0, label: "CN" },
-];
+const DAYS = WEEKDAYS;
 
 const EMPTY: ClassPayload = {
   name: "",
@@ -36,6 +31,8 @@ const EMPTY: ClassPayload = {
   scheduleDays: [],
   startTime: "18:00",
   endTime: "19:30",
+  startsOn: null,
+  endsOn: null,
   capacity: 12,
   status: "OPEN",
 };
@@ -64,6 +61,10 @@ export function ClassesAdmin() {
   const [form, setForm] = useState<ClassPayload>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<"name" | "startTime" | "endTime" | "startsOn" | "endsOn" | "capacity", string>>
+  >({});
+  const formRef = useRef<HTMLFormElement>(null);
   const [deleteTarget, setDeleteTarget] = useState<ClassGroup | null>(null);
   const [teachers, setTeachers] = useState<ManagedUser[]>([]);
   const [courses, setCourses] = useState<Array<{ id: string; title: string }>>([]);
@@ -111,6 +112,7 @@ export function ClassesAdmin() {
     setEditing(null);
     setForm(EMPTY);
     setFormError(null);
+    setFieldErrors({});
     setFormOpen(true);
   }
 
@@ -123,18 +125,32 @@ export function ClassesAdmin() {
       scheduleDays: item.scheduleDays,
       startTime: item.startTime,
       endTime: item.endTime,
+      startsOn: item.startsOn,
+      endsOn: item.endsOn,
       room: item.room,
       capacity: item.capacity,
       status: item.status,
     });
     setFormError(null);
+    setFieldErrors({});
     setFormOpen(true);
   }
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
-    if (!form.name.trim()) {
-      setFormError("Tên lớp không được để trống.");
+    const errors = validateClassForm({
+      name: form.name,
+      startTime: form.startTime ?? null,
+      endTime: form.endTime ?? null,
+      startsOn: form.startsOn ?? null,
+      endsOn: form.endsOn ?? null,
+      capacity: form.capacity ?? null,
+      room: form.room ?? null,
+    });
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setFormError("Vui lòng sửa các ô còn lỗi trước khi lưu.");
+      scrollToFirstInvalid(formRef.current);
       return;
     }
     setSaving(true);
@@ -144,6 +160,8 @@ export function ClassesAdmin() {
       name: form.name.trim(),
       courseId: form.courseId || null,
       teacherId: form.teacherId || null,
+      startsOn: form.startsOn || null,
+      endsOn: form.endsOn || null,
       capacity: form.capacity ? Number(form.capacity) : null,
     };
     try {
@@ -155,6 +173,7 @@ export function ClassesAdmin() {
       setReloadKey((value) => value + 1);
     } catch (err) {
       setFormError(formatError(err));
+      scrollToFirstInvalid(formRef.current);
     } finally {
       setSaving(false);
     }
@@ -214,20 +233,27 @@ export function ClassesAdmin() {
 
       {formOpen && !isTeacher ? (
         <form
+          ref={formRef}
+          noValidate
           onSubmit={handleSave}
           className="grid gap-4 rounded-2xl border border-border bg-card p-5 md:grid-cols-2"
         >
           <h3 className="text-lg font-black md:col-span-2 font-[family-name:var(--font-nunito)]">
             {editing ? "Sửa lớp" : "Thêm lớp"}
           </h3>
-          {formError ? <p className="text-sm text-red-600 md:col-span-2">{formError}</p> : null}
-          <label className="text-sm md:col-span-2">
-            <span className="mb-1 block font-semibold">Tên lớp</span>
+          {formError ? <p role="alert" className="text-sm text-red-600 md:col-span-2">{formError}</p> : null}
+          <label className="text-sm md:col-span-2" data-invalid={fieldErrors.name ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Tên lớp *</span>
             <Input
-              required
+              maxLength={100}
+              className={fieldErrors.name ? "border-red-500" : ""}
               value={form.name}
-              onChange={(event) => setForm({ ...form, name: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, name: event.target.value });
+                setFieldErrors((current) => ({ ...current, name: undefined }));
+              }}
             />
+            {fieldErrors.name ? <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p> : null}
           </label>
           <label className="text-sm">
             <span className="mb-1 block font-semibold">Khóa học (tuỳ chọn)</span>
@@ -282,32 +308,83 @@ export function ClassesAdmin() {
               })}
             </div>
           </fieldset>
-          <label className="text-sm">
+          <label className="text-sm" data-invalid={fieldErrors.startTime ? "true" : undefined}>
             <span className="mb-1 block font-semibold">Giờ bắt đầu</span>
             <Input
               type="time"
+              className={fieldErrors.startTime ? "border-red-500" : ""}
               value={form.startTime ?? ""}
-              onChange={(event) => setForm({ ...form, startTime: event.target.value || null })}
+              onChange={(event) => {
+                setForm({ ...form, startTime: event.target.value || null });
+                setFieldErrors((current) => ({ ...current, startTime: undefined }));
+              }}
             />
+            {fieldErrors.startTime ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.startTime}</p>
+            ) : null}
           </label>
-          <label className="text-sm">
+          <label className="text-sm" data-invalid={fieldErrors.endTime ? "true" : undefined}>
             <span className="mb-1 block font-semibold">Giờ kết thúc</span>
             <Input
               type="time"
+              className={fieldErrors.endTime ? "border-red-500" : ""}
               value={form.endTime ?? ""}
-              onChange={(event) => setForm({ ...form, endTime: event.target.value || null })}
+              onChange={(event) => {
+                setForm({ ...form, endTime: event.target.value || null });
+                setFieldErrors((current) => ({ ...current, endTime: undefined }));
+              }}
             />
+            {fieldErrors.endTime ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.endTime}</p>
+            ) : null}
           </label>
-          <label className="text-sm">
+          <label className="text-sm" data-invalid={fieldErrors.startsOn ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Ngày bắt đầu khóa (tuỳ chọn)</span>
+            <Input
+              type="date"
+              className={fieldErrors.startsOn ? "border-red-500" : ""}
+              value={form.startsOn ?? ""}
+              onChange={(event) => {
+                setForm({ ...form, startsOn: event.target.value || null });
+                setFieldErrors((current) => ({ ...current, startsOn: undefined }));
+              }}
+            />
+            {fieldErrors.startsOn ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.startsOn}</p>
+            ) : null}
+          </label>
+          <label className="text-sm" data-invalid={fieldErrors.endsOn ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Ngày kết thúc khóa (tuỳ chọn)</span>
+            <Input
+              type="date"
+              className={fieldErrors.endsOn ? "border-red-500" : ""}
+              value={form.endsOn ?? ""}
+              min={form.startsOn ?? undefined}
+              onChange={(event) => {
+                setForm({ ...form, endsOn: event.target.value || null });
+                setFieldErrors((current) => ({ ...current, endsOn: undefined }));
+              }}
+            />
+            {fieldErrors.endsOn ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.endsOn}</p>
+            ) : null}
+          </label>
+          <label className="text-sm" data-invalid={fieldErrors.capacity ? "true" : undefined}>
             <span className="mb-1 block font-semibold">Sĩ số</span>
             <Input
               type="number"
               min={1}
+              max={200}
+              className={fieldErrors.capacity ? "border-red-500" : ""}
               value={form.capacity ?? ""}
-              onChange={(event) =>
-                setForm({ ...form, capacity: event.target.value ? Number(event.target.value) : null })
-              }
+              onChange={(event) => {
+                setForm({ ...form, capacity: event.target.value ? Number(event.target.value) : null });
+                setFieldErrors((current) => ({ ...current, capacity: undefined }));
+              }}
             />
+            {fieldErrors.capacity ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.capacity}</p>
+            ) : null}
           </label>
           <label className="text-sm">
             <span className="mb-1 block font-semibold">Trạng thái</span>
@@ -328,6 +405,22 @@ export function ClassesAdmin() {
               {saving ? "Đang lưu..." : "Lưu lớp"}
             </Button>
           </div>
+          {editing ? (
+            <p className="text-sm text-muted-foreground md:col-span-2">
+              Thêm / gỡ học viên ở{" "}
+              <Link
+                href={`${PAGE_PATHS.admin}/classes/${editing.id}`}
+                className="font-semibold text-primary hover:underline"
+              >
+                danh sách học viên của lớp
+              </Link>
+              .
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground md:col-span-2">
+              Lưu lớp xong, mở lớp để thêm học viên vào danh sách.
+            </p>
+          )}
         </form>
       ) : null}
 
@@ -357,16 +450,24 @@ export function ClassesAdmin() {
                   {item.capacity ? `/${item.capacity}` : ""} HV
                 </p>
               </div>
-              {!isTeacher ? (
-                <div className="flex gap-1">
-                  <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(item)}>
-                    <Pencil className="size-4" />
-                  </Button>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setDeleteTarget(item)}>
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ) : null}
+              <div className="flex flex-wrap gap-1">
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <Link href={`${PAGE_PATHS.admin}/classes/${item.id}`}>
+                    <Users className="size-4" />
+                    Học viên
+                  </Link>
+                </Button>
+                {!isTeacher ? (
+                  <>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(item)}>
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setDeleteTarget(item)}>
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </>
+                ) : null}
+              </div>
             </div>
           ))
         )}

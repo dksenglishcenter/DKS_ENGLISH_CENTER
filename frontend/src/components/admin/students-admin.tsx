@@ -6,9 +6,9 @@ import { Pencil, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { formatError } from "@/lib/errors/format-error";
-import { listUsers } from "@/lib/users/api";
-import type { ManagedUser } from "@/lib/users/types";
+import { PAGE_PATHS } from "@/lib/navigation-paths";
 import {
   createStudent,
   deleteStudent,
@@ -16,6 +16,10 @@ import {
   updateStudent,
 } from "@/lib/ops/api";
 import type { ListMeta, Student, StudentStatus } from "@/lib/ops/types";
+import { validateStudentForm } from "@/lib/ops/validate";
+import { listUsers } from "@/lib/users/api";
+import type { ManagedUser } from "@/lib/users/types";
+import { sanitizePhoneInput } from "@/lib/validation/phone";
 
 const PAGE_SIZE = 20;
 const FILTER_CONTROL =
@@ -31,20 +35,16 @@ type FormState = {
   fullName: string;
   phone: string;
   email: string;
-  parentName: string;
-  parentPhone: string;
   status: StudentStatus;
-  parentUserIds: string[];
+  parentUserId: string;
 };
 
 const EMPTY_FORM: FormState = {
   fullName: "",
   phone: "",
   email: "",
-  parentName: "",
-  parentPhone: "",
   status: "STUDYING",
-  parentUserIds: [],
+  parentUserId: "",
 };
 
 export function StudentsAdmin() {
@@ -64,6 +64,9 @@ export function StudentsAdmin() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<"fullName" | "phone" | "email", string>>
+  >({});
   const [deleteTarget, setDeleteTarget] = useState<Student | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [parents, setParents] = useState<ManagedUser[]>([]);
@@ -103,6 +106,7 @@ export function StudentsAdmin() {
     setEditing(null);
     setForm(EMPTY_FORM);
     setFormError(null);
+    setFieldErrors({});
     setFormOpen(true);
   }
 
@@ -112,31 +116,34 @@ export function StudentsAdmin() {
       fullName: student.fullName,
       phone: student.phone ?? "",
       email: student.email ?? "",
-      parentName: student.parentName ?? "",
-      parentPhone: student.parentPhone ?? "",
       status: student.status,
-      parentUserIds: student.parents?.map((item) => item.parentUserId) ?? [],
+      parentUserId: student.parents?.[0]?.parentUserId ?? "",
     });
     setFormError(null);
+    setFieldErrors({});
     setFormOpen(true);
   }
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
-    if (form.fullName.trim().length < 2) {
-      setFormError("Họ tên cần ít nhất 2 ký tự.");
+    const errors = validateStudentForm(form);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setFormError("Vui lòng sửa các ô còn lỗi trước khi lưu.");
+      scrollToFirstInvalid(formRef.current);
       return;
     }
     setSaving(true);
     setFormError(null);
+    const parent = parents.find((item) => item.id === form.parentUserId);
     const payload = {
       fullName: form.fullName.trim(),
       phone: form.phone.trim() || null,
       email: form.email.trim() || null,
-      parentName: form.parentName.trim() || null,
-      parentPhone: form.parentPhone.trim() || null,
+      parentName: parent?.fullName ?? null,
+      parentPhone: parent?.phone ?? null,
       status: form.status,
-      parentUserIds: form.parentUserIds,
+      parentUserIds: form.parentUserId ? [form.parentUserId] : [],
     };
     try {
       const response = editing
@@ -147,6 +154,7 @@ export function StudentsAdmin() {
       setReloadKey((value) => value + 1);
     } catch (error) {
       setFormError(formatError(error));
+      scrollToFirstInvalid(formRef.current);
     } finally {
       setSaving(false);
     }
@@ -252,6 +260,7 @@ export function StudentsAdmin() {
       {formOpen ? (
         <form
           ref={formRef}
+          noValidate
           onSubmit={handleSave}
           className="grid gap-4 rounded-2xl border border-border bg-card p-5 md:grid-cols-2"
         >
@@ -259,30 +268,56 @@ export function StudentsAdmin() {
             {editing ? "Sửa học viên" : "Thêm học viên"}
           </h3>
           {formError ? (
-            <p className="text-sm text-red-600 md:col-span-2">{formError}</p>
+            <p role="alert" className="text-sm text-red-600 md:col-span-2">
+              {formError}
+            </p>
           ) : null}
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold">Họ tên</span>
+          <label className="text-sm" data-invalid={fieldErrors.fullName ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Họ tên *</span>
             <Input
-              required
+              maxLength={100}
+              className={fieldErrors.fullName ? "border-red-500" : ""}
               value={form.fullName}
-              onChange={(event) => setForm({ ...form, fullName: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, fullName: event.target.value });
+                setFieldErrors((current) => ({ ...current, fullName: undefined }));
+              }}
             />
+            {fieldErrors.fullName ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.fullName}</p>
+            ) : null}
           </label>
-          <label className="text-sm">
+          <label className="text-sm" data-invalid={fieldErrors.phone ? "true" : undefined}>
             <span className="mb-1 block font-semibold">Số điện thoại</span>
             <Input
+              inputMode="tel"
+              maxLength={20}
+              className={fieldErrors.phone ? "border-red-500" : ""}
               value={form.phone}
-              onChange={(event) => setForm({ ...form, phone: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, phone: sanitizePhoneInput(event.target.value) });
+                setFieldErrors((current) => ({ ...current, phone: undefined }));
+              }}
             />
+            {fieldErrors.phone ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>
+            ) : null}
           </label>
-          <label className="text-sm">
+          <label className="text-sm" data-invalid={fieldErrors.email ? "true" : undefined}>
             <span className="mb-1 block font-semibold">Email</span>
             <Input
               type="email"
+              maxLength={255}
+              className={fieldErrors.email ? "border-red-500" : ""}
               value={form.email}
-              onChange={(event) => setForm({ ...form, email: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, email: event.target.value });
+                setFieldErrors((current) => ({ ...current, email: undefined }));
+              }}
             />
+            {fieldErrors.email ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
+            ) : null}
           </label>
           <label className="text-sm">
             <span className="mb-1 block font-semibold">Trạng thái</span>
@@ -298,48 +333,30 @@ export function StudentsAdmin() {
               <option value="FINISHED">Kết thúc</option>
             </select>
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold">Phụ huynh (text)</span>
-            <Input
-              value={form.parentName}
-              onChange={(event) => setForm({ ...form, parentName: event.target.value })}
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold">SĐT phụ huynh</span>
-            <Input
-              value={form.parentPhone}
-              onChange={(event) => setForm({ ...form, parentPhone: event.target.value })}
-            />
-          </label>
-          <fieldset className="md:col-span-2">
-            <legend className="mb-2 text-sm font-semibold">Tài khoản phụ huynh</legend>
+          <label className="text-sm md:col-span-2">
+            <span className="mb-1 block font-semibold">Tài khoản phụ huynh</span>
+            <select
+              className={`h-12 w-full ${FILTER_CONTROL}`}
+              value={form.parentUserId}
+              onChange={(event) => setForm({ ...form, parentUserId: event.target.value })}
+            >
+              <option value="">Chưa gắn phụ huynh</option>
+              {parents.map((parent) => (
+                <option key={parent.id} value={parent.id}>
+                  {parent.fullName} · {parent.email}
+                </option>
+              ))}
+            </select>
             {parents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Chưa có tài khoản PARENT. Tạo trong mục Người dùng.
+              <p className="mt-1 text-xs text-muted-foreground">
+                Chưa có tài khoản PARENT. Tạo trong{" "}
+                <a href={`${PAGE_PATHS.admin}/users`} className="font-semibold text-primary hover:underline">
+                  Người dùng
+                </a>
+                .
               </p>
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2">
-                {parents.map((parent) => (
-                  <label key={parent.id} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={form.parentUserIds.includes(parent.id)}
-                      onChange={(event) => {
-                        setForm((current) => ({
-                          ...current,
-                          parentUserIds: event.target.checked
-                            ? [...current.parentUserIds, parent.id]
-                            : current.parentUserIds.filter((id) => id !== parent.id),
-                        }));
-                      }}
-                    />
-                    {parent.fullName} · {parent.email}
-                  </label>
-                ))}
-              </div>
-            )}
-          </fieldset>
+            ) : null}
+          </label>
           <div className="flex justify-end gap-2 md:col-span-2">
             <Button type="button" variant="outline" onClick={() => setFormOpen(false)}>
               Hủy
@@ -374,7 +391,9 @@ export function StudentsAdmin() {
                     <td className="px-4 py-3 font-semibold">{student.fullName}</td>
                     <td className="px-4 py-3">{student.phone ?? "—"}</td>
                     <td className="px-4 py-3">
-                      {student.parents?.[0]?.parent.fullName || student.parentName || "—"}
+                      {student.parents?.[0]
+                        ? `${student.parents[0].parent.fullName} · ${student.parents[0].parent.email}`
+                        : student.parentName || "—"}
                     </td>
                     <td className="px-4 py-3">{STATUS_LABEL[student.status]}</td>
                     <td className="px-4 py-3 text-right">

@@ -72,6 +72,7 @@ export class CloudinaryService {
       CLOUDINARY_FOLDERS.aboutFacilities,
       CLOUDINARY_FOLDERS.aboutVision,
       CLOUDINARY_FOLDERS.aboutTeachers,
+      CLOUDINARY_FOLDERS.tuitionProofs,
     ];
   }
 

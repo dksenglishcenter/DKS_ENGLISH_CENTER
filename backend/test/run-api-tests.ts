@@ -783,6 +783,71 @@ async function main() {
       expectMessage(res.body as Json, 'định dạng');
     });
 
+    const classSched = expectStatus(
+      await adminApi.send('POST', '/api/classes', {
+        name: 'Lop T345',
+        teacherId: teacherA.id,
+        scheduleDays: [2, 3, 4],
+        startsOn: '2026-08-10',
+        endsOn: '2026-08-20',
+        capacity: 10,
+        status: 'OPEN',
+      }),
+      201,
+    ).data as Json;
+    created.classIds.push(String(classSched.id));
+
+    await test('Từ chối điểm danh thứ không trong lịch', async () => {
+      const res = await adminApi.send(
+        'POST',
+        `/api/classes/${classSched.id}/sessions`,
+        { date: '2026-08-15' },
+      );
+      expectStatus(res, 400);
+      expectMessage(res.body as Json, 'lịch lớp');
+    });
+
+    await test('Từ chối điểm danh trước ngày bắt đầu khóa', async () => {
+      const res = await adminApi.send(
+        'POST',
+        `/api/classes/${classSched.id}/sessions`,
+        { date: '2026-08-04' },
+      );
+      expectStatus(res, 400);
+      expectMessage(res.body as Json, 'trở đi');
+    });
+
+    await test('Từ chối điểm danh sau ngày kết thúc khóa', async () => {
+      const res = await adminApi.send(
+        'POST',
+        `/api/classes/${classSched.id}/sessions`,
+        { date: '2026-08-25' },
+      );
+      expectStatus(res, 400);
+      expectMessage(res.body as Json, 'không được sau');
+    });
+
+    await test('Cho phép điểm danh đúng thứ trong khoảng khóa', async () => {
+      expectStatus(
+        await adminApi.send('POST', `/api/classes/${classSched.id}/sessions`, {
+          date: '2026-08-18',
+        }),
+        201,
+      );
+    });
+
+    await test('Từ chối ngày kết thúc khóa trước ngày bắt đầu', async () => {
+      const res = await adminApi.send('POST', '/api/classes', {
+        name: 'Lop sai ngay',
+        teacherId: teacherA.id,
+        startsOn: '2026-08-20',
+        endsOn: '2026-08-10',
+        capacity: 10,
+      });
+      expectStatus(res, 400);
+      expectMessage(res.body as Json, 'sau hoặc bằng');
+    });
+
     const session = expectStatus(
       await adminApi.send('POST', `/api/classes/${classAtt.id}/sessions`, {
         date: '2026-08-21',
@@ -1371,6 +1436,14 @@ async function main() {
       if (rate.present !== 3 || rate.percent !== 100) {
         throw new Error(`rate=${JSON.stringify(rate)}`);
       }
+      const classes = data.classes as Json[];
+      if (!Array.isArray(classes) || classes.length < 1) {
+        throw new Error('Thiếu classes trong điểm danh PH');
+      }
+      const first = classes[0];
+      if (!Array.isArray(first.sessions)) {
+        throw new Error('Thiếu sessions theo lớp');
+      }
     });
 
     await test('Tỷ lệ có buổi vắng', async () => {
@@ -1423,20 +1496,104 @@ async function main() {
         await parentAApi.send(
           'POST',
           `/api/parent/invoices/${invChild1.id}/report-transfer`,
+          {
+            paymentProofUrl:
+              'https://res.cloudinary.com/demo/image/upload/v1/dks-english-center/tuition/proofs/e2e-proof.jpg',
+          },
         ),
         201,
       );
       expectMessage(body, 'báo chuyển khoản');
       if ((body.data as Json).status !== 'PENDING') throw new Error('Chưa PENDING');
+      if (!(body.data as Json).paymentProofUrl) {
+        throw new Error('Thiếu paymentProofUrl');
+      }
+    });
+
+    await test('Báo CK thiếu minh chứng → 400', async () => {
+      const unpaid = expectStatus(
+        await adminApi.send('POST', '/api/tuition', {
+          studentId: child1.id,
+          period: '2026-11',
+          amount: 1000000,
+          dueDate: '2026-11-15',
+        }),
+        201,
+      ).data as Json;
+      created.invoiceIds.push(String(unpaid.id));
+      const res = await parentAApi.send(
+        'POST',
+        `/api/parent/invoices/${unpaid.id}/report-transfer`,
+        {},
+      );
+      expectStatus(res, 400);
+    });
+
+    await test('Báo CK URL ngoài hệ thống → 400', async () => {
+      const unpaid = expectStatus(
+        await adminApi.send('POST', '/api/tuition', {
+          studentId: child1.id,
+          period: '2026-12',
+          amount: 1000000,
+          dueDate: '2026-12-15',
+        }),
+        201,
+      ).data as Json;
+      created.invoiceIds.push(String(unpaid.id));
+      const res = await parentAApi.send(
+        'POST',
+        `/api/parent/invoices/${unpaid.id}/report-transfer`,
+        { paymentProofUrl: 'https://example.com/fake-proof.jpg' },
+      );
+      expectStatus(res, 400);
+      expectMessage(res.body as Json, 'Cloudinary');
     });
 
     await test('Báo CK lần 2 → 400', async () => {
       const res = await parentAApi.send(
         'POST',
         `/api/parent/invoices/${invChild1.id}/report-transfer`,
+        {
+          paymentProofUrl:
+            'https://res.cloudinary.com/demo/image/upload/v1/dks-english-center/tuition/proofs/e2e-proof-2.jpg',
+        },
       );
       expectStatus(res, 400);
       expectMessage(res.body as Json, 'đã báo chuyển khoản');
+    });
+
+    await test('PENDING thiếu ảnh → cho bổ sung minh chứng', async () => {
+      const unpaid = expectStatus(
+        await adminApi.send('POST', '/api/tuition', {
+          studentId: child1.id,
+          period: '2027-01',
+          amount: 1000000,
+          dueDate: '2027-01-15',
+        }),
+        201,
+      ).data as Json;
+      created.invoiceIds.push(String(unpaid.id));
+
+      await prisma.tuitionInvoice.update({
+        where: { id: String(unpaid.id) },
+        data: { status: 'PENDING', paymentProofUrl: null },
+      });
+
+      const body = expectStatus(
+        await parentAApi.send(
+          'POST',
+          `/api/parent/invoices/${unpaid.id}/report-transfer`,
+          {
+            paymentProofUrl:
+              'https://res.cloudinary.com/demo/image/upload/v1/dks-english-center/tuition/proofs/e2e-repair.jpg',
+          },
+        ),
+        201,
+      );
+      expectMessage(body, 'bổ sung minh chứng');
+      if (!(body.data as Json).paymentProofUrl) {
+        throw new Error('Chưa lưu paymentProofUrl');
+      }
     });
 
     await test('Không báo CK hóa đơn đã PAID', async () => {
@@ -1447,6 +1604,10 @@ async function main() {
       const res = await parentAApi.send(
         'POST',
         `/api/parent/invoices/${invChild2.id}/report-transfer`,
+        {
+          paymentProofUrl:
+            'https://res.cloudinary.com/demo/image/upload/v1/dks-english-center/tuition/proofs/e2e-paid.jpg',
+        },
       );
       expectStatus(res, 400);
       expectMessage(res.body as Json, 'đã được xác nhận');
@@ -1456,6 +1617,10 @@ async function main() {
       const res = await parentAApi.send(
         'POST',
         `/api/parent/invoices/${invChild3.id}/report-transfer`,
+        {
+          paymentProofUrl:
+            'https://res.cloudinary.com/demo/image/upload/v1/dks-english-center/tuition/proofs/e2e-other.jpg',
+        },
       );
       expectStatus(res, 403);
       expectMessage(res.body as Json, 'không có quyền');
@@ -1466,6 +1631,10 @@ async function main() {
         await teacherAApi.send(
           'POST',
           `/api/parent/invoices/${invChild3.id}/report-transfer`,
+          {
+            paymentProofUrl:
+              'https://res.cloudinary.com/demo/image/upload/v1/dks-english-center/tuition/proofs/e2e-teacher.jpg',
+          },
         ),
         403,
       );

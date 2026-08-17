@@ -11,6 +11,7 @@ import type {
   InvoicePayload,
   InvoiceStatus,
   ListMeta,
+  ParentClassAttendance,
   Student,
   StudentPayload,
   StudentStatus,
@@ -207,6 +208,7 @@ export function getParentChildAttendance(studentId: string) {
   return apiFetch<{
     data: {
       student: { id: string; fullName: string; status: StudentStatus };
+      classes: ParentClassAttendance[];
       records: AttendanceRecord[];
       rate: AttendanceRate;
     };
@@ -227,9 +229,12 @@ export function listParentReminders() {
   });
 }
 
-export function reportTransfer(invoiceId: string) {
+/** Gửi minh chứng: multipart `file` — backend tự upload Cloudinary rồi lưu URL. */
+export function reportTransfer(invoiceId: string, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
   return apiFetch<{ message: string; data: TuitionInvoice }>(
     `/parent/invoices/${invoiceId}/report-transfer`,
-    { method: "POST" },
+    { method: "POST", body: formData },
   );
 }

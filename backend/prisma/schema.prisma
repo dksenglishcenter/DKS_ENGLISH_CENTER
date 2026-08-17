@@ -125,7 +125,9 @@ model Course {
   level          String
   target         String
   tuition        String
-  duration       String   @default("90 phút/buổi")
+  duration       String    @default("90 phút/buổi")
+  startDate      DateTime? @map("start_date") @db.Date
+  endDate        DateTime? @map("end_date") @db.Date
   perks          String[]
   category       String
   coverImageUrl  String   @map("cover_image_url")
@@ -292,6 +294,8 @@ model ClassGroup {
   scheduleDays Int[]       @map("schedule_days")
   startTime    String?     @map("start_time")
   endTime      String?     @map("end_time")
+  startsOn     DateTime?   @map("starts_on") @db.Date
+  endsOn       DateTime?   @map("ends_on") @db.Date
   room         String?
   capacity     Int?
   status       ClassStatus @default(OPEN)
@@ -376,6 +380,7 @@ model TuitionInvoice {
   dueDate   DateTime      @map("due_date") @db.Date
   status    InvoiceStatus @default(UNPAID)
   note      String?
+  paymentProofUrl String? @map("payment_proof_url")
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
 

@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
@@ -12,7 +12,9 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
+import { DATE_ONLY_PATTERN } from '../../common/validation/date-only';
 
 export const COURSE_CATEGORIES = [
   'grade-10',
@@ -64,6 +66,30 @@ export class CreateCourseDto {
   @MinLength(2)
   @MaxLength(80)
   duration!: string;
+
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => {
+    if (value === undefined) return undefined;
+    if (value === null || value === '') return null;
+    return typeof value === 'string' ? value.trim() : value;
+  })
+  @ValidateIf((_, value) => value != null)
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'Ngày bắt đầu khóa phải có định dạng YYYY-MM-DD.',
+  })
+  startDate?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => {
+    if (value === undefined) return undefined;
+    if (value === null || value === '') return null;
+    return typeof value === 'string' ? value.trim() : value;
+  })
+  @ValidateIf((_, value) => value != null)
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'Ngày kết thúc khóa phải có định dạng YYYY-MM-DD.',
+  })
+  endDate?: string | null;
 
   @IsArray()
   @ArrayMinSize(1)

@@ -59,6 +59,8 @@ export type ClassGroup = {
   scheduleDays: number[];
   startTime: string | null;
   endTime: string | null;
+  startsOn: string | null;
+  endsOn: string | null;
   room: string | null;
   capacity: number | null;
   status: ClassStatus;
@@ -66,7 +68,13 @@ export type ClassGroup = {
   updatedAt: string;
   studentCount: number;
   teacher: { id: string; fullName: string; email: string } | null;
-  course: { id: string; title: string; slug: string } | null;
+  course: {
+    id: string;
+    title: string;
+    slug: string;
+    startDate: string | null;
+    endDate: string | null;
+  } | null;
   enrollments?: Array<{
     id: string;
     studentId: string;
@@ -88,6 +96,8 @@ export type ClassPayload = {
   scheduleDays?: number[];
   startTime?: string | null;
   endTime?: string | null;
+  startsOn?: string | null;
+  endsOn?: string | null;
   room?: string | null;
   capacity?: number | null;
   status?: ClassStatus;
@@ -99,6 +109,34 @@ export type AttendanceRate = {
   late: number;
   absent: number;
   percent: number;
+};
+
+export type ParentSessionKind = "marked" | "opened" | "upcoming" | "planned";
+
+export type ParentClassSession = {
+  date: string;
+  sessionId: string | null;
+  status: AttendanceStatus | null;
+  note: string | null;
+  kind: ParentSessionKind;
+};
+
+export type ParentClassAttendance = {
+  id: string;
+  name: string;
+  scheduleDays: number[];
+  startTime: string | null;
+  endTime: string | null;
+  startsOn: string | null;
+  endsOn: string | null;
+  course: {
+    id: string;
+    title: string;
+    startDate: string | null;
+    endDate: string | null;
+  } | null;
+  sessions: ParentClassSession[];
+  rate: AttendanceRate;
 };
 
 export type AttendanceRecord = {
@@ -128,6 +166,7 @@ export type TuitionInvoice = {
   dueDate: string;
   status: InvoiceStatus;
   note: string | null;
+  paymentProofUrl: string | null;
   createdAt: string;
   updatedAt: string;
   student?: { id: string; fullName: string; phone?: string | null; email?: string | null };

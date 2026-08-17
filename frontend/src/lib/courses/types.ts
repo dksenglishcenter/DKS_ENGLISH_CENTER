@@ -8,6 +8,8 @@ export type Course = {
   target: string;
   tuition: string;
   duration: string;
+  startDate: string | null;
+  endDate: string | null;
   perks: string[];
   category: string;
   coverImageUrl: string;
@@ -30,6 +32,8 @@ export type CoursePayload = {
   target: string;
   tuition: string;
   duration: string;
+  startDate?: string | null;
+  endDate?: string | null;
   perks: string[];
   category: string;
   coverImageUrl: string;

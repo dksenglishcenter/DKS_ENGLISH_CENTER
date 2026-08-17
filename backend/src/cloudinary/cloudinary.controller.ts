@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -14,7 +15,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { Role } from '../../generated/prisma/client';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import type { AuthRequestUser } from '../auth/guards/jwt-auth.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CloudinaryService } from './cloudinary.service';
@@ -44,7 +47,7 @@ export class CloudinaryController {
 
   @Post('upload')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.PARENT)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -54,9 +57,16 @@ export class CloudinaryController {
   async upload(
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: UploadMediaDto,
+    @CurrentUser() actor: AuthRequestUser,
   ) {
     if (!file) {
       throw new BadRequestException('Thiếu file ảnh (field: file)');
+    }
+
+    if (actor.role === Role.PARENT && dto.category !== 'tuition-proof') {
+      throw new ForbiddenException(
+        'Phụ huynh chỉ được upload minh chứng học phí.',
+      );
     }
 
     const result = await this.cloudinaryService.uploadImage(file, {
@@ -145,7 +155,9 @@ export class CloudinaryController {
     const ok =
       body?.publicId?.startsWith('dks-english-center/courses/') ||
       body?.publicId?.startsWith('dks-english-center/home/gallery/') ||
-      body?.publicId?.startsWith('dks-english-center/about/');
+      body?.publicId?.startsWith('dks-english-center/about/') ||
+      body?.publicId?.startsWith('dks-english-center/blog/') ||
+      body?.publicId?.startsWith('dks-english-center/tuition/proofs/');
     if (!ok) {
       throw new BadRequestException('publicId không hợp lệ');
     }

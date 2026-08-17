@@ -12,9 +12,11 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import { ClassStatus } from '../../../generated/prisma/client';
 import { CUID_MESSAGE, CUID_PATTERN } from '../../common/validation/cuid';
+import { DATE_ONLY_PATTERN } from '../../common/validation/date-only';
 
 const Trim = () =>
   Transform(({ value }: { value: unknown }) =>
@@ -124,6 +126,22 @@ export class CreateClassDto {
 
   @IsOptional()
   @OptionalBlankToNull()
+  @ValidateIf((_, value) => value != null)
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'Ngày bắt đầu khóa phải có định dạng YYYY-MM-DD.',
+  })
+  startsOn?: string | null;
+
+  @IsOptional()
+  @OptionalBlankToNull()
+  @ValidateIf((_, value) => value != null)
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'Ngày kết thúc khóa phải có định dạng YYYY-MM-DD.',
+  })
+  endsOn?: string | null;
+
+  @IsOptional()
+  @OptionalBlankToNull()
   @IsString()
   @MaxLength(50, { message: 'Phòng học không được vượt quá 50 ký tự.' })
   room?: string | null;
@@ -182,6 +200,22 @@ export class UpdateClassDto {
   @OptionalBlankToNull()
   @Matches(/^\d{2}:\d{2}$/, { message: 'Giờ kết thúc phải có định dạng HH:mm.' })
   endTime?: string | null;
+
+  @IsOptional()
+  @OptionalBlankToNull()
+  @ValidateIf((_, value) => value != null)
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'Ngày bắt đầu khóa phải có định dạng YYYY-MM-DD.',
+  })
+  startsOn?: string | null;
+
+  @IsOptional()
+  @OptionalBlankToNull()
+  @ValidateIf((_, value) => value != null)
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'Ngày kết thúc khóa phải có định dạng YYYY-MM-DD.',
+  })
+  endsOn?: string | null;
 
   @IsOptional()
   @OptionalBlankToNull()

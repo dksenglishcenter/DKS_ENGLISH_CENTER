@@ -5,14 +5,33 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AttendanceStatus, InvoiceStatus } from '../../generated/prisma/client';
-import { formatDateOnly, utcToday } from '../common/validation/date-only';
+import { CLOUDINARY_FOLDERS } from '../cloudinary/cloudinary.constants';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import {
+  formatDateOnly,
+  optionalDateOnly,
+  utcToday,
+} from '../common/validation/date-only';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  buildParentClassTimeline,
+  rateFromStatuses,
+  resolveClassWindow,
+} from './parent-attendance';
 
 const REMINDER_DAYS = 3;
 
+type ReportTransferInput = {
+  file?: Express.Multer.File;
+  paymentProofUrl?: string;
+};
+
 @Injectable()
 export class ParentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   bankDetails() {
     return {
@@ -33,6 +52,15 @@ export class ParentService {
             fullName: true,
             status: true,
             phone: true,
+            enrollments: {
+              where: { leftAt: null },
+              select: {
+                id: true,
+                classId: true,
+                class: { select: { id: true, name: true, status: true } },
+              },
+              orderBy: { joinedAt: 'asc' },
+            },
           },
         },
       },
@@ -50,6 +78,75 @@ export class ParentService {
       select: { id: true, fullName: true, status: true },
     });
 
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { studentId, leftAt: null },
+      include: {
+        class: {
+          include: {
+            course: {
+              select: {
+                id: true,
+                title: true,
+                startDate: true,
+                endDate: true,
+              },
+            },
+            sessions: {
+              orderBy: { date: 'desc' },
+              include: {
+                attendances: {
+                  where: { studentId },
+                  select: { id: true, status: true, note: true },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { joinedAt: 'asc' },
+    });
+
+    const today = formatDateOnly(utcToday());
+    const classes = enrollments.map((enrollment) => {
+      const classGroup = enrollment.class;
+      const window = resolveClassWindow({
+        startsOn: classGroup.startsOn,
+        endsOn: classGroup.endsOn,
+        courseStart: classGroup.course?.startDate,
+        courseEnd: classGroup.course?.endDate,
+      });
+      const sessions = buildParentClassTimeline({
+        scheduleDays: classGroup.scheduleDays,
+        startsOn: window.startsOn,
+        endsOn: window.endsOn,
+        sessions: classGroup.sessions,
+        today,
+      });
+      const marked = sessions
+        .map((session) => session.status)
+        .filter((status): status is AttendanceStatus => status != null);
+
+      return {
+        id: classGroup.id,
+        name: classGroup.name,
+        scheduleDays: classGroup.scheduleDays,
+        startTime: classGroup.startTime,
+        endTime: classGroup.endTime,
+        startsOn: window.startsOn,
+        endsOn: window.endsOn,
+        course: classGroup.course
+          ? {
+              id: classGroup.course.id,
+              title: classGroup.course.title,
+              startDate: optionalDateOnly(classGroup.course.startDate),
+              endDate: optionalDateOnly(classGroup.course.endDate),
+            }
+          : null,
+        sessions,
+        rate: rateFromStatuses(marked),
+      };
+    });
+
     const records = await this.prisma.attendanceRecord.findMany({
       where: { studentId },
       include: {
@@ -64,16 +161,10 @@ export class ParentService {
       orderBy: { session: { date: 'desc' } },
     });
 
-    const statuses = records.map((record) => record.status);
-    const total = statuses.length;
-    const attended = statuses.filter(
-      (status) =>
-        status === AttendanceStatus.PRESENT || status === AttendanceStatus.LATE,
-    ).length;
-
     return {
       data: {
         student,
+        classes,
         records: records.map((record) => ({
           id: record.id,
           status: record.status,
@@ -81,13 +172,7 @@ export class ParentService {
           date: formatDateOnly(record.session.date),
           class: record.session.class,
         })),
-        rate: {
-          total,
-          present: statuses.filter((s) => s === AttendanceStatus.PRESENT).length,
-          late: statuses.filter((s) => s === AttendanceStatus.LATE).length,
-          absent: statuses.filter((s) => s === AttendanceStatus.ABSENT).length,
-          percent: total === 0 ? 0 : Math.round((attended / total) * 100),
-        },
+        rate: rateFromStatuses(records.map((record) => record.status)),
       },
     };
   }
@@ -134,7 +219,13 @@ export class ParentService {
     };
   }
 
-  async reportTransfer(parentUserId: string, invoiceId: string) {
+  async reportTransfer(
+    parentUserId: string,
+    invoiceId: string,
+    input: ReportTransferInput,
+  ) {
+    const proofUrl = await this.resolveProofUrl(input);
+
     const invoice = await this.prisma.tuitionInvoice.findUnique({
       where: { id: invoiceId },
       include: { student: { select: { id: true, fullName: true } } },
@@ -148,17 +239,64 @@ export class ParentService {
     if (invoice.status === InvoiceStatus.PAID) {
       throw new BadRequestException('Khoản học phí này đã được xác nhận.');
     }
+
+    // Cho phép bổ sung minh chứng nếu báo CK trước đó chưa kèm ảnh.
     if (invoice.status === InvoiceStatus.PENDING) {
-      throw new BadRequestException('Bạn đã báo chuyển khoản, vui lòng chờ xác nhận.');
+      if (invoice.paymentProofUrl) {
+        throw new BadRequestException(
+          'Bạn đã báo chuyển khoản, vui lòng chờ xác nhận.',
+        );
+      }
+
+      const updated = await this.prisma.tuitionInvoice.update({
+        where: { id: invoiceId },
+        data: { paymentProofUrl: proofUrl },
+        include: { student: { select: { id: true, fullName: true } } },
+      });
+
+      return {
+        message: 'Đã bổ sung minh chứng chuyển khoản.',
+        data: updated,
+      };
     }
 
     const updated = await this.prisma.tuitionInvoice.update({
       where: { id: invoiceId },
-      data: { status: InvoiceStatus.PENDING },
+      data: {
+        status: InvoiceStatus.PENDING,
+        paymentProofUrl: proofUrl,
+      },
       include: { student: { select: { id: true, fullName: true } } },
     });
 
     return { message: 'Đã ghi nhận báo chuyển khoản.', data: updated };
+  }
+
+  private async resolveProofUrl(input: ReportTransferInput) {
+    if (input.file) {
+      if (!input.file.mimetype?.startsWith('image/')) {
+        throw new BadRequestException(
+          'Minh chứng phải là file ảnh (PNG, JPG, WebP...).',
+        );
+      }
+      const uploaded = await this.cloudinaryService.uploadImage(input.file, {
+        category: 'tuition-proof',
+      });
+      return uploaded.secure_url;
+    }
+
+    const proofUrl = input.paymentProofUrl?.trim();
+    if (!proofUrl) {
+      throw new BadRequestException(
+        'Vui lòng chọn ảnh minh chứng chuyển khoản.',
+      );
+    }
+    if (!proofUrl.includes(CLOUDINARY_FOLDERS.tuitionProofs)) {
+      throw new BadRequestException(
+        'Minh chứng phải được upload qua hệ thống (Cloudinary).',
+      );
+    }
+    return proofUrl;
   }
 
   private async linkedStudentIds(parentUserId: string) {

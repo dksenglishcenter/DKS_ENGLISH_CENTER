@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import { PaymentProofViewer } from "@/components/media/payment-proof-viewer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatAdminDate } from "@/lib/admin/format";
+import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { formatError } from "@/lib/errors/format-error";
 import {
   createInvoice,
@@ -15,6 +17,7 @@ import {
   markInvoicePaid,
 } from "@/lib/ops/api";
 import type { InvoiceStatus, ListMeta, Student, TuitionInvoice } from "@/lib/ops/types";
+import { validateInvoiceForm } from "@/lib/ops/validate";
 
 const FILTER_CONTROL =
   "h-11 rounded-lg border border-border bg-card px-4 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary";
@@ -41,6 +44,11 @@ export function TuitionAdmin() {
   const [reloadKey, setReloadKey] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<"studentId" | "period" | "amount" | "dueDate" | "note", string>>
+  >({});
+  const formRef = useRef<HTMLFormElement>(null);
   const [deleteTarget, setDeleteTarget] = useState<TuitionInvoice | null>(null);
   const [form, setForm] = useState({
     studentId: "",
@@ -76,8 +84,15 @@ export function TuitionAdmin() {
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
+    const errors = validateInvoiceForm(form);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setFormError("Vui lòng sửa các ô còn lỗi trước khi tạo.");
+      scrollToFirstInvalid(formRef.current);
+      return;
+    }
     setSaving(true);
-    setError(null);
+    setFormError(null);
     try {
       const response = await createInvoice({
         studentId: form.studentId,
@@ -90,7 +105,8 @@ export function TuitionAdmin() {
       setFormOpen(false);
       setReloadKey((value) => value + 1);
     } catch (err) {
-      setError(formatError(err));
+      setFormError(formatError(err));
+      scrollToFirstInvalid(formRef.current);
     } finally {
       setSaving(false);
     }
@@ -103,7 +119,14 @@ export function TuitionAdmin() {
           <h2 className="text-2xl font-black font-[family-name:var(--font-nunito)]">Học phí</h2>
           <p className="text-sm text-muted-foreground">Tạo khoản tháng và xác nhận đã nhận.</p>
         </div>
-        <Button type="button" onClick={() => setFormOpen(true)}>
+        <Button
+          type="button"
+          onClick={() => {
+            setFormError(null);
+            setFieldErrors({});
+            setFormOpen(true);
+          }}
+        >
           Tạo khoản tháng
         </Button>
       </div>
@@ -132,15 +155,27 @@ export function TuitionAdmin() {
       </select>
 
       {formOpen ? (
-        <form onSubmit={handleCreate} className="grid gap-4 rounded-2xl border border-border bg-card p-5 md:grid-cols-2">
+        <form
+          ref={formRef}
+          noValidate
+          onSubmit={handleCreate}
+          className="grid gap-4 rounded-2xl border border-border bg-card p-5 md:grid-cols-2"
+        >
           <h3 className="font-black md:col-span-2">Khoản học phí mới</h3>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold">Học viên</span>
+          {formError ? (
+            <p role="alert" className="text-sm text-red-600 md:col-span-2">
+              {formError}
+            </p>
+          ) : null}
+          <label className="text-sm" data-invalid={fieldErrors.studentId ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Học viên *</span>
             <select
-              required
-              className={`h-12 w-full ${FILTER_CONTROL}`}
+              className={`h-12 w-full ${FILTER_CONTROL} ${fieldErrors.studentId ? "border-red-500" : ""}`}
               value={form.studentId}
-              onChange={(event) => setForm({ ...form, studentId: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, studentId: event.target.value });
+                setFieldErrors((current) => ({ ...current, studentId: undefined }));
+              }}
             >
               <option value="">Chọn học viên</option>
               {students.map((student) => (
@@ -149,38 +184,71 @@ export function TuitionAdmin() {
                 </option>
               ))}
             </select>
+            {fieldErrors.studentId ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.studentId}</p>
+            ) : null}
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold">Kỳ (tháng)</span>
+          <label className="text-sm" data-invalid={fieldErrors.period ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Kỳ (tháng) *</span>
             <Input
               type="month"
-              required
+              className={fieldErrors.period ? "border-red-500" : ""}
               value={form.period}
-              onChange={(event) => setForm({ ...form, period: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, period: event.target.value });
+                setFieldErrors((current) => ({ ...current, period: undefined }));
+              }}
             />
+            {fieldErrors.period ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.period}</p>
+            ) : null}
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold">Số tiền</span>
+          <label className="text-sm" data-invalid={fieldErrors.amount ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Số tiền *</span>
             <Input
               type="number"
               min={0}
-              required
+              step={1}
+              className={fieldErrors.amount ? "border-red-500" : ""}
               value={form.amount}
-              onChange={(event) => setForm({ ...form, amount: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, amount: event.target.value });
+                setFieldErrors((current) => ({ ...current, amount: undefined }));
+              }}
             />
+            {fieldErrors.amount ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.amount}</p>
+            ) : null}
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold">Hạn đóng</span>
+          <label className="text-sm" data-invalid={fieldErrors.dueDate ? "true" : undefined}>
+            <span className="mb-1 block font-semibold">Hạn đóng *</span>
             <Input
               type="date"
-              required
+              className={fieldErrors.dueDate ? "border-red-500" : ""}
               value={form.dueDate}
-              onChange={(event) => setForm({ ...form, dueDate: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, dueDate: event.target.value });
+                setFieldErrors((current) => ({ ...current, dueDate: undefined }));
+              }}
             />
+            {fieldErrors.dueDate ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.dueDate}</p>
+            ) : null}
           </label>
-          <label className="text-sm md:col-span-2">
+          <label className="text-sm md:col-span-2" data-invalid={fieldErrors.note ? "true" : undefined}>
             <span className="mb-1 block font-semibold">Ghi chú</span>
-            <Input value={form.note} onChange={(event) => setForm({ ...form, note: event.target.value })} />
+            <Input
+              maxLength={500}
+              className={fieldErrors.note ? "border-red-500" : ""}
+              value={form.note}
+              onChange={(event) => {
+                setForm({ ...form, note: event.target.value });
+                setFieldErrors((current) => ({ ...current, note: undefined }));
+              }}
+            />
+            {fieldErrors.note ? (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.note}</p>
+            ) : null}
           </label>
           <div className="flex justify-end gap-2 md:col-span-2">
             <Button type="button" variant="outline" onClick={() => setFormOpen(false)}>
@@ -208,6 +276,11 @@ export function TuitionAdmin() {
                     {invoice.period} · {money(invoice.amount)} · hạn {formatAdminDate(invoice.dueDate)} ·{" "}
                     {STATUS_LABEL[invoice.status]}
                   </p>
+                  {invoice.paymentProofUrl ? (
+                    <PaymentProofViewer url={invoice.paymentProofUrl} label="Minh chứng CK" />
+                  ) : invoice.status === "PENDING" ? (
+                    <p className="mt-1 text-xs text-amber-700">Chưa có minh chứng ảnh.</p>
+                  ) : null}
                 </div>
                 <div className="flex gap-2">
                   {invoice.status !== "PAID" ? (

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ClipboardCheck, LogOut, Wallet } from "lucide-react";
 
 import { DKSLogo } from "@/components/brand/dks-logo";
+import { PaymentProofViewer } from "@/components/media/payment-proof-viewer";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser, logoutUser } from "@/lib/auth/api";
@@ -20,11 +21,14 @@ import {
   listParentReminders,
   reportTransfer,
 } from "@/lib/ops/api";
+import { formatScheduleDays } from "@/lib/ops/class-schedule";
 import type {
   AttendanceRate,
-  AttendanceRecord,
+  AttendanceStatus,
   BankDetails,
   InvoiceStatus,
+  ParentClassAttendance,
+  ParentClassSession,
   Student,
   TuitionInvoice,
 } from "@/lib/ops/types";
@@ -35,14 +39,51 @@ const STATUS_LABEL: Record<InvoiceStatus, string> = {
   PAID: "Đã nhận",
 };
 
-const ATTEND_LABEL = {
+const ATTEND_LABEL: Record<AttendanceStatus, string> = {
   PRESENT: "Có mặt",
   ABSENT: "Vắng",
   LATE: "Muộn",
-} as const;
+};
+
+const SESSION_KIND_LABEL: Record<ParentClassSession["kind"], string> = {
+  marked: "",
+  opened: "Chưa điểm danh",
+  upcoming: "Sắp tới",
+  planned: "Chưa mở buổi",
+};
+
+function sessionStatusLabel(session: ParentClassSession) {
+  if (session.status) return ATTEND_LABEL[session.status];
+  return SESSION_KIND_LABEL[session.kind];
+}
+
+function sessionStatusClass(session: ParentClassSession) {
+  if (session.status === "PRESENT") return "bg-emerald-100 text-emerald-800";
+  if (session.status === "LATE") return "bg-amber-100 text-amber-800";
+  if (session.status === "ABSENT") return "bg-red-100 text-red-800";
+  if (session.kind === "upcoming") return "bg-sky-100 text-sky-800";
+  if (session.kind === "opened") return "bg-secondary text-foreground";
+  return "bg-muted text-muted-foreground";
+}
 
 function money(value: number) {
   return `${new Intl.NumberFormat("vi-VN").format(value)} ₫`;
+}
+
+function formatPeriod(startsOn: string | null, endsOn: string | null) {
+  if (startsOn && endsOn) {
+    return `${formatAdminDate(startsOn)} → ${formatAdminDate(endsOn)}`;
+  }
+  if (startsOn) return `Từ ${formatAdminDate(startsOn)}`;
+  if (endsOn) return `Đến ${formatAdminDate(endsOn)}`;
+  return "Chưa set ngày bắt đầu / kết thúc khóa";
+}
+
+function formatClassTime(startTime: string | null, endTime: string | null) {
+  if (startTime && endTime) return `${startTime} – ${endTime}`;
+  if (startTime) return `Từ ${startTime}`;
+  if (endTime) return `Đến ${endTime}`;
+  return null;
 }
 
 export function ParentPortal() {
@@ -52,7 +93,7 @@ export function ParentPortal() {
   const [tab, setTab] = useState<"attendance" | "tuition">("attendance");
   const [children, setChildren] = useState<Student[]>([]);
   const [childId, setChildId] = useState("");
-  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [classes, setClasses] = useState<ParentClassAttendance[]>([]);
   const [rate, setRate] = useState<AttendanceRate | null>(null);
   const [invoices, setInvoices] = useState<TuitionInvoice[]>([]);
   const [reminders, setReminders] = useState<TuitionInvoice[]>([]);
@@ -60,6 +101,9 @@ export function ParentPortal() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [proofFiles, setProofFiles] = useState<
+    Record<string, { file: File; preview: string }>
+  >({});
 
   useEffect(() => {
     let cancelled = false;
@@ -97,8 +141,8 @@ export function ParentPortal() {
     if (!childId) return;
     void getParentChildAttendance(childId)
       .then((response) => {
-        setRecords(response.data.records);
-        setRate(response.data.rate);
+        setClasses(response.data.classes ?? []);
+        setRate(response.data.rate ?? null);
       })
       .catch((err) => setError(formatError(err)));
   }, [childId]);
@@ -118,6 +162,9 @@ export function ParentPortal() {
     await logoutUser();
     router.replace(PAGE_PATHS.login);
   }
+
+  const selectedChild = children.find((child) => child.id === childId);
+  const childEnrollments = selectedChild?.enrollments ?? [];
 
   if (checking || !user) {
     return (
@@ -196,30 +243,87 @@ export function ParentPortal() {
                 {children.map((child) => (
                   <option key={child.id} value={child.id}>
                     {child.fullName}
+                    {(child.enrollments?.length ?? 0) > 0
+                      ? ` · ${child.enrollments!.map((item) => item.class.name).join(", ")}`
+                      : ""}
                   </option>
                 ))}
               </select>
             </label>
+            {childEnrollments.length > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Đang học: {childEnrollments.map((item) => item.class.name).join(", ")}
+              </p>
+            ) : null}
             {rate ? (
               <div className="rounded-2xl border border-border bg-card p-4">
-                <p className="text-sm text-muted-foreground">Tỷ lệ đi học</p>
+                <p className="text-sm text-muted-foreground">Tỷ lệ đi học (toàn bộ lớp)</p>
                 <p className="text-3xl font-black">{rate.percent}%</p>
                 <p className="text-xs text-muted-foreground">
-                  {rate.present} có mặt · {rate.late} muộn · {rate.absent} vắng / {rate.total} buổi
+                  {rate.present} có mặt · {rate.late} muộn · {rate.absent} vắng / {rate.total} buổi đã điểm danh
                 </p>
               </div>
             ) : null}
-            <ul className="space-y-2">
-              {records.map((record) => (
-                <li key={record.id} className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm">
-                  <div>
-                    <p className="font-semibold">{record.date ? formatAdminDate(record.date) : "—"}</p>
-                    <p className="text-xs text-muted-foreground">{record.class?.name}</p>
-                  </div>
-                  <span className="font-bold">{ATTEND_LABEL[record.status as keyof typeof ATTEND_LABEL]}</span>
-                </li>
-              ))}
-            </ul>
+            {(classes ?? []).length === 0 ? (
+              <p className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+                {childEnrollments.length > 0
+                  ? `Học viên đang ở lớp ${childEnrollments.map((item) => item.class.name).join(", ")}. Đang tải lịch buổi — nếu vẫn trống, restart backend rồi F5.`
+                  : "Học viên chưa được xếp vào lớp nào. Vào Admin → Lớp học → Học viên để thêm."}
+              </p>
+            ) : (
+              (classes ?? []).map((item) => {
+                const timeLabel = formatClassTime(item.startTime, item.endTime);
+                return (
+                  <article key={item.id} className="space-y-3 rounded-2xl border border-border bg-card p-4">
+                    <div>
+                      <h3 className="text-lg font-black font-[family-name:var(--font-nunito)]">
+                        {item.name}
+                      </h3>
+                      {item.course ? (
+                        <p className="text-sm text-muted-foreground">Khóa: {item.course.title}</p>
+                      ) : null}
+                      <p className="mt-1 text-sm font-semibold">
+                        Thời gian khóa: {formatPeriod(item.startsOn, item.endsOn)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Lịch: {formatScheduleDays(item.scheduleDays)}
+                        {timeLabel ? ` · ${timeLabel}` : ""}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Đã điểm danh: {item.rate.present} có mặt · {item.rate.late} muộn ·{" "}
+                        {item.rate.absent} vắng / {item.rate.total} buổi ({item.rate.percent}%)
+                      </p>
+                    </div>
+                    {item.sessions.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        Chưa có buổi nào. Admin hãy set ngày bắt đầu/kết thúc khóa hoặc mở điểm danh.
+                      </p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {item.sessions.map((session) => (
+                          <li
+                            key={`${item.id}-${session.date}`}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2.5 text-sm"
+                          >
+                            <div>
+                              <p className="font-semibold">{formatAdminDate(session.date)}</p>
+                              {session.note ? (
+                                <p className="text-xs text-muted-foreground">{session.note}</p>
+                              ) : null}
+                            </div>
+                            <span
+                              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${sessionStatusClass(session)}`}
+                            >
+                              {sessionStatusLabel(session)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </article>
+                );
+              })
+            )}
           </section>
         ) : (
           <section className="space-y-4">
@@ -262,28 +366,92 @@ export function ParentPortal() {
                     </span>
                   </div>
                   <p className="mt-2 text-lg font-black">{money(invoice.amount)}</p>
-                  {invoice.status === "UNPAID" ? (
-                    <Button
-                      type="button"
-                      className="mt-3 w-full"
-                      disabled={busy}
-                      onClick={() => {
-                        setBusy(true);
-                        void reportTransfer(invoice.id)
-                          .then((response) => {
-                            setNotice(response.message);
-                            setTab("tuition");
-                            return listParentInvoices();
-                          })
-                          .then((response) => {
-                            if (response) setInvoices(response.data);
-                          })
-                          .catch((err) => setError(formatError(err)))
-                          .finally(() => setBusy(false));
-                      }}
-                    >
-                      Đã chuyển khoản
-                    </Button>
+                  {invoice.paymentProofUrl ? (
+                    <PaymentProofViewer
+                      url={invoice.paymentProofUrl}
+                      label="Minh chứng đã gửi"
+                    />
+                  ) : null}
+                  {invoice.status === "UNPAID" ||
+                  (invoice.status === "PENDING" && !invoice.paymentProofUrl) ? (
+                    <div className="mt-3 space-y-2">
+                      {!invoice.paymentProofUrl && invoice.status === "PENDING" ? (
+                        <p className="text-xs text-amber-700">
+                          Lần trước chưa lưu được ảnh — vui lòng gửi lại minh chứng.
+                        </p>
+                      ) : null}
+                      <label className="block text-sm">
+                        <span className="mb-1 block font-semibold">Minh chứng chuyển khoản *</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-2 file:font-semibold"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            setProofFiles((current) => {
+                              const previous = current[invoice.id];
+                              if (previous) URL.revokeObjectURL(previous.preview);
+                              if (!file) {
+                                const next = { ...current };
+                                delete next[invoice.id];
+                                return next;
+                              }
+                              return {
+                                ...current,
+                                [invoice.id]: {
+                                  file,
+                                  preview: URL.createObjectURL(file),
+                                },
+                              };
+                            });
+                          }}
+                        />
+                      </label>
+                      {proofFiles[invoice.id] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={proofFiles[invoice.id].preview}
+                          alt="Minh chứng chuyển khoản"
+                          className="max-h-40 rounded-xl border border-border object-contain"
+                        />
+                      ) : null}
+                      <Button
+                        type="button"
+                        className="w-full"
+                        disabled={busy || !proofFiles[invoice.id]}
+                        onClick={() => {
+                          const selected = proofFiles[invoice.id];
+                          if (!selected) {
+                            setError("Vui lòng chọn ảnh minh chứng chuyển khoản.");
+                            return;
+                          }
+                          setBusy(true);
+                          setError(null);
+                          void reportTransfer(invoice.id, selected.file)
+                            .then((response) => {
+                              setNotice(response.message);
+                              URL.revokeObjectURL(selected.preview);
+                              setProofFiles((current) => {
+                                const next = { ...current };
+                                delete next[invoice.id];
+                                return next;
+                              });
+                              return listParentInvoices();
+                            })
+                            .then((response) => {
+                              if (response) setInvoices(response.data);
+                            })
+                            .catch((err) => setError(formatError(err)))
+                            .finally(() => setBusy(false));
+                        }}
+                      >
+                        {busy
+                          ? "Đang gửi..."
+                          : invoice.status === "PENDING"
+                            ? "Gửi lại minh chứng"
+                            : "Đã chuyển khoản"}
+                      </Button>
+                    </div>
                   ) : null}
                 </li>
               ))}

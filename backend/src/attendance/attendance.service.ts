@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { AttendanceStatus, Role } from '../../generated/prisma/client';
 import { ClassesService } from '../classes/classes.service';
+import { assertSessionFitsClass } from '../classes/class-schedule';
 import {
   formatDateOnly,
   parseDateOnly,
@@ -26,8 +27,14 @@ export class AttendanceService {
   ) {}
 
   async openSession(classId: string, dto: OpenSessionDto, actor: Actor) {
-    await this.classesService.getOwnedClass(classId, actor);
+    const classGroup = await this.classesService.getOwnedClass(classId, actor);
     const date = parseDateOnly(dto.date);
+    assertSessionFitsClass({
+      date,
+      scheduleDays: classGroup.scheduleDays,
+      startsOn: classGroup.startsOn ?? classGroup.course?.startDate ?? null,
+      endsOn: classGroup.endsOn ?? classGroup.course?.endDate ?? null,
+    });
 
     const session = await this.prisma.classSession.upsert({
       where: { classId_date: { classId, date } },

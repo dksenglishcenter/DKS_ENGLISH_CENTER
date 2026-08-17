@@ -16,6 +16,12 @@ import {
   saveAttendance,
 } from "@/lib/ops/api";
 import type { AttendanceStatus, ClassGroup, ClassSession } from "@/lib/ops/types";
+import {
+  attendanceDateError,
+  attendanceWindow,
+  formatScheduleDays,
+  nextScheduledDate,
+} from "@/lib/ops/class-schedule";
 
 function todayIso() {
   const now = new Date();
@@ -58,7 +64,13 @@ export function AttendanceAdmin() {
       .then((response) => {
         const rows = "meta" in response ? response.data : response.data;
         setClasses(rows);
-        if (rows[0]) setClassId(rows[0].id);
+        if (rows[0]) {
+          setClassId(rows[0].id);
+          const { min, max } = attendanceWindow(rows[0]);
+          if (attendanceDateError(date, rows[0])) {
+            setDate(nextScheduledDate(date, rows[0].scheduleDays, min, max));
+          }
+        }
       })
       .catch((err) => setError(formatError(err)));
   }, [isTeacher]);
@@ -95,6 +107,10 @@ export function AttendanceAdmin() {
     void loadClassDay(classId, date);
   }, [classId, date]);
 
+  const selectedClass = classes.find((item) => item.id === classId);
+  const dateError = attendanceDateError(date, selectedClass);
+  const dateWindow = selectedClass ? attendanceWindow(selectedClass) : {};
+
   const allPresent = useMemo(
     () => roster.length > 0 && roster.every((student) => marks[student.id] === "PRESENT"),
     [roster, marks],
@@ -102,6 +118,10 @@ export function AttendanceAdmin() {
 
   async function handleSave() {
     if (!classId || roster.length === 0) return;
+    if (dateError) {
+      setError(dateError);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -123,7 +143,13 @@ export function AttendanceAdmin() {
     <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-black font-[family-name:var(--font-nunito)]">Điểm danh</h2>
-        <p className="text-sm text-muted-foreground">Chọn lớp và ngày, lưu một lần cho cả buổi.</p>
+        <p className="text-sm text-muted-foreground">
+          Chỉ lưu được ngày đúng lịch lớp
+          {selectedClass?.scheduleDays.length
+            ? ` (${formatScheduleDays(selectedClass.scheduleDays)})`
+            : ""}
+          .
+        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -132,7 +158,16 @@ export function AttendanceAdmin() {
           <select
             className="h-12 w-full rounded-lg border border-border bg-card px-3 text-sm font-semibold"
             value={classId}
-            onChange={(event) => setClassId(event.target.value)}
+            onChange={(event) => {
+              const nextId = event.target.value;
+              setClassId(nextId);
+              const next = classes.find((item) => item.id === nextId);
+              if (!next) return;
+              const { min, max } = attendanceWindow(next);
+              if (attendanceDateError(date, next)) {
+                setDate(nextScheduledDate(date, next.scheduleDays, min, max));
+              }
+            }}
           >
             {classes.length === 0 ? <option value="">Chưa có lớp</option> : null}
             {classes.map((item) => (
@@ -144,7 +179,15 @@ export function AttendanceAdmin() {
         </label>
         <label className="text-sm">
           <span className="mb-1 block font-semibold">Ngày</span>
-          <Input type="date" className="h-12" value={date} onChange={(event) => setDate(event.target.value)} />
+          <Input
+            type="date"
+            className={`h-12 ${dateError ? "border-red-500" : ""}`}
+            value={date}
+            min={dateWindow.min}
+            max={dateWindow.max}
+            onChange={(event) => setDate(event.target.value)}
+          />
+          {dateError ? <p className="mt-1 text-xs text-red-600">{dateError}</p> : null}
         </label>
       </div>
 
@@ -170,7 +213,7 @@ export function AttendanceAdmin() {
         >
           {allPresent ? "Đã chọn tất cả có mặt" : "Tất cả có mặt"}
         </Button>
-        <Button type="button" disabled={saving || roster.length === 0} onClick={() => void handleSave()}>
+        <Button type="button" disabled={saving || roster.length === 0 || Boolean(dateError)} onClick={() => void handleSave()}>
           {saving ? "Đang lưu..." : "Lưu điểm danh"}
         </Button>
       </div>

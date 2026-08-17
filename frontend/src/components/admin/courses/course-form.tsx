@@ -83,6 +83,8 @@ const EMPTY_FORM: CoursePayload = {
   target: TARGET_OPTIONS[0],
   tuition: "",
   duration: DURATION_OPTIONS[1],
+  startDate: null,
+  endDate: null,
   perks: [""],
   category: "",
   coverImageUrl: "",
@@ -131,6 +133,10 @@ function mapServerFieldErrors(message: string): FieldErrors {
       errors.tuition = "Học phí chưa hợp lệ";
     } else if (lower.includes("duration")) {
       errors.duration = "Thời gian chưa hợp lệ";
+    } else if (lower.includes("startdate") || lower.includes("ngày bắt đầu")) {
+      errors.startDate = "Ngày bắt đầu khóa chưa hợp lệ";
+    } else if (lower.includes("enddate") || lower.includes("ngày kết thúc")) {
+      errors.endDate = "Ngày kết thúc khóa chưa hợp lệ";
     } else if (lower.includes("perk")) {
       errors.perks = "Cần ít nhất 1 điểm nổi bật";
     } else if (text) {
@@ -241,6 +247,8 @@ function createInitialValues(
       target: course.target,
       tuition: course.tuition,
       duration: course.duration,
+      startDate: course.startDate,
+      endDate: course.endDate,
       perks: course.perks.length ? course.perks : [""],
       category: normalizeCategory(course.category),
       coverImageUrl: course.coverImageUrl,
@@ -341,6 +349,11 @@ export function CourseForm({
     if (!availableSortOrders.includes(payload.sortOrder ?? -1)) {
       errors.sortOrder = "Thứ tự này đã được dùng — chọn số khác";
     }
+    const startDate = payload.startDate?.trim() || "";
+    const endDate = payload.endDate?.trim() || "";
+    if (startDate && endDate && endDate < startDate) {
+      errors.endDate = "Ngày kết thúc khóa phải sau hoặc bằng ngày bắt đầu.";
+    }
 
     return errors;
   };
@@ -380,6 +393,8 @@ export function CourseForm({
       subtitle: form.subtitle.trim(),
       description: form.description.trim(),
       perks: form.perks.map((item) => item.trim()).filter(Boolean),
+      startDate: form.startDate || null,
+      endDate: form.endDate || null,
     };
 
     const localErrors = validateForm(payload);
@@ -467,6 +482,31 @@ export function CourseForm({
           error={fieldErrors.duration}
           onChange={(value) => updateField("duration", value)}
         />
+        <label className="block text-sm">
+          <span className="mb-1 block font-semibold text-foreground">Ngày bắt đầu khóa (tuỳ chọn)</span>
+          <input
+            type="date"
+            className={`h-11 w-full rounded-lg border bg-card px-3 py-2 lg:h-auto ${
+              fieldErrors.startDate ? "border-red-500" : "border-border"
+            }`}
+            value={form.startDate ?? ""}
+            onChange={(event) => updateField("startDate", event.target.value || null)}
+          />
+          <FieldError message={fieldErrors.startDate} />
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block font-semibold text-foreground">Ngày kết thúc khóa (tuỳ chọn)</span>
+          <input
+            type="date"
+            className={`h-11 w-full rounded-lg border bg-card px-3 py-2 lg:h-auto ${
+              fieldErrors.endDate ? "border-red-500" : "border-border"
+            }`}
+            value={form.endDate ?? ""}
+            min={form.startDate ?? undefined}
+            onChange={(event) => updateField("endDate", event.target.value || null)}
+          />
+          <FieldError message={fieldErrors.endDate} />
+        </label>
 
         <label className="block text-sm">
           <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>

@@ -5,6 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Role } from '../../generated/prisma/client';
+import {
+  assertDateRange,
+  optionalDateOnly,
+  parseOptionalDateOnly,
+} from '../common/validation/date-only';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateClassDto,
@@ -14,13 +19,17 @@ import {
 
 const CLASS_LIST_INCLUDE = {
   teacher: { select: { id: true, fullName: true, email: true } },
-  course: { select: { id: true, title: true, slug: true } },
+  course: {
+    select: { id: true, title: true, slug: true, startDate: true, endDate: true },
+  },
   _count: { select: { enrollments: { where: { leftAt: null } } } },
 } satisfies Prisma.ClassGroupInclude;
 
 const CLASS_DETAIL_INCLUDE = {
   teacher: { select: { id: true, fullName: true, email: true, role: true } },
-  course: { select: { id: true, title: true, slug: true } },
+  course: {
+    select: { id: true, title: true, slug: true, startDate: true, endDate: true },
+  },
   enrollments: {
     where: { leftAt: null },
     include: {
@@ -69,7 +78,7 @@ export class ClassesService {
     ]);
 
     return {
-      data: rows.map(this.toListItem),
+      data: rows.map((row) => this.toListItem(row)),
       meta: {
         totalItems,
         totalPages: Math.ceil(totalItems / query.pageSize) || 1,
@@ -85,7 +94,7 @@ export class ClassesService {
       orderBy: [{ status: 'asc' }, { name: 'asc' }],
       include: CLASS_LIST_INCLUDE,
     });
-    return { data: rows.map(this.toListItem) };
+    return { data: rows.map((row) => this.toListItem(row)) };
   }
 
   async findOne(id: string, actor: { id: string; role: string }) {
@@ -103,6 +112,9 @@ export class ClassesService {
   async create(dto: CreateClassDto) {
     await this.assertTeacherId(dto.teacherId);
     await this.assertCourseId(dto.courseId);
+    const startsOn = parseOptionalDateOnly(dto.startsOn) ?? null;
+    const endsOn = parseOptionalDateOnly(dto.endsOn) ?? null;
+    assertDateRange(startsOn, endsOn);
 
     const classGroup = await this.prisma.classGroup.create({
       data: {
@@ -113,6 +125,8 @@ export class ClassesService {
         scheduleDays: dto.scheduleDays ?? [],
         startTime: dto.startTime ?? null,
         endTime: dto.endTime ?? null,
+        startsOn,
+        endsOn,
         room: dto.room ?? null,
         capacity: dto.capacity ?? null,
         status: dto.status,
@@ -145,6 +159,22 @@ export class ClassesService {
       }
     }
 
+    if (dto.startsOn !== undefined || dto.endsOn !== undefined) {
+      const existing = await this.prisma.classGroup.findUnique({
+        where: { id },
+        select: { startsOn: true, endsOn: true },
+      });
+      const startsOn =
+        dto.startsOn !== undefined
+          ? (parseOptionalDateOnly(dto.startsOn) ?? null)
+          : (existing?.startsOn ?? null);
+      const endsOn =
+        dto.endsOn !== undefined
+          ? (parseOptionalDateOnly(dto.endsOn) ?? null)
+          : (existing?.endsOn ?? null);
+      assertDateRange(startsOn, endsOn);
+    }
+
     const classGroup = await this.prisma.classGroup.update({
       where: { id },
       data: {
@@ -155,6 +185,12 @@ export class ClassesService {
         ...(dto.scheduleDays !== undefined ? { scheduleDays: dto.scheduleDays } : {}),
         ...(dto.startTime !== undefined ? { startTime: dto.startTime } : {}),
         ...(dto.endTime !== undefined ? { endTime: dto.endTime } : {}),
+        ...(dto.startsOn !== undefined
+          ? { startsOn: parseOptionalDateOnly(dto.startsOn) ?? null }
+          : {}),
+        ...(dto.endsOn !== undefined
+          ? { endsOn: parseOptionalDateOnly(dto.endsOn) ?? null }
+          : {}),
         ...(dto.room !== undefined ? { room: dto.room } : {}),
         ...(dto.capacity !== undefined ? { capacity: dto.capacity } : {}),
         ...(dto.status !== undefined ? { status: dto.status } : {}),
@@ -239,7 +275,15 @@ export class ClassesService {
   async getOwnedClass(classId: string, actor: { id: string; role: string }) {
     const classGroup = await this.prisma.classGroup.findUnique({
       where: { id: classId },
-      select: { id: true, teacherId: true, name: true },
+      select: {
+        id: true,
+        teacherId: true,
+        name: true,
+        scheduleDays: true,
+        startsOn: true,
+        endsOn: true,
+        course: { select: { startDate: true, endDate: true } },
+      },
     });
     if (!classGroup) {
       throw new NotFoundException('Không tìm thấy lớp học.');
@@ -261,15 +305,42 @@ export class ClassesService {
     row: Prisma.ClassGroupGetPayload<{ include: typeof CLASS_LIST_INCLUDE }>,
   ) {
     const { _count, ...rest } = row;
-    return { ...rest, studentCount: _count.enrollments };
+    return { ...this.withDateFields(rest), studentCount: _count.enrollments };
   }
 
   private toDetail(
     row: Prisma.ClassGroupGetPayload<{ include: typeof CLASS_DETAIL_INCLUDE }>,
   ) {
     return {
-      ...row,
+      ...this.withDateFields(row),
       studentCount: row.enrollments.length,
+    };
+  }
+
+  private withDateFields<
+    T extends {
+      startsOn: Date | null;
+      endsOn: Date | null;
+      course: {
+        id: string;
+        title: string;
+        slug: string;
+        startDate: Date | null;
+        endDate: Date | null;
+      } | null;
+    },
+  >(row: T) {
+    return {
+      ...row,
+      startsOn: optionalDateOnly(row.startsOn),
+      endsOn: optionalDateOnly(row.endsOn),
+      course: row.course
+        ? {
+            ...row.course,
+            startDate: optionalDateOnly(row.course.startDate),
+            endDate: optionalDateOnly(row.course.endDate),
+          }
+        : null,
     };
   }
 
