@@ -31,6 +31,17 @@ import type { AuthUser } from "@/lib/auth/types";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { cn } from "@/components/ui/utils";
 
+/**
+ * TEMP: ẩn menu Giai đoạn 3 (chưa thanh toán) — display: none.
+ * Xóa href khỏi set này khi khách thanh toán để hiện lại.
+ */
+const PHASE3_NAV_HIDDEN_HREFS = new Set([
+  `${PAGE_PATHS.admin}/students`,
+  `${PAGE_PATHS.admin}/classes`,
+  `${PAGE_PATHS.admin}/attendance`,
+  `${PAGE_PATHS.admin}/tuition`,
+]);
+
 const ADMIN_NAV = [
   { href: PAGE_PATHS.admin, label: "Tổng quan", icon: LayoutDashboard },
   { href: `${PAGE_PATHS.admin}/students`, label: "Học viên", icon: UsersRound },
@@ -207,6 +218,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               ? "bg-primary text-white"
               : "text-white/75 hover:bg-white/10 hover:text-white",
           )}
+          style={
+            PHASE3_NAV_HIDDEN_HREFS.has(item.href)
+              ? { display: "none" }
+              : undefined
+          }
         >
           <Icon className="h-4 w-4" />
           {item.label}
