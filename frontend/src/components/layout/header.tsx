@@ -22,6 +22,7 @@ export function Header() {
   const links: { label: string; page: Page }[] = [
     { label: "Trang chủ", page: "home" },
     { label: "Khóa học", page: "courses" },
+    { label: "Thi thử", page: "exam" },
     { label: "Về chúng tôi", page: "about" },
     { label: "Blog", page: "blog" },
     { label: "Tuyển dụng", page: "careers" },
