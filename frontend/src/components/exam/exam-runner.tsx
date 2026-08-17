@@ -143,7 +143,7 @@ export function ExamRunner({
         {/* Content: passage + questions */}
         <div className="flex min-h-0 flex-1 flex-col">
           {/* Section tabs */}
-          <div className="flex gap-2 border-b border-border bg-card px-4 py-2">
+          <div className="flex justify-center gap-2 border-b border-border bg-card px-4 py-2">
             {test.sections.map((s, i) => (
               <button
                 key={s.id}
