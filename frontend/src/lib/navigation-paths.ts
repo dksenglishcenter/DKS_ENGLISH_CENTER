@@ -1,6 +1,7 @@
 export type Page =
   | "home"
   | "courses"
+  | "exam"
   | "about"
   | "blog"
   | "careers"
@@ -15,6 +16,7 @@ export type Page =
 export const PAGE_PATHS: Record<Page, string> = {
   home: "/",
   courses: "/courses",
+  exam: "/exam",
   about: "/about",
   blog: "/blog",
   careers: "/careers",
@@ -30,6 +32,7 @@ export const PAGE_PATHS: Record<Page, string> = {
 const PATH_PAGES: Record<string, Page> = {
   "/": "home",
   "/courses": "courses",
+  "/exam": "exam",
   "/about": "about",
   "/blog": "blog",
   "/careers": "careers",

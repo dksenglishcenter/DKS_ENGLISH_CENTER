@@ -64,6 +64,33 @@ export class CloudinaryService {
     });
   }
 
+  /** Upload a Listening audio file. Cloudinary stores audio as 'video'. */
+  async uploadAudio(file: Express.Multer.File): Promise<UploadApiResponse> {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('File âm thanh không hợp lệ');
+    }
+    if (!file.mimetype.startsWith('audio/')) {
+      throw new BadRequestException('Chỉ chấp nhận file âm thanh (MP3, M4A, WAV...)');
+    }
+
+    return new Promise((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        {
+          folder: 'dks-english-center/exam/audio',
+          resource_type: 'video', // Cloudinary treats audio as video
+        },
+        (error, result) => {
+          if (error || !result) {
+            reject(error ?? new Error('Upload Cloudinary thất bại'));
+            return;
+          }
+          resolve(result);
+        },
+      );
+      upload.end(file.buffer);
+    });
+  }
+
   private managedFolders() {
     return [
       CLOUDINARY_FOLDERS.courses,
