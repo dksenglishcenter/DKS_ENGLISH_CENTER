@@ -28,7 +28,7 @@ import {
 
 @Controller()
 @UseGuards(JwtAuthGuard, RolesGuard, FeatureGuard)
-@RequireFeature('ATTENDANCE')
+@RequireFeature('PHASE3')
 @Roles(Role.ADMIN, Role.TEACHER)
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}

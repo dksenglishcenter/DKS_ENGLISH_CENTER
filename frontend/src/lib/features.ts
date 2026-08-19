@@ -10,7 +10,8 @@ function flag(value: string | undefined): boolean {
 }
 
 export const features = {
-  attendance: flag(process.env.NEXT_PUBLIC_FEATURE_ATTENDANCE),
+  /** Management suite: students, classes, attendance, tuition (GĐ3). */
+  phase3: flag(process.env.NEXT_PUBLIC_FEATURE_PHASE3),
   mockTest: flag(process.env.NEXT_PUBLIC_FEATURE_MOCK_TEST),
 } as const;
 

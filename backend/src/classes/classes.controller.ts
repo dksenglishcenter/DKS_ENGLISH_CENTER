@@ -15,6 +15,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import type { AuthRequestUser } from '../auth/guards/jwt-auth.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { RequireFeature } from '../common/feature.decorator';
+import { FeatureGuard } from '../common/feature.guard';
 import { ClassesService } from './classes.service';
 import {
   ClassParamsDto,
@@ -26,7 +28,8 @@ import {
 } from './dto/class.dto';
 
 @Controller('classes')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FeatureGuard)
+@RequireFeature('PHASE3')
 export class ClassesController {
   constructor(private readonly classesService: ClassesService) {}
 

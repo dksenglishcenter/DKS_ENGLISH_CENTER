@@ -33,23 +33,12 @@ import { features, type FeatureKey } from "@/lib/features";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { cn } from "@/components/ui/utils";
 
-/**
- * TEMP: ẩn menu Giai đoạn 3 (chưa thanh toán) — display: none.
- * Xóa href khỏi set này khi khách thanh toán để hiện lại.
- */
-const PHASE3_NAV_HIDDEN_HREFS = new Set([
-  `${PAGE_PATHS.admin}/students`,
-  `${PAGE_PATHS.admin}/classes`,
-  `${PAGE_PATHS.admin}/attendance`,
-  `${PAGE_PATHS.admin}/tuition`,
-]);
-
 const ADMIN_NAV = [
   { href: PAGE_PATHS.admin, label: "Tổng quan", icon: LayoutDashboard },
-  { href: `${PAGE_PATHS.admin}/students`, label: "Học viên", icon: UsersRound },
-  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp học", icon: School },
-  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "attendance" },
-  { href: `${PAGE_PATHS.admin}/tuition`, label: "Học phí", icon: Wallet },
+  { href: `${PAGE_PATHS.admin}/students`, label: "Học viên", icon: UsersRound, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp học", icon: School, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/tuition`, label: "Học phí", icon: Wallet, feature: "phase3" },
   { href: `${PAGE_PATHS.admin}/courses`, label: "Khóa học", icon: BookOpen },
   { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText, feature: "mockTest" },
   {
@@ -86,8 +75,8 @@ const ADMIN_NAV = [
 ] as const;
 
 const TEACHER_NAV = [
-  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School },
-  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "attendance" },
+  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "phase3" },
   { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText, feature: "mockTest" },
   {
     href: `${PAGE_PATHS.admin}/exam-grading`,
@@ -99,10 +88,18 @@ const TEACHER_NAV = [
 
 /** Which feature (if any) owns this admin route — used to block it when off. */
 function featureForPath(pathname: string): FeatureKey | null {
-  if (pathname.startsWith(`${PAGE_PATHS.admin}/attendance`)) return "attendance";
+  const p = `${PAGE_PATHS.admin}`;
   if (
-    pathname.startsWith(`${PAGE_PATHS.admin}/exams`) ||
-    pathname.startsWith(`${PAGE_PATHS.admin}/exam-grading`)
+    pathname.startsWith(`${p}/students`) ||
+    pathname.startsWith(`${p}/classes`) ||
+    pathname.startsWith(`${p}/attendance`) ||
+    pathname.startsWith(`${p}/tuition`)
+  ) {
+    return "phase3";
+  }
+  if (
+    pathname.startsWith(`${p}/exams`) ||
+    pathname.startsWith(`${p}/exam-grading`)
   ) {
     return "mockTest";
   }
@@ -261,11 +258,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               ? "bg-primary text-white"
               : "text-white/75 hover:bg-white/10 hover:text-white",
           )}
-          style={
-            PHASE3_NAV_HIDDEN_HREFS.has(item.href)
-              ? { display: "none" }
-              : undefined
-          }
         >
           <Icon className="h-4 w-4" />
           {item.label}

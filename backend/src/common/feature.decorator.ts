@@ -2,8 +2,9 @@ import { SetMetadata } from '@nestjs/common';
 
 export const FEATURE_KEY = 'feature';
 
-/** Names map to env vars FEATURE_<NAME> (e.g. FEATURE_MOCK_TEST=true). */
-export type FeatureName = 'MOCK_TEST' | 'ATTENDANCE';
+/** Names map to env vars FEATURE_<NAME> (e.g. FEATURE_MOCK_TEST=true).
+ *  PHASE3 = the management suite (students, classes, attendance, tuition). */
+export type FeatureName = 'MOCK_TEST' | 'PHASE3';
 
 /** Gate a controller/route behind a feature flag. */
 export const RequireFeature = (name: FeatureName) =>
