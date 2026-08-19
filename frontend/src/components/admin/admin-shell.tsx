@@ -29,6 +29,7 @@ import { DKSLogo } from "@/components/brand/dks-logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { getCurrentUser, logoutUser } from "@/lib/auth/api";
 import type { AuthUser } from "@/lib/auth/types";
+import { features, type FeatureKey } from "@/lib/features";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { cn } from "@/components/ui/utils";
 
@@ -47,14 +48,15 @@ const ADMIN_NAV = [
   { href: PAGE_PATHS.admin, label: "Tổng quan", icon: LayoutDashboard },
   { href: `${PAGE_PATHS.admin}/students`, label: "Học viên", icon: UsersRound },
   { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp học", icon: School },
-  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "attendance" },
   { href: `${PAGE_PATHS.admin}/tuition`, label: "Học phí", icon: Wallet },
   { href: `${PAGE_PATHS.admin}/courses`, label: "Khóa học", icon: BookOpen },
-  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText },
+  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText, feature: "mockTest" },
   {
     href: `${PAGE_PATHS.admin}/exam-grading`,
     label: "Chấm bài",
     icon: ClipboardCheck,
+    feature: "mockTest",
   },
   {
     href: `${PAGE_PATHS.admin}/success-stories`,
@@ -85,14 +87,27 @@ const ADMIN_NAV = [
 
 const TEACHER_NAV = [
   { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School },
-  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
-  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "attendance" },
+  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText, feature: "mockTest" },
   {
     href: `${PAGE_PATHS.admin}/exam-grading`,
     label: "Chấm bài",
     icon: ClipboardCheck,
+    feature: "mockTest",
   },
 ] as const;
+
+/** Which feature (if any) owns this admin route — used to block it when off. */
+function featureForPath(pathname: string): FeatureKey | null {
+  if (pathname.startsWith(`${PAGE_PATHS.admin}/attendance`)) return "attendance";
+  if (
+    pathname.startsWith(`${PAGE_PATHS.admin}/exams`) ||
+    pathname.startsWith(`${PAGE_PATHS.admin}/exam-grading`)
+  ) {
+    return "mockTest";
+  }
+  return null;
+}
 
 function teacherCanAccess(pathname: string) {
   return (
@@ -165,6 +180,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
   }, [user, pathname, router]);
 
+  // Block routes whose feature flag is off (not just hide the menu item).
+  useEffect(() => {
+    const feature = featureForPath(pathname);
+    if (feature && !features[feature]) {
+      router.replace(PAGE_PATHS.admin);
+    }
+  }, [pathname, router]);
+
   useEffect(() => {
     setMobileSidebarOpen(false);
   }, [pathname]);
@@ -188,7 +211,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [mobileSidebarOpen]);
 
   const navItems = useMemo(
-    () => (user?.role === "TEACHER" ? TEACHER_NAV : ADMIN_NAV),
+    () =>
+      (user?.role === "TEACHER" ? TEACHER_NAV : ADMIN_NAV).filter(
+        (item) => !("feature" in item) || features[item.feature as FeatureKey],
+      ),
     [user?.role],
   );
 

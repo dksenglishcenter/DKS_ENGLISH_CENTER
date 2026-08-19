@@ -11,6 +11,7 @@ import { Container } from "@/components/layout/container";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { homePathForRole } from "@/lib/auth/home-path";
+import { features, type FeatureKey } from "@/lib/features";
 import { getActivePage, PAGE_PATHS, type Page } from "@/lib/navigation-paths";
 
 export function Header() {
@@ -19,15 +20,16 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const { user, ready, logout, loggingOut } = useAuthSession();
 
-  const links: { label: string; page: Page }[] = [
+  const allLinks: { label: string; page: Page; feature?: FeatureKey }[] = [
     { label: "Trang chủ", page: "home" },
     { label: "Khóa học", page: "courses" },
-    { label: "Thi thử", page: "exam" },
+    { label: "Thi thử", page: "exam", feature: "mockTest" },
     { label: "Về chúng tôi", page: "about" },
     { label: "Blog", page: "blog" },
     { label: "Tuyển dụng", page: "careers" },
     { label: "Liên hệ", page: "contact" },
   ];
+  const links = allLinks.filter((l) => !l.feature || features[l.feature]);
 
   const linkClass = (page: Page) =>
     `rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 font-[family-name:var(--font-nunito)] ${

@@ -21,6 +21,8 @@ import type { AuthRequestUser } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { RequireFeature } from '../common/feature.decorator';
+import { FeatureGuard } from '../common/feature.guard';
 import { GradeSpeakingDto, GradeWritingDto } from './dto/grade.dto';
 import { ImportTestDto } from './dto/import-test.dto';
 import { SaveAnswersDto } from './dto/save-answers.dto';
@@ -36,6 +38,8 @@ const MAX_AUDIO_SIZE = 30 * 1024 * 1024;
  * authoring and require an ADMIN or TEACHER account.
  */
 @Controller('mock-tests')
+@UseGuards(FeatureGuard)
+@RequireFeature('MOCK_TEST')
 export class MockTestController {
   constructor(private readonly service: MockTestService) {}
 
