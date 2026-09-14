@@ -17,6 +17,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { FacilityImagesModule } from './facility-images/facility-images.module';
 import { GalleryImagesModule } from './gallery-images/gallery-images.module';
 import { JobsModule } from './jobs/jobs.module';
+import { MockTestModule } from './mock-test/mock-test.module';
 import { ParentModule } from './parent/parent.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StudentsModule } from './students/students.module';
@@ -48,6 +49,7 @@ import { UsersModule } from './users/users.module';
     AttendanceModule,
     TuitionModule,
     ParentModule,
+    MockTestModule,
     // Global default: 200 requests/min/IP. Sensitive routes override via @Throttle.
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 200 }]),
   ],

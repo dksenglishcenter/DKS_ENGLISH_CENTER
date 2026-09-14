@@ -8,6 +8,7 @@ import {
   Briefcase,
   Building2,
   ClipboardCheck,
+  FileText,
   FileUser,
   GraduationCap,
   ImageIcon,
@@ -28,27 +29,24 @@ import { DKSLogo } from "@/components/brand/dks-logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { getCurrentUser, logoutUser } from "@/lib/auth/api";
 import type { AuthUser } from "@/lib/auth/types";
+import { features, type FeatureKey } from "@/lib/features";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { cn } from "@/components/ui/utils";
 
-/**
- * TEMP: ẩn menu Giai đoạn 3 (chưa thanh toán) — display: none.
- * Xóa href khỏi set này khi khách thanh toán để hiện lại.
- */
-const PHASE3_NAV_HIDDEN_HREFS = new Set([
-  `${PAGE_PATHS.admin}/students`,
-  `${PAGE_PATHS.admin}/classes`,
-  `${PAGE_PATHS.admin}/attendance`,
-  `${PAGE_PATHS.admin}/tuition`,
-]);
-
 const ADMIN_NAV = [
   { href: PAGE_PATHS.admin, label: "Tổng quan", icon: LayoutDashboard },
-  { href: `${PAGE_PATHS.admin}/students`, label: "Học viên", icon: UsersRound },
-  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp học", icon: School },
-  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
-  { href: `${PAGE_PATHS.admin}/tuition`, label: "Học phí", icon: Wallet },
+  { href: `${PAGE_PATHS.admin}/students`, label: "Học viên", icon: UsersRound, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp học", icon: School, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/tuition`, label: "Học phí", icon: Wallet, feature: "phase3" },
   { href: `${PAGE_PATHS.admin}/courses`, label: "Khóa học", icon: BookOpen },
+  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText, feature: "mockTest" },
+  {
+    href: `${PAGE_PATHS.admin}/exam-grading`,
+    label: "Chấm bài",
+    icon: ClipboardCheck,
+    feature: "mockTest",
+  },
   {
     href: `${PAGE_PATHS.admin}/success-stories`,
     label: "Câu chuyện",
@@ -77,16 +75,47 @@ const ADMIN_NAV = [
 ] as const;
 
 const TEACHER_NAV = [
-  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School },
-  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck },
+  { href: `${PAGE_PATHS.admin}/classes`, label: "Lớp của tôi", icon: School, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/attendance`, label: "Điểm danh", icon: ClipboardCheck, feature: "phase3" },
+  { href: `${PAGE_PATHS.admin}/exams`, label: "Đề thi thử", icon: FileText, feature: "mockTest" },
+  {
+    href: `${PAGE_PATHS.admin}/exam-grading`,
+    label: "Chấm bài",
+    icon: ClipboardCheck,
+    feature: "mockTest",
+  },
 ] as const;
+
+/** Which feature (if any) owns this admin route — used to block it when off. */
+function featureForPath(pathname: string): FeatureKey | null {
+  const p = `${PAGE_PATHS.admin}`;
+  if (
+    pathname.startsWith(`${p}/students`) ||
+    pathname.startsWith(`${p}/classes`) ||
+    pathname.startsWith(`${p}/attendance`) ||
+    pathname.startsWith(`${p}/tuition`)
+  ) {
+    return "phase3";
+  }
+  if (
+    pathname.startsWith(`${p}/exams`) ||
+    pathname.startsWith(`${p}/exam-grading`)
+  ) {
+    return "mockTest";
+  }
+  return null;
+}
 
 function teacherCanAccess(pathname: string) {
   return (
     pathname === `${PAGE_PATHS.admin}/classes` ||
     pathname.startsWith(`${PAGE_PATHS.admin}/classes/`) ||
     pathname === `${PAGE_PATHS.admin}/attendance` ||
-    pathname.startsWith(`${PAGE_PATHS.admin}/attendance/`)
+    pathname.startsWith(`${PAGE_PATHS.admin}/attendance/`) ||
+    pathname === `${PAGE_PATHS.admin}/exams` ||
+    pathname.startsWith(`${PAGE_PATHS.admin}/exams/`) ||
+    pathname === `${PAGE_PATHS.admin}/exam-grading` ||
+    pathname.startsWith(`${PAGE_PATHS.admin}/exam-grading/`)
   );
 }
 
@@ -148,6 +177,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
   }, [user, pathname, router]);
 
+  // Block routes whose feature flag is off (not just hide the menu item).
+  useEffect(() => {
+    const feature = featureForPath(pathname);
+    if (feature && !features[feature]) {
+      router.replace(PAGE_PATHS.admin);
+    }
+  }, [pathname, router]);
+
   useEffect(() => {
     setMobileSidebarOpen(false);
   }, [pathname]);
@@ -171,7 +208,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [mobileSidebarOpen]);
 
   const navItems = useMemo(
-    () => (user?.role === "TEACHER" ? TEACHER_NAV : ADMIN_NAV),
+    () =>
+      (user?.role === "TEACHER" ? TEACHER_NAV : ADMIN_NAV).filter(
+        (item) => !("feature" in item) || features[item.feature as FeatureKey],
+      ),
     [user?.role],
   );
 
@@ -218,11 +258,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               ? "bg-primary text-white"
               : "text-white/75 hover:bg-white/10 hover:text-white",
           )}
-          style={
-            PHASE3_NAV_HIDDEN_HREFS.has(item.href)
-              ? { display: "none" }
-              : undefined
-          }
         >
           <Icon className="h-4 w-4" />
           {item.label}

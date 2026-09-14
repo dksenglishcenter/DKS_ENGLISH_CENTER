@@ -14,6 +14,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import type { AuthRequestUser } from '../auth/guards/jwt-auth.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { RequireFeature } from '../common/feature.decorator';
+import { FeatureGuard } from '../common/feature.guard';
 import { ClassParamsDto } from '../classes/dto/class.dto';
 import { StudentParamsDto } from '../students/dto/student.dto';
 import { AttendanceService } from './attendance.service';
@@ -25,7 +27,8 @@ import {
 } from './dto/attendance.dto';
 
 @Controller()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FeatureGuard)
+@RequireFeature('PHASE3')
 @Roles(Role.ADMIN, Role.TEACHER)
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}

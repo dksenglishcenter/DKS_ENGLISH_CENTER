@@ -13,6 +13,8 @@ import { Role } from '../../generated/prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { RequireFeature } from '../common/feature.decorator';
+import { FeatureGuard } from '../common/feature.guard';
 import {
   CreateStudentDto,
   LinkParentDto,
@@ -24,7 +26,8 @@ import {
 import { StudentsService } from './students.service';
 
 @Controller('students')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FeatureGuard)
+@RequireFeature('PHASE3')
 @Roles(Role.ADMIN)
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { getAdminDashboardStats } from "@/lib/dashboard/api";
+import { features, type FeatureKey } from "@/lib/features";
 import type { AdminDashboardStats } from "@/lib/dashboard/types";
 import { formatError } from "@/lib/errors/format-error";
 import { PAGE_PATHS } from "@/lib/navigation-paths";
@@ -28,8 +29,8 @@ type Kpi = {
   hint: string;
   href: string;
   icon: LucideIcon;
-  /** TEMP GĐ3 — ẩn bằng display:none đến khi khách thanh toán */
-  phase3Hidden?: boolean;
+  /** Hidden until this feature flag is on. */
+  feature?: FeatureKey;
 };
 
 function KpiTile({ kpi }: { kpi: Kpi }) {
@@ -38,7 +39,6 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
     <Link
       href={kpi.href}
       className="rounded-2xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
-      style={kpi.phase3Hidden ? { display: "none" } : undefined}
     >
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-muted-foreground">{kpi.title}</p>
@@ -195,7 +195,6 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
     stats.gallery.total +
     stats.facilities.total;
 
-  // TEMP: phase3Hidden = true → display:none; bỏ flag khi khách thanh toán.
   const kpis: Kpi[] = [
     {
       title: "HV đang học",
@@ -203,7 +202,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Học viên trạng thái đang học",
       href: `${admin}/students`,
       icon: UsersRound,
-      phase3Hidden: true,
+      feature: "phase3",
     },
     {
       title: "Lớp đang mở",
@@ -211,7 +210,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Lớp OPEN",
       href: `${admin}/classes`,
       icon: School,
-      phase3Hidden: true,
+      feature: "phase3",
     },
     {
       title: "Buổi 7 ngày",
@@ -219,7 +218,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Buổi điểm danh gần đây",
       href: `${admin}/attendance`,
       icon: ClipboardCheck,
-      phase3Hidden: true,
+      feature: "phase3",
     },
     {
       title: "Học phí chưa đóng",
@@ -227,7 +226,7 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
       hint: "Invoice UNPAID",
       href: `${admin}/tuition`,
       icon: Wallet,
-      phase3Hidden: true,
+      feature: "phase3",
     },
     {
       title: "Tổng nội dung",
@@ -291,7 +290,9 @@ function DashboardContent({ stats }: { stats: AdminDashboardStats }) {
     <div className="space-y-6">
       {/* KPI row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => (
+        {kpis
+          .filter((kpi) => !kpi.feature || features[kpi.feature])
+          .map((kpi) => (
           <KpiTile key={kpi.title} kpi={kpi} />
         ))}
       </div>

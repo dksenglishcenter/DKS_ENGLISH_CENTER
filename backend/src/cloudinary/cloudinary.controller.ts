@@ -26,6 +26,7 @@ import { RestoreMediaDto, StashMediaDto } from './dto/stash-media.dto';
 import { UploadMediaDto } from './dto/upload-media.dto';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_AUDIO_SIZE = 30 * 1024 * 1024;
 
 @Controller('media')
 export class CloudinaryController {
@@ -83,6 +84,28 @@ export class CloudinaryController {
       width: result.width,
       height: result.height,
       format: result.format,
+    };
+  }
+
+  /** Upload a Listening audio file (teacher/admin authoring). */
+  @Post('upload-audio')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_AUDIO_SIZE },
+    }),
+  )
+  async uploadAudio(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('Thiếu file âm thanh (field: file)');
+    }
+    const result = await this.cloudinaryService.uploadAudio(file);
+    return {
+      message: 'Upload thành công',
+      url: result.secure_url,
+      publicId: result.public_id,
     };
   }
 
