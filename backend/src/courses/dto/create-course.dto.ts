@@ -13,14 +13,19 @@ import {
   Min,
   MinLength,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 import { DATE_ONLY_PATTERN } from '../../common/validation/date-only';
+import { CourseRoadmapDto } from './course-roadmap.dto';
 
 export const COURSE_CATEGORIES = [
   'grade-10',
   'thpt-university',
   'ielts',
   'global-success',
+  'communicative',
+  'pre-primary',
+  'toeic',
 ] as const;
 
 export class CreateCourseDto {
@@ -95,6 +100,16 @@ export class CreateCourseDto {
   @ArrayMinSize(1)
   @IsString({ each: true })
   perks!: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  curriculum?: string[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CourseRoadmapDto)
+  roadmap?: CourseRoadmapDto | null;
 
   @IsString()
   @IsIn(COURSE_CATEGORIES, {

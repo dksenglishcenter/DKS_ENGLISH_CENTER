@@ -1,3 +1,13 @@
+export type CourseRoadmapStage = {
+  name: string;
+  band?: string;
+  modules: string[];
+};
+
+export type CourseRoadmap = {
+  stages: CourseRoadmapStage[];
+};
+
 export type Course = {
   id: string;
   slug: string;
@@ -11,6 +21,8 @@ export type Course = {
   startDate: string | null;
   endDate: string | null;
   perks: string[];
+  curriculum: string[];
+  roadmap: CourseRoadmap | null;
   category: string;
   coverImageUrl: string;
   accent: string;
@@ -35,6 +47,8 @@ export type CoursePayload = {
   startDate?: string | null;
   endDate?: string | null;
   perks: string[];
+  curriculum?: string[];
+  roadmap?: CourseRoadmap | null;
   category: string;
   coverImageUrl: string;
   accent?: string;

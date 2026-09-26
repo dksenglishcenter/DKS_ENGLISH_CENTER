@@ -83,9 +83,9 @@ export function ContactPage({
         label="Liên hệ"
         title={
           <>
-            Chúng Tôi Sẵn Sàng
+            Chúng tôi sẵn sàng
             <br />
-            Hỗ Trợ Bạn
+            hỗ trợ bạn
           </>
         }
         description="Đăng ký học thử hoặc nhận tư vấn miễn phí. Đội ngũ DKS sẽ liên hệ và xây dựng lộ trình phù hợp với mục tiêu của bạn"
@@ -100,7 +100,7 @@ export function ContactPage({
                 id="contact-information-title"
                 className="mb-6 text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]"
               >
-                Thông Tin Liên Hệ
+                Thông tin liên hệ
               </h2>
               <address className="space-y-4 not-italic">
                 {contactDetails.map((detail) => {
@@ -235,7 +235,7 @@ export function ContactPage({
                 id="contact-form-title"
                 className="mb-1 text-xl font-black text-foreground font-[family-name:var(--font-nunito)]"
               >
-                Nhận Tư Vấn Lộ Trình Học Phù Hợp
+                Nhận tư vấn lộ trình học phù hợp
               </h2>
               <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                Chúng tôi sẽ liên hệ trong thời gian sớm nhất để tư vấn khóa học phù hợp với trình độ và mục tiêu của bạn

@@ -13,6 +13,10 @@ import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { slugify } from "@/lib/admin/slugify";
 import { createBlogPost, updateBlogPost } from "@/lib/blog/api";
 import type { BlogPost, BlogPostPayload, BlogSection } from "@/lib/blog/types";
+import {
+  BLOG_CATEGORY_SUGGESTIONS,
+  parseBlogTagsInput,
+} from "@/lib/blog/types";
 import { formatError } from "@/lib/errors/format-error";
 import { isHttpUrl } from "@/lib/media/is-http-url";
 
@@ -21,6 +25,7 @@ type EditableSection = BlogSection & { clientKey: string };
 type FieldKey =
   | keyof BlogPostPayload
   | "form"
+  | "tagsInput"
   | `sections.${number}.heading`
   | `sections.${number}.body`;
 
@@ -32,17 +37,9 @@ const createEmptySection = (): EditableSection => ({
   body: "",
 });
 
-const CATEGORY_OPTIONS = [
-  "IELTS Tips",
-  "Học Tiếng Anh",
-  "Công Nghệ",
-  "Thi Cử",
-  "Ngữ Pháp",
-  "Phụ Huynh",
-] as const;
-
-type BlogFormState = Omit<BlogPostPayload, "sections"> & {
+type BlogFormState = Omit<BlogPostPayload, "sections" | "tags"> & {
   sections: EditableSection[];
+  tagsInput: string;
 };
 
 function toEditableSections(sections: BlogSection[]): EditableSection[] {
@@ -92,6 +89,7 @@ function createInitialValues(
       title: post.title,
       excerpt: post.excerpt,
       category: post.category,
+      tagsInput: (post.tags ?? []).join(", "),
       publishedAt: post.publishedAt,
       readTimeMinutes: post.readTimeMinutes,
       coverImageUrl: post.coverImageUrl,
@@ -108,7 +106,8 @@ function createInitialValues(
     slug: "",
     title: "",
     excerpt: "",
-    category: CATEGORY_OPTIONS[0],
+    category: BLOG_CATEGORY_SUGGESTIONS[0],
+    tagsInput: "",
     publishedAt: new Date().toISOString().slice(0, 10),
     readTimeMinutes: 5,
     coverImageUrl: "",
@@ -213,8 +212,8 @@ export function BlogForm({
       errors.slug = "Slug chỉ gồm chữ thường, số và dấu gạch ngang";
     }
     if (form.excerpt.trim().length < 10) errors.excerpt = "Tóm tắt cần tối thiểu 10 ký tự";
-    if (!(CATEGORY_OPTIONS as readonly string[]).includes(form.category.trim())) {
-      errors.category = "Vui lòng chọn chuyên mục";
+    if (form.category.trim().length < 2) {
+      errors.category = "Chuyên mục cần tối thiểu 2 ký tự";
     }
     if (!form.publishedAt) errors.publishedAt = "Ngày đăng là bắt buộc";
     if (!Number.isInteger(form.readTimeMinutes) || form.readTimeMinutes < 1) {
@@ -261,12 +260,14 @@ export function BlogForm({
     setSaving(true);
     try {
       const sections = serializeSections(form.sections);
+      const { tagsInput, sections: _sections, ...rest } = form;
       const payload: BlogPostPayload = {
-        ...form,
+        ...rest,
         slug: form.slug.trim(),
         title: form.title.trim(),
         excerpt: form.excerpt.trim(),
         category: form.category.trim(),
+        tags: parseBlogTagsInput(tagsInput),
         coverImageUrl: form.coverImageUrl.trim(),
         intro: form.intro.trim(),
         takeaway: form.takeaway.trim(),
@@ -375,29 +376,73 @@ export function BlogForm({
           <FieldError message={fieldErrors.excerpt} />
         </label>
 
-        <label className="block text-sm" data-invalid={fieldErrors.category ? "true" : undefined}>
+        <div className="block text-sm" data-invalid={fieldErrors.category ? "true" : undefined}>
           <span className="mb-1 block font-semibold text-foreground">Chuyên mục</span>
           <select
             className={`h-12 w-full rounded-lg border bg-card px-4 py-3 lg:h-auto lg:px-3 lg:py-2 ${
               fieldErrors.category ? "border-red-500" : "border-border"
             }`}
-            value={form.category}
+            value={
+              (BLOG_CATEGORY_SUGGESTIONS as readonly string[]).includes(form.category)
+                ? form.category
+                : "__custom__"
+            }
             onChange={(event) => {
-              setForm((prev) => ({ ...prev, category: event.target.value }));
+              const value = event.target.value;
               clearFieldError("category");
+              if (value === "__custom__") {
+                setForm((prev) => ({
+                  ...prev,
+                  category: (BLOG_CATEGORY_SUGGESTIONS as readonly string[]).includes(
+                    prev.category,
+                  )
+                    ? ""
+                    : prev.category,
+                }));
+                return;
+              }
+              setForm((prev) => ({ ...prev, category: value }));
             }}
           >
-            {!(CATEGORY_OPTIONS as readonly string[]).includes(form.category) &&
-            form.category ? (
-              <option value={form.category}>{form.category}</option>
-            ) : null}
-            {CATEGORY_OPTIONS.map((option) => (
+            {BLOG_CATEGORY_SUGGESTIONS.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
+            <option value="__custom__">Khác (tự nhập)…</option>
           </select>
+          {!(BLOG_CATEGORY_SUGGESTIONS as readonly string[]).includes(form.category) ? (
+            <Input
+              className={`mt-2 ${fieldErrors.category ? "border-red-500" : ""}`}
+              value={form.category}
+              placeholder="Nhập chuyên mục mới…"
+              onChange={(event) => {
+                setForm((prev) => ({ ...prev, category: event.target.value }));
+                clearFieldError("category");
+              }}
+            />
+          ) : null}
+          <p className="mt-1 text-xs text-muted-foreground">
+            Chọn từ danh sách, hoặc “Khác” để thêm chuyên mục mới.
+          </p>
           <FieldError message={fieldErrors.category} />
+        </div>
+
+        <label className="block text-sm md:col-span-2" data-invalid={fieldErrors.tagsInput ? "true" : undefined}>
+          <span className="mb-1 block font-semibold text-foreground">Hashtags</span>
+          <Input
+            className={fieldErrors.tagsInput ? "border-red-500" : ""}
+            value={form.tagsInput}
+            placeholder="VD: writing, band7, tips (cách nhau bằng dấu phẩy)"
+            onChange={(event) => {
+              setForm((prev) => ({ ...prev, tagsInput: event.target.value }));
+              clearFieldError("tagsInput");
+            }}
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Một bài có nhiều tag. Hiển thị dạng #hashtag trên trang Blog.
+          </p>
+          <FieldError message={fieldErrors.tagsInput} />
         </label>
 
         <label className="block text-sm" data-invalid={fieldErrors.publishedAt ? "true" : undefined}>

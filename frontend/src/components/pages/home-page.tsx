@@ -35,42 +35,42 @@ import type { SuccessStory } from "@/lib/success-stories/types";
 const FEATURES = [
   {
     icon: Heart,
-    title: "Giáo Viên Nhiệt Tâm",
+    title: "Giáo viên nhiệt tâm",
     description:
       "Đội ngũ giáo viên tận tâm, yêu nghề, luôn đặt sự tiến bộ của học viên lên hàng đầu.",
     iconWrap: "rounded-2xl",
   },
   {
     icon: Lightbulb,
-    title: "Phương Pháp Sáng Tạo",
+    title: "Phương pháp sáng tạo",
     description:
       "Kết hợp phương pháp giảng dạy hiện đại với công nghệ AI, giúp học viên tiến bộ nhanh và vui vẻ.",
     iconWrap: "rounded-full",
   },
   {
     icon: GraduationCap,
-    title: "Cam Kết Kết Quả",
+    title: "Cam kết kết quả",
     description:
       "Cam kết hoàn tiền nếu không đạt mục tiêu sau khóa học. Học viên là ưu tiên số một.",
     iconWrap: "rounded-xl",
   },
   {
     icon: Users,
-    title: "Lớp Học Nhỏ",
+    title: "Lớp học nhỏ",
     description:
       "Tối đa 12 học viên mỗi lớp, đảm bảo giáo viên chú ý và hỗ trợ từng em một cách hiệu quả.",
     iconWrap: "rounded-[1.75rem]",
   },
   {
     icon: Award,
-    title: "Cơ Sở Hiện Đại",
+    title: "Cơ sở hiện đại",
     description:
       "Phòng học được trang bị màn hình tương tác, âm thanh chất lượng cao và không gian thoải mái.",
     iconWrap: "rounded-full",
   },
   {
     icon: Globe,
-    title: "Kết Nối Toàn Cầu",
+    title: "Kết nối toàn cầu",
     description:
       "Tạo cơ hội giao lưu với học viên quốc tế, mở rộng mạng lưới và trải nghiệm văn hóa đa dạng.",
     iconWrap: "rounded-2xl rotate-3",
@@ -181,7 +181,7 @@ async function CoursesSection() {
           <SectionHeading
             icon={BookOpen}
             label="Khóa học nổi bật"
-            title="Chương Trình Học Tại DKS"
+            title="Chương trình học tại DKS"
             sub="Đa dạng khóa học phù hợp với mọi mục tiêu từ - luyện thi vào lớp 10, Đại học & THPT, IELTS 1:1 và Global Success lớp 1–9."
             titleId="featured-courses-title"
           />
@@ -229,7 +229,7 @@ function WhyChooseUs() {
                 align="left"
                 icon={Sparkles}
                 label="Tại sao chọn DKS?"
-                title="Điều Làm Nên Sự Khác Biệt"
+                title="Điều làm nên sự khác biệt"
                 sub="Không chỉ dạy tiếng Anh — chúng tôi xây nền tự tin để học viên thích học và tiến bộ bền vững."
                 titleId="why-dks-title"
               />
@@ -295,7 +295,7 @@ function GallerySection({ photos }: { photos: GalleryImage[] }) {
             <SectionHeading
               icon={Camera}
               label="Hình ảnh học tập"
-              title="Môi Trường Học Tập Tại DKS"
+              title="Môi trường học tập tại DKS"
               sub="Không gian học tập hiện đại, thân thiện – nơi mỗi buổi học là một trải nghiệm thú vị."
               titleId="gallery-title"
             />
@@ -340,7 +340,7 @@ function GallerySection({ photos }: { photos: GalleryImage[] }) {
           <SectionHeading
             icon={Camera}
             label="Hình ảnh học tập"
-            title="Môi Trường Học Tập Tại DKS"
+            title="Môi trường học tập tại DKS"
             sub="Không gian học tập hiện đại, thân thiện – nơi mỗi buổi học là một trải nghiệm thú vị."
             titleId="gallery-title"
           />

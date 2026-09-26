@@ -13,9 +13,11 @@ import {
   Min,
   MinLength,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 
 import { COURSE_CATEGORIES } from './create-course.dto';
+import { CourseRoadmapDto } from './course-roadmap.dto';
 import { DATE_ONLY_PATTERN } from '../../common/validation/date-only';
 
 export class UpdateCourseDto {
@@ -99,6 +101,16 @@ export class UpdateCourseDto {
   @ArrayMinSize(1)
   @IsString({ each: true })
   perks?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  curriculum?: string[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CourseRoadmapDto)
+  roadmap?: CourseRoadmapDto | null;
 
   @IsOptional()
   @IsString()

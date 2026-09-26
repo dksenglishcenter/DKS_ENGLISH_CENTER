@@ -1,7 +1,7 @@
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPageMetadata({
-  title: "Tuyển Dụng",
+  title: "Tuyển dụng",
   description:
     "Tuyển dụng giáo viên IELTS, tư vấn tuyển sinh và gia sư tiếng Anh tại DKS English Center. Môi trường năng động, lương cạnh tranh, cơ hội thăng tiến.",
   path: "/careers",

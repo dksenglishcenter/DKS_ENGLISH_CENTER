@@ -13,6 +13,7 @@ export type BlogPost = {
   title: string;
   excerpt: string;
   category: string;
+  tags: string[];
   publishedAt: string;
   readTimeMinutes: number;
   coverImageUrl: string;
@@ -33,6 +34,7 @@ export type BlogPostSummary = Pick<
   | "title"
   | "excerpt"
   | "category"
+  | "tags"
   | "publishedAt"
   | "readTimeMinutes"
   | "coverImageUrl"
@@ -44,6 +46,7 @@ export type BlogPostPayload = {
   title: string;
   excerpt: string;
   category: string;
+  tags?: string[];
   publishedAt: string;
   readTimeMinutes: number;
   coverImageUrl: string;
@@ -58,8 +61,24 @@ export type BlogPostPayload = {
 export type ListBlogPostsParams = {
   featured?: boolean;
   category?: string;
+  tag?: string;
   publishedOnly?: boolean;
 };
+
+/** Gợi ý chuyên mục — admin vẫn nhập tùy ý ngoài list này. */
+export const BLOG_CATEGORY_SUGGESTIONS = [
+  "Reading",
+  "Listening",
+  "Writing",
+  "Speaking",
+  "IELTS",
+  "TOEIC",
+  "THPT",
+  "Tips",
+  "Chia sẻ kinh nghiệm",
+  "Phương pháp học",
+  "Phụ huynh",
+] as const;
 
 /** Internal path (/courses) or absolute http(s) URL. */
 export function isValidBlogLinkHref(href: string): boolean {
@@ -72,4 +91,25 @@ export function isValidBlogLinkHref(href: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function normalizeBlogTag(raw: string): string {
+  return raw.trim().replace(/^#+/, "").replace(/\s+/g, "-");
+}
+
+export function parseBlogTagsInput(value: string): string[] {
+  const seen = new Set<string>();
+  const tags: string[] = [];
+  for (const part of value.split(/[,;]+/)) {
+    const tag = normalizeBlogTag(part);
+    if (!tag || seen.has(tag.toLowerCase())) continue;
+    seen.add(tag.toLowerCase());
+    tags.push(tag);
+  }
+  return tags;
+}
+
+export function formatBlogTag(tag: string): string {
+  const clean = normalizeBlogTag(tag);
+  return clean ? `#${clean}` : "";
 }

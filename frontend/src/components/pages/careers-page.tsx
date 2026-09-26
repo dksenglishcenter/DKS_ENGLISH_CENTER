@@ -48,7 +48,7 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
           <Reveal className="lg:col-span-3">
           <div>
             <h2 className="text-2xl font-black text-foreground mb-6 font-[family-name:var(--font-nunito)]">
-              Vị Trí Đang Tuyển ({jobs.length})
+              Vị trí đang tuyển ({jobs.length})
             </h2>
             {jobs.length === 0 ? (
               <div
@@ -166,7 +166,7 @@ export function CareersPage({ jobs }: { jobs: PublicJob[] }) {
               <div className="bg-card rounded-2xl border border-border p-8 sticky top-24">
                 <div className="text-3xl mb-3">✉️</div>
                 <h2 className="text-xl font-black text-foreground mb-1 font-[family-name:var(--font-nunito)]">
-                  Gửi Đơn Ứng Tuyển
+                  Gửi đơn ứng tuyển
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6 font-[family-name:var(--font-body)]">
                   Điền thông tin và chúng tôi sẽ liên hệ trong 24 giờ.

@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, Calendar, Clock, Tag } from "lucide-react";
+import { ArrowLeft, BookOpen, Calendar, Clock, Hash, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,19 +8,21 @@ import { CourseCoverImage } from "@/components/media/course-cover-image";
 import { BlogMarkdownBody } from "@/lib/blog/blog-markdown";
 import { formatBlogDate } from "@/lib/blog/format";
 import type { BlogPost, BlogPostSummary } from "@/lib/blog/types";
+import { formatBlogTag } from "@/lib/blog/types";
 
 type BlogPostPageProps = {
   post: BlogPost;
   relatedPosts: BlogPostSummary[];
-  categories: string[];
+  popularTags: string[];
 };
 
 export function BlogPostPage({
   post,
   relatedPosts,
-  categories,
+  popularTags,
 }: BlogPostPageProps) {
   const formattedDate = formatBlogDate(post.publishedAt);
+  const postTags = post.tags ?? [];
 
   return (
     <article className="min-h-screen bg-card">
@@ -62,7 +64,7 @@ export function BlogPostPage({
               <ShareButton title={post.title} />
             </div>
 
-            <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-muted pb-6 text-sm text-muted-foreground">
+            <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
               <time dateTime={post.publishedAt} className="flex items-center gap-1.5">
                 <Calendar aria-hidden="true" className="size-4" /> {formattedDate}
               </time>
@@ -73,6 +75,23 @@ export function BlogPostPage({
                 <Tag aria-hidden="true" className="size-4" /> {post.category}
               </span>
             </div>
+
+            {postTags.length > 0 ? (
+              <div className="mb-6 flex flex-wrap gap-2 border-b border-muted pb-6">
+                {postTags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/blog?tag=${encodeURIComponent(tag)}`}
+                    className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <Hash aria-hidden="true" className="size-3" />
+                    {formatBlogTag(tag).replace(/^#/, "")}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="mb-6 border-b border-muted pb-6" />
+            )}
 
             <div className="mb-8 flex items-center gap-3 rounded-xl bg-secondary p-4">
               <div className="flex size-10 flex-none items-center justify-center rounded-full bg-primary text-sm font-black text-white font-[family-name:var(--font-heading)]">
@@ -189,18 +208,18 @@ export function BlogPostPage({
               </div>
             </section>
 
-            <nav className="rounded-2xl border border-muted bg-card p-5" aria-label="Chuyên mục Blog">
-              <h2 className="mb-3 text-base font-black text-foreground font-[family-name:var(--font-heading)]">
-                Chuyên mục
+            <nav className="rounded-2xl border border-muted bg-card p-5" aria-label="Hashtags Blog">
+              <h2 className="mb-3 flex items-center gap-2 text-base font-black text-foreground font-[family-name:var(--font-heading)]">
+                <Hash aria-hidden="true" className="size-4 text-primary" /> Hashtags
               </h2>
               <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
+                {popularTags.map((tag) => (
                   <Link
-                    key={category}
-                    href="/blog"
+                    key={tag}
+                    href={`/blog?tag=${encodeURIComponent(tag)}`}
                     className="rounded-full bg-muted px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
-                    {category}
+                    {formatBlogTag(tag)}
                   </Link>
                 ))}
               </div>

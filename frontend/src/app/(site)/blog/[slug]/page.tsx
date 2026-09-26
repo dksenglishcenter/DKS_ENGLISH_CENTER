@@ -47,13 +47,22 @@ export default async function Page({ params }: BlogPostRouteProps) {
     getRelatedBlogPosts(post),
     getBlogPosts(),
   ]);
-  const categories = Array.from(new Set(allPosts.map((item) => item.category)));
+  const tagCounts = new Map<string, number>();
+  for (const item of allPosts) {
+    for (const tag of item.tags ?? []) {
+      tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+    }
+  }
+  const popularTags = [...tagCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([tag]) => tag)
+    .slice(0, 20);
 
   return (
     <BlogPostPage
       post={post}
       relatedPosts={relatedPosts}
-      categories={categories}
+      popularTags={popularTags}
     />
   );
 }

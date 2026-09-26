@@ -17,6 +17,7 @@ const BLOG_POST_SELECT = {
   title: true,
   excerpt: true,
   category: true,
+  tags: true,
   publishedAt: true,
   readTimeMinutes: true,
   coverImageUrl: true,
@@ -29,6 +30,20 @@ const BLOG_POST_SELECT = {
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.BlogPostSelect;
+
+/** Chuẩn hóa hashtag: bỏ # đầu, trim, bỏ trùng. */
+function normalizeTags(tags: string[] | undefined): string[] {
+  if (!tags?.length) return [];
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const raw of tags) {
+    const tag = raw.trim().replace(/^#+/, '').replace(/\s+/g, '-');
+    if (!tag || seen.has(tag.toLowerCase())) continue;
+    seen.add(tag.toLowerCase());
+    result.push(tag);
+  }
+  return result;
+}
 
 function extractSectionImageUrls(sections: unknown): string[] {
   if (!Array.isArray(sections)) return [];
@@ -79,6 +94,11 @@ export class BlogService {
       where.category = query.category;
     }
 
+    if (query.tag) {
+      const tag = query.tag.trim().replace(/^#+/, '');
+      if (tag) where.tags = { has: tag };
+    }
+
     return this.prisma.blogPost.findMany({
       where,
       orderBy: [{ sortOrder: 'asc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }],
@@ -106,7 +126,8 @@ export class BlogService {
           slug: dto.slug,
           title: dto.title,
           excerpt: dto.excerpt,
-          category: dto.category,
+          category: dto.category.trim(),
+          tags: normalizeTags(dto.tags),
           publishedAt: new Date(dto.publishedAt),
           readTimeMinutes: dto.readTimeMinutes,
           coverImageUrl: dto.coverImageUrl,
@@ -149,7 +170,10 @@ export class BlogService {
           ...(dto.slug !== undefined ? { slug: dto.slug } : {}),
           ...(dto.title !== undefined ? { title: dto.title } : {}),
           ...(dto.excerpt !== undefined ? { excerpt: dto.excerpt } : {}),
-          ...(dto.category !== undefined ? { category: dto.category } : {}),
+          ...(dto.category !== undefined
+            ? { category: dto.category.trim() }
+            : {}),
+          ...(dto.tags !== undefined ? { tags: normalizeTags(dto.tags) } : {}),
           ...(dto.publishedAt !== undefined
             ? { publishedAt: new Date(dto.publishedAt) }
             : {}),

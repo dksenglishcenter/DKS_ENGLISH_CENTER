@@ -24,7 +24,7 @@ export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
           <SectionHeading
             icon={Heart}
             label="Khoảnh khắc & cảm nhận"
-            title="Học Viên Thích Học Ở DKS"
+            title="Học viên thích học ở DKS"
             sub="Ảnh thật và lời nhắn ngắn từ lớp — thành công cũng là khi các bé thích đến học."
             titleId="testimonials-title"
           />

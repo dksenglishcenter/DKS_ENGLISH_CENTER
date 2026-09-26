@@ -9,7 +9,12 @@ import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace"
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { slugify } from "@/lib/admin/slugify";
 import { createCourse, updateCourse } from "@/lib/courses/api";
-import type { Course, CoursePayload } from "@/lib/courses/types";
+import type {
+  Course,
+  CoursePayload,
+  CourseRoadmap,
+  CourseRoadmapStage,
+} from "@/lib/courses/types";
 import { ApiError, formatError } from "@/lib/errors/format-error";
 import { isHttpUrl } from "@/lib/media/is-http-url";
 
@@ -19,6 +24,9 @@ const LEVEL_OPTIONS = [
   "Học sinh lớp 11",
   "Học sinh lớp 12",
   "A1 – C1",
+  "A1 – B1",
+  "A2 – B2",
+  "3–6 tuổi",
   "Lớp 1–9 · Pre-A1 – B1+",
   "Mọi trình độ",
 ] as const;
@@ -30,10 +38,14 @@ const TARGET_OPTIONS = [
   "IELTS 6.5 – 8.0+",
   "Phát triển toàn diện 4 kỹ năng",
   "Giao tiếp thực tế",
+  "Giao tiếp công việc · họp · email",
+  "Yêu thích tiếng Anh · sẵn sàng vào lớp 1",
+  "TOEIC 450 – 800+",
 ] as const;
 
 const DURATION_OPTIONS = [
   "60 phút/buổi",
+  "60–75 phút/buổi",
   "90 phút/buổi",
   "120 phút/buổi",
   "Theo khối lớp",
@@ -58,13 +70,18 @@ const COURSE_ICONS = [
   "📖",
   "🧑‍🏫",
   "🔥",
+  "💼",
+  "🧸",
 ] as const;
 
 const CATEGORY_OPTIONS = [
   { value: "grade-10", label: "Thi vào lớp 10" },
-  { value: "thpt-university", label: "THPT & Đại học" },
+  { value: "thpt-university", label: "THPT & đại học" },
   { value: "ielts", label: "IELTS" },
   { value: "global-success", label: "Global Success" },
+  { value: "communicative", label: "Người đi làm" },
+  { value: "pre-primary", label: "Tiền tiểu học" },
+  { value: "toeic", label: "TOEIC" },
 ] as const;
 
 const DEFAULT_COURSE_COLORS = {
@@ -72,7 +89,13 @@ const DEFAULT_COURSE_COLORS = {
   bg: "#FFF7F3",
 } as const;
 
-type FieldErrors = Partial<Record<keyof CoursePayload | "form", string>>;
+type FieldErrors = Partial<Record<keyof CoursePayload | "form" | "roadmap", string>>;
+
+const EMPTY_STAGE: CourseRoadmapStage = {
+  name: "",
+  band: "",
+  modules: [""],
+};
 
 const EMPTY_FORM: CoursePayload = {
   slug: "",
@@ -82,10 +105,12 @@ const EMPTY_FORM: CoursePayload = {
   level: LEVEL_OPTIONS[0],
   target: TARGET_OPTIONS[0],
   tuition: "",
-  duration: DURATION_OPTIONS[1],
+  duration: DURATION_OPTIONS[2],
   startDate: null,
   endDate: null,
   perks: [""],
+  curriculum: [""],
+  roadmap: { stages: [{ ...EMPTY_STAGE, modules: [""] }] },
   category: "",
   coverImageUrl: "",
   accent: "#F16522",
@@ -95,6 +120,31 @@ const EMPTY_FORM: CoursePayload = {
   sortOrder: 0,
   isPublished: true,
 };
+
+function normalizeRoadmap(roadmap: CourseRoadmap | null | undefined): CourseRoadmap | null {
+  if (!roadmap?.stages?.length) return null;
+  const stages = roadmap.stages
+    .map((stage) => ({
+      name: stage.name.trim(),
+      band: stage.band?.trim() || undefined,
+      modules: (stage.modules ?? []).map((item) => item.trim()).filter(Boolean),
+    }))
+    .filter((stage) => stage.name.length >= 2 && stage.modules.length > 0);
+  return stages.length ? { stages } : null;
+}
+
+function toEditableRoadmap(roadmap: Course["roadmap"]): CourseRoadmap {
+  if (roadmap?.stages?.length) {
+    return {
+      stages: roadmap.stages.map((stage) => ({
+        name: stage.name,
+        band: stage.band ?? "",
+        modules: stage.modules.length ? [...stage.modules] : [""],
+      })),
+    };
+  }
+  return { stages: [{ ...EMPTY_STAGE, modules: [""] }] };
+}
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -139,6 +189,10 @@ function mapServerFieldErrors(message: string): FieldErrors {
       errors.endDate = "Ngày kết thúc khóa chưa hợp lệ";
     } else if (lower.includes("perk")) {
       errors.perks = "Cần ít nhất 1 điểm nổi bật";
+    } else if (lower.includes("curriculum")) {
+      errors.curriculum = "Giáo trình chưa hợp lệ";
+    } else if (lower.includes("roadmap") || lower.includes("stages")) {
+      errors.roadmap = "Lộ trình chưa hợp lệ — mỗi giai đoạn cần tên + ít nhất 1 module";
     } else if (text) {
       errors.form = errors.form ? `${errors.form}. ${text}` : text;
     }
@@ -250,6 +304,8 @@ function createInitialValues(
       startDate: course.startDate,
       endDate: course.endDate,
       perks: course.perks.length ? course.perks : [""],
+      curriculum: course.curriculum?.length ? course.curriculum : [""],
+      roadmap: toEditableRoadmap(course.roadmap),
       category: normalizeCategory(course.category),
       coverImageUrl: course.coverImageUrl,
       accent: course.accent,
@@ -385,6 +441,7 @@ export function CourseForm({
     clearFieldError("form");
 
     const category = normalizeCategory(form.category);
+    const roadmap = normalizeRoadmap(form.roadmap);
     const payload: CoursePayload = {
       ...form,
       category,
@@ -393,6 +450,8 @@ export function CourseForm({
       subtitle: form.subtitle.trim(),
       description: form.description.trim(),
       perks: form.perks.map((item) => item.trim()).filter(Boolean),
+      curriculum: (form.curriculum ?? []).map((item) => item.trim()).filter(Boolean),
+      roadmap,
       startDate: form.startDate || null,
       endDate: form.endDate || null,
     };
@@ -636,6 +695,150 @@ export function CourseForm({
         />
         <FieldError message={fieldErrors.perks} />
       </label>
+
+      <label className="block text-sm">
+        <span className="mb-1 block font-semibold text-foreground">
+          Giáo trình sơ lược (mỗi dòng 1 mục)
+        </span>
+        <textarea
+          className={`min-h-28 w-full rounded-lg border px-3 py-2 ${
+            fieldErrors.curriculum ? "border-red-500" : "border-border"
+          }`}
+          value={(form.curriculum ?? []).join("\n")}
+          placeholder={"Listening Part 1–4\nReading Part 5–7\nTừ vựng & ngữ pháp"}
+          onChange={(event) =>
+            updateField("curriculum", event.target.value.split("\n"))
+          }
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          Hiện ở khối “Giáo trình sơ lược” trên trang khóa học (có thể để trống).
+        </p>
+        <FieldError message={fieldErrors.curriculum} />
+      </label>
+
+      <div className="space-y-3 rounded-xl border border-border bg-secondary/40 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h4 className="text-sm font-black text-foreground font-[family-name:var(--font-nunito)]">
+              Lộ trình học (đồ họa cột)
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              Mỗi giai đoạn = 1 cột. Band là nhãn trên cột (vd. 5.5+, Cơ bản). Module = nội dung
+              dưới cột.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setForm((prev) => ({
+                ...prev,
+                roadmap: {
+                  stages: [
+                    ...(prev.roadmap?.stages ?? []),
+                    { ...EMPTY_STAGE, modules: [""] },
+                  ],
+                },
+              }))
+            }
+          >
+            + Thêm giai đoạn
+          </Button>
+        </div>
+
+        {(form.roadmap?.stages ?? []).map((stage, index) => (
+          <div
+            key={`stage-${index}`}
+            className="space-y-2 rounded-lg border border-border bg-card p-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Giai đoạn {index + 1}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={(form.roadmap?.stages.length ?? 0) <= 1}
+                onClick={() =>
+                  setForm((prev) => {
+                    const stages = [...(prev.roadmap?.stages ?? [])];
+                    stages.splice(index, 1);
+                    return {
+                      ...prev,
+                      roadmap: { stages: stages.length ? stages : [{ ...EMPTY_STAGE, modules: [""] }] },
+                    };
+                  })
+                }
+              >
+                Xóa
+              </Button>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
+              <label className="block text-sm">
+                <span className="mb-1 block font-semibold text-foreground">Tên giai đoạn</span>
+                <input
+                  className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
+                  value={stage.name}
+                  placeholder="VD: IELTS khởi động"
+                  onChange={(event) => {
+                    clearFieldError("roadmap");
+                    setForm((prev) => {
+                      const stages = [...(prev.roadmap?.stages ?? [])];
+                      stages[index] = { ...stages[index], name: event.target.value };
+                      return { ...prev, roadmap: { stages } };
+                    });
+                  }}
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="mb-1 block font-semibold text-foreground">
+                  Band / nhãn cột (tuỳ chọn)
+                </span>
+                <input
+                  className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
+                  value={stage.band ?? ""}
+                  placeholder="VD: 5.5+ → 6.5+"
+                  onChange={(event) => {
+                    clearFieldError("roadmap");
+                    setForm((prev) => {
+                      const stages = [...(prev.roadmap?.stages ?? [])];
+                      stages[index] = { ...stages[index], band: event.target.value };
+                      return { ...prev, roadmap: { stages } };
+                    });
+                  }}
+                />
+              </label>
+            </div>
+            <label className="block text-sm">
+              <span className="mb-1 block font-semibold text-foreground">
+                Modules (mỗi dòng 1 ý)
+              </span>
+              <textarea
+                className="min-h-20 w-full rounded-lg border border-border px-3 py-2"
+                value={(stage.modules ?? []).join("\n")}
+                placeholder={"Basic English\nPhát âm & từ vựng lõi"}
+                onChange={(event) => {
+                  clearFieldError("roadmap");
+                  setForm((prev) => {
+                    const stages = [...(prev.roadmap?.stages ?? [])];
+                    stages[index] = {
+                      ...stages[index],
+                      modules: event.target.value.split("\n"),
+                    };
+                    return { ...prev, roadmap: { stages } };
+                  });
+                }}
+              />
+            </label>
+          </div>
+        ))}
+        <FieldError message={fieldErrors.roadmap} />
+        <p className="text-xs text-muted-foreground">
+          Để trống hết giai đoạn → trang public sẽ ẩn khối lộ trình.
+        </p>
+      </div>
 
       <AdminImageField
         label="Cover"

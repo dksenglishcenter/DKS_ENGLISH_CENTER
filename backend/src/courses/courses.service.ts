@@ -29,6 +29,8 @@ const COURSE_SELECT = {
   startDate: true,
   endDate: true,
   perks: true,
+  curriculum: true,
+  roadmap: true,
   category: true,
   coverImageUrl: true,
   accent: true,
@@ -104,10 +106,14 @@ export class CoursesService {
           startDate,
           endDate,
           perks: dto.perks,
+          curriculum: dto.curriculum ?? [],
+          roadmap: dto.roadmap
+            ? (dto.roadmap as unknown as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
           category: dto.category,
           coverImageUrl: dto.coverImageUrl,
-          accent: dto.accent ?? '#F16522',
-          bg: dto.bg ?? '#FFF4EC',
+          accent: dto.accent ?? '#C85A2E',
+          bg: dto.bg ?? '#F3EEE6',
           icon: dto.icon ?? '📚',
           featured: dto.featured ?? true,
           sortOrder: dto.sortOrder ?? 0,
@@ -171,6 +177,17 @@ export class CoursesService {
             ? { endDate: parseOptionalDateOnly(dto.endDate) ?? null }
             : {}),
           ...(dto.perks !== undefined ? { perks: dto.perks } : {}),
+          ...(dto.curriculum !== undefined
+            ? { curriculum: dto.curriculum }
+            : {}),
+          ...(dto.roadmap !== undefined
+            ? {
+                roadmap:
+                  dto.roadmap === null
+                    ? Prisma.JsonNull
+                    : (dto.roadmap as unknown as Prisma.InputJsonValue),
+              }
+            : {}),
           ...(dto.category !== undefined ? { category: dto.category } : {}),
           ...(dto.coverImageUrl !== undefined
             ? { coverImageUrl: dto.coverImageUrl }

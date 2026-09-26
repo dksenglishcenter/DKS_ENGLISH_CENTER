@@ -24,7 +24,7 @@ const COURSES_SEED = [
   {
     slug: 'grade-10',
     category: 'grade-10',
-    title: 'Luyện Thi Vào Lớp 10',
+    title: 'Luyện thi vào lớp 10',
     subtitle: 'Ôn thi lớp 9 lên lớp 10 THPT',
     level: 'Học sinh lớp 9',
     target: 'Kỳ thi tuyển sinh lớp 10',
@@ -42,6 +42,31 @@ const COURSES_SEED = [
       'Luyện đề và chữa bài chi tiết',
       'Xây dựng lộ trình ôn tập hiệu quả',
     ],
+    curriculum: [
+      'Ngữ pháp trọng điểm lớp 9',
+      'Từ vựng theo chủ đề đề thi',
+      'Kỹ năng đọc hiểu & viết đoạn',
+      'Luyện đề minh họa & đề thật',
+    ],
+    roadmap: {
+      stages: [
+        {
+          name: 'Nền tảng',
+          band: 'Ôn vững',
+          modules: ['Ngữ pháp lõi', 'Từ vựng chủ đề', 'Làm quen cấu trúc đề'],
+        },
+        {
+          name: 'Luyện đề',
+          band: 'Tăng tốc',
+          modules: ['Đề minh họa', 'Chữa lỗi phổ biến', 'Chiến lược làm bài'],
+        },
+        {
+          name: 'Chốt điểm',
+          band: 'Về đích',
+          modules: ['Mock test định kỳ', 'Ôn theo điểm yếu', 'Tâm lý phòng thi'],
+        },
+      ],
+    },
     featured: true,
     sortOrder: 0,
     isPublished: true,
@@ -49,8 +74,8 @@ const COURSES_SEED = [
   {
     slug: 'thpt-university',
     category: 'thpt-university',
-    title: 'Luyện Thi Đại Học & THPT',
-    subtitle: 'Ôn thi tốt nghiệp và xét tuyển Đại học',
+    title: 'Luyện thi đại học & THPT',
+    subtitle: 'Ôn thi tốt nghiệp và xét tuyển đại học',
     level: 'Học sinh lớp 12',
     target: 'Tốt nghiệp THPT · Đại học',
     tuition: '150.000 ₫/buổi',
@@ -60,13 +85,43 @@ const COURSES_SEED = [
     bg: '#FFF7F3',
     icon: '🎓',
     description:
-      'Khóa học củng cố kiến thức, luyện đề chuyên sâu và rèn chiến lược làm bài cho kỳ thi tốt nghiệp THPT và xét tuyển Đại học.',
+      'Khóa học củng cố kiến thức, luyện đề chuyên sâu và rèn chiến lược làm bài cho kỳ thi tốt nghiệp THPT và xét tuyển đại học.',
     perks: [
       'Bám sát cấu trúc đề thi Bộ Giáo dục',
       'Giáo viên giàu kinh nghiệm luyện thi',
       'Lớp sĩ số nhỏ',
       'Lộ trình ôn tập khoa học',
     ],
+    curriculum: [
+      'Ngữ pháp & từ vựng học thuật',
+      'Đọc hiểu đa dạng dạng bài',
+      'Viết luận ngắn theo tiêu chí',
+      'Luyện đề THPTQG theo tuần',
+    ],
+    roadmap: {
+      stages: [
+        {
+          name: 'Khởi động',
+          band: 'Chẩn đoán',
+          modules: ['Kiểm tra đầu vào', 'Lấp lỗ hổng kiến thức', 'Lịch ôn cá nhân'],
+        },
+        {
+          name: 'Chạy đà',
+          band: 'Ôn sâu',
+          modules: ['Chuyên đề trọng điểm', 'Luyện kỹ năng', 'Bài tập tuần'],
+        },
+        {
+          name: 'Tăng tốc',
+          band: 'Đề thật',
+          modules: ['Mock test', 'Phân tích sai sót', 'Chiến thuật thời gian'],
+        },
+        {
+          name: 'Về đích',
+          band: 'Chốt điểm',
+          modules: ['Ôn nhanh', 'Đề sát hạch', 'Tư vấn tâm lý thi'],
+        },
+      ],
+    },
     featured: true,
     sortOrder: 1,
     isPublished: true,
@@ -75,9 +130,9 @@ const COURSES_SEED = [
     slug: 'ielts',
     category: 'ielts',
     title: 'IELTS 1-1',
-    subtitle: 'Luyện thi IELTS đảm bảo đầu ra',
+    subtitle: 'Luyện thi IELTS theo lộ trình band',
     level: 'A1 – C1',
-    target: 'IELTS 5.0 – 7.0+',
+    target: 'IELTS 5.0 – 8.0+',
     tuition: '300.000 – 500.000 ₫/buổi',
     duration: '120 phút/buổi',
     coverImageUrl: unsplashCover('1434030216411-0b793f4b4173'),
@@ -85,13 +140,43 @@ const COURSES_SEED = [
     bg: '#FFF4EC',
     icon: '🎯',
     description:
-      'Khóa học 1 kèm 1 được thiết kế riêng theo trình độ, mục tiêu điểm số và tiến độ của từng học viên.',
+      'Khóa 1 kèm 1 thiết kế theo trình độ và mục tiêu band. Lộ trình rõ từng giai: khởi động → chạy đà → tăng tốc → về đích.',
     perks: [
       'Lộ trình cá nhân hóa sau kiểm tra đầu vào',
       '120 phút/buổi, 2–3 buổi/tuần',
       'Thi thử và báo cáo tiến độ định kỳ',
       'Cam kết đầu ra theo lộ trình',
     ],
+    curriculum: [
+      'Listening: note-taking & dạng bài',
+      'Reading: skimming, scanning, paraphrase',
+      'Writing: Task 1 & Task 2 theo band',
+      'Speaking: Part 1–3 + phản xạ',
+    ],
+    roadmap: {
+      stages: [
+        {
+          name: 'IELTS khởi động',
+          band: 'Beginner → 2.5+',
+          modules: ['Basic English', 'Phát âm & từ vựng lõi', 'Làm quen format IELTS'],
+        },
+        {
+          name: 'IELTS chạy đà',
+          band: '3.5+ → 4.5+',
+          modules: ['Pre-IELTS', 'Ngữ pháp nền', 'Kỹ năng từng phần'],
+        },
+        {
+          name: 'IELTS tăng tốc',
+          band: '5.5+ → 6.5+',
+          modules: ['Intensive L/R/W/S', 'Chiến lược band', 'Mock test định kỳ'],
+        },
+        {
+          name: 'IELTS về đích',
+          band: '7.0+ → 8.0+',
+          modules: ['Advanced strategies', 'Chữa lỗi band cao', 'Simulated exam'],
+        },
+      ],
+    },
     featured: true,
     sortOrder: 2,
     isPublished: true,
@@ -99,7 +184,7 @@ const COURSES_SEED = [
   {
     slug: 'global-success',
     category: 'global-success',
-    title: 'Global Success Lớp 1–9',
+    title: 'Global Success lớp 1–9',
     subtitle: 'Tiếng Anh theo chương trình Bộ Giáo dục',
     level: 'Lớp 1–9 · Pre-A1 – B1+',
     target: 'Phát triển toàn diện 4 kỹ năng',
@@ -117,8 +202,183 @@ const COURSES_SEED = [
       'Đánh giá học thuật định kỳ',
       'Nền tảng cho kỳ thi vào lớp 10',
     ],
+    curriculum: [
+      'Bám sách Global Success theo khối',
+      'Nghe – nói giao tiếp lớp học',
+      'Đọc hiểu & viết đoạn theo chủ đề',
+      'Kiểm tra định kỳ theo unit',
+    ],
+    roadmap: {
+      stages: [
+        {
+          name: 'Tiểu học',
+          band: 'Lớp 1–5',
+          modules: ['Phát âm vui', 'Từ vựng đời sống', 'Nói theo tình huống'],
+        },
+        {
+          name: 'THCS nền',
+          band: 'Lớp 6–7',
+          modules: ['Ngữ pháp cơ bản', 'Đọc hiểu ngắn', 'Viết câu–đoạn'],
+        },
+        {
+          name: 'THCS nâng',
+          band: 'Lớp 8–9',
+          modules: ['4 kỹ năng', 'Đề kiểm tra', 'Sẵn sàng vào 10'],
+        },
+      ],
+    },
     featured: true,
     sortOrder: 3,
+    isPublished: true,
+  },
+  {
+    slug: 'communicative',
+    category: 'communicative',
+    title: 'Tiếng Anh giao tiếp người đi làm',
+    subtitle: 'Giao tiếp & sử dụng tiếng Anh cơ bản tại công sở',
+    level: 'A1 – B1',
+    target: 'Giao tiếp công việc · họp · email',
+    tuition: 'Liên hệ tư vấn',
+    duration: '90 phút/buổi',
+    coverImageUrl: unsplashCover('1552664730-d307ca884978'),
+    accent: '#F16522',
+    bg: '#FFF4EC',
+    icon: '💼',
+    description:
+      'Khóa dành cho người đi làm: tự tin nói trong họp, trả lời khách, viết email và xử lý tình huống công sở thường gặp.',
+    perks: [
+      'Lịch học linh hoạt buổi tối / cuối tuần',
+      'Tình huống thực tế tại nơi làm việc',
+      'Lớp nhỏ, thực hành nhiều',
+      'Giáo trình giao tiếp ứng dụng',
+    ],
+    curriculum: [
+      'Small talk & networking',
+      'Họp / trình bày ngắn',
+      'Email & tin nhắn công việc',
+      'Xử lý khiếu nại & đàm phán cơ bản',
+    ],
+    roadmap: {
+      stages: [
+        {
+          name: 'Mở miệng',
+          band: 'Cơ bản',
+          modules: ['Giới thiệu bản thân', 'Small talk', 'Phát âm rõ'],
+        },
+        {
+          name: 'Công sở',
+          band: 'Ứng dụng',
+          modules: ['Họp ngắn', 'Gọi điện', 'Email chuẩn'],
+        },
+        {
+          name: 'Tự tin',
+          band: 'Thành thạo',
+          modules: ['Thuyết trình ngắn', 'Đàm phán nhẹ', 'Role-play thực tế'],
+        },
+      ],
+    },
+    featured: true,
+    sortOrder: 4,
+    isPublished: true,
+  },
+  {
+    slug: 'pre-primary',
+    category: 'pre-primary',
+    title: 'Tiếng Anh tiền tiểu học',
+    subtitle: 'Làm quen tiếng Anh qua trò chơi cho trẻ mẫu giáo',
+    level: '3–6 tuổi',
+    target: 'Yêu thích tiếng Anh · sẵn sàng vào lớp 1',
+    tuition: 'Liên hệ tư vấn',
+    duration: '60–75 phút/buổi',
+    coverImageUrl: unsplashCover('1503454537195-1dcabb73ffb9'),
+    accent: '#FFA200',
+    bg: '#FFFBF0',
+    icon: '🧸',
+    description:
+      'Chương trình tiền tiểu học: học qua bài hát, trò chơi và vận động — giúp bé thích tiếng Anh trước khi vào lớp 1.',
+    perks: [
+      'Lớp nhỏ theo độ tuổi',
+      'Học qua chơi, ít áp lực',
+      'Phát âm & nghe phản xạ',
+      'Phối hợp phụ huynh tại nhà',
+    ],
+    curriculum: [
+      'Phonics & âm cơ bản',
+      'Từ vựng chủ đề đời sống',
+      'Bài hát / storytelling',
+      'Trò chơi vận động ngôn ngữ',
+    ],
+    roadmap: {
+      stages: [
+        {
+          name: 'Làm quen',
+          band: 'Nghe – bắt chước',
+          modules: ['Chào hỏi', 'Bài hát', 'Từ vựng màu/số'],
+        },
+        {
+          name: 'Phát triển',
+          band: 'Nói theo mẫu',
+          modules: ['Câu đơn giản', 'Phonics vui', 'Kể tranh'],
+        },
+        {
+          name: 'Sẵn sàng lớp 1',
+          band: 'Tự tin hơn',
+          modules: ['Nghe hiểu ngắn', 'Nói trước nhóm', 'Thói quen học'],
+        },
+      ],
+    },
+    featured: true,
+    sortOrder: 5,
+    isPublished: true,
+  },
+  {
+    slug: 'toeic',
+    category: 'toeic',
+    title: 'Luyện thi TOEIC',
+    subtitle: 'Listening & Reading theo mục tiêu điểm',
+    level: 'A2 – B2',
+    target: 'TOEIC 450 – 800+',
+    tuition: 'Liên hệ tư vấn',
+    duration: '120 phút/buổi',
+    coverImageUrl: unsplashCover('1454165804606-c3d57bc86b40'),
+    accent: '#C0470F',
+    bg: '#FFF7F3',
+    icon: '📝',
+    description:
+      'Luyện TOEIC Listening & Reading theo lộ trình điểm: từ nền tảng đến tăng tốc đề thi, phù hợp sinh viên và người đi làm.',
+    perks: [
+      'Bám sát format đề ETS',
+      'Chiến lược từng Part',
+      'Mock test định kỳ',
+      'Báo cáo tiến độ rõ ràng',
+    ],
+    curriculum: [
+      'Listening Part 1–4',
+      'Reading Part 5–7',
+      'Từ vựng & ngữ pháp TOEIC',
+      'Đề thi thử & phân tích lỗi',
+    ],
+    roadmap: {
+      stages: [
+        {
+          name: 'TOEIC nền',
+          band: '450+',
+          modules: ['Format đề', 'Ngữ pháp lõi', 'Từ vựng công sở'],
+        },
+        {
+          name: 'TOEIC tăng tốc',
+          band: '600+',
+          modules: ['Chiến lược Part', 'Luyện đề timed', 'Chữa lỗi'],
+        },
+        {
+          name: 'TOEIC về đích',
+          band: '750–800+',
+          modules: ['Mock full test', 'Kỹ thuật thời gian', 'Ôn điểm yếu'],
+        },
+      ],
+    },
+    featured: true,
+    sortOrder: 6,
     isPublished: true,
   },
 ];
@@ -336,7 +596,8 @@ const BLOG_POSTS_SEED = [
     title: '5 Bí Quyết Học IELTS Writing Đạt Band 7.0+',
     excerpt:
       'Writing là kỹ năng nhiều thí sinh gặp khó khăn nhất. Bài viết chia sẻ 5 chiến lược giúp bạn cải thiện Writing một cách hệ thống.',
-    category: 'IELTS Tips',
+    category: 'Writing',
+    tags: ['IELTS', 'writing', 'band7', 'tips'],
     publishedAt: new Date('2025-06-15'),
     readTimeMinutes: 8,
     coverImageUrl: unsplashCover('1481627834876-b7833e8f5570'),
@@ -375,7 +636,8 @@ const BLOG_POSTS_SEED = [
     title: 'Cách Phát Âm Tiếng Anh Chuẩn Trong 30 Ngày',
     excerpt:
       'Phát âm chuẩn là nền tảng của tiếng Anh tự tin. Kế hoạch 30 ngày này sẽ giúp bạn cải thiện pronunciation một cách bài bản.',
-    category: 'Học Tiếng Anh',
+    category: 'Speaking',
+    tags: ['phát-âm', 'speaking', 'phương-pháp-học'],
     publishedAt: new Date('2025-06-10'),
     readTimeMinutes: 6,
     coverImageUrl: unsplashCover('1434030216411-0b793f4b4173'),
@@ -410,7 +672,8 @@ const BLOG_POSTS_SEED = [
     title: 'Top 10 Ứng Dụng Học Tiếng Anh Hiệu Quả 2025',
     excerpt:
       'Công nghệ AI đang thay đổi cách chúng ta học ngoại ngữ. Điểm qua 10 ứng dụng tốt nhất giúp bạn luyện tập mọi lúc mọi nơi.',
-    category: 'Công Nghệ',
+    category: 'Tips',
+    tags: ['ứng-dụng', 'tips', 'công-nghệ'],
     publishedAt: new Date('2025-06-05'),
     readTimeMinutes: 5,
     coverImageUrl: unsplashCover('1522202176988-66273c2fd55f'),
@@ -427,7 +690,8 @@ const BLOG_POSTS_SEED = [
     title: 'Chiến Lược Luyện Thi Tiếng Anh Vào Lớp 10 Hiệu Quả',
     excerpt:
       'Kỳ thi vào lớp 10 có thể chinh phục nếu bạn có chiến lược đúng. Bài viết hướng dẫn từng bước chuẩn bị chi tiết.',
-    category: 'Thi Cử',
+    category: 'THPT',
+    tags: ['lớp-10', 'thi-cử', 'THPT'],
     publishedAt: new Date('2025-06-01'),
     readTimeMinutes: 10,
     coverImageUrl: unsplashCover('1580582932707-520aed937b7b'),
@@ -444,7 +708,8 @@ const BLOG_POSTS_SEED = [
     title: 'Lỗi Ngữ Pháp Người Việt Hay Mắc Khi Học Tiếng Anh',
     excerpt:
       'Phân tích những lỗi ngữ pháp phổ biến và đưa ra cách khắc phục hiệu quả cho người học tiếng Anh tại Việt Nam.',
-    category: 'Ngữ Pháp',
+    category: 'Phương pháp học',
+    tags: ['ngữ-pháp', 'tips', 'chia-sẻ-kinh-nghiệm'],
     publishedAt: new Date('2025-05-25'),
     readTimeMinutes: 7,
     coverImageUrl: unsplashCover('1529400971008-f566de0e6dfc'),
@@ -461,7 +726,8 @@ const BLOG_POSTS_SEED = [
     title: 'Học Tiếng Anh Cùng Con Từ 3 Tuổi: Nên Hay Không?',
     excerpt:
       'Độ tuổi nào phù hợp để bắt đầu học tiếng Anh? Chuyên gia giải đáp và đưa phương pháp tiếp cận phù hợp từng độ tuổi.',
-    category: 'Phụ Huynh',
+    category: 'Phụ huynh',
+    tags: ['phụ-huynh', 'trẻ-em', 'chia-sẻ-kinh-nghiệm'],
     publishedAt: new Date('2025-05-20'),
     readTimeMinutes: 9,
     coverImageUrl: unsplashCover('1580582932707-520aed937b7b'),
@@ -506,6 +772,8 @@ async function main() {
     const data = {
       ...course,
       perks: [...course.perks],
+      curriculum: [...(course.curriculum ?? [])],
+      roadmap: course.roadmap ?? undefined,
     };
     await prisma.course.upsert({
       where: { slug: course.slug },

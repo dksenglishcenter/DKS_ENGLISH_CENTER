@@ -203,7 +203,10 @@ export function SuccessStoriesAdmin() {
         badge: form.badge.trim(),
         text: form.text.trim(),
         avatar: form.avatar.trim().toUpperCase().slice(0, 4),
-        imageUrl: isHttpUrl(form.imageUrl) ? form.imageUrl!.trim() : null,
+        imageUrl:
+          form.imageUrl && isHttpUrl(form.imageUrl)
+            ? form.imageUrl.trim()
+            : null,
       };
       if (editingId) await updateSuccessStory(editingId, payload);
       else await createSuccessStory(payload);

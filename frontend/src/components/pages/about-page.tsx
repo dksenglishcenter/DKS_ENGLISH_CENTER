@@ -44,25 +44,25 @@ export async function AboutPage() {
   const values = [
     {
       icon: Heart,
-      title: "Tận Tâm",
+      title: "Tận tâm",
       desc: "Mỗi học viên là một cá nhân đặc biệt. Chúng tôi cam kết đồng hành tận tâm trong suốt hành trình học tập.",
       wrap: "rounded-2xl",
     },
     {
       icon: Lightbulb,
-      title: "Sáng Tạo",
+      title: "Sáng tạo",
       desc: "Không ngừng đổi mới phương pháp, ứng dụng công nghệ để mang lại trải nghiệm học tập tốt nhất.",
       wrap: "rounded-full",
     },
     {
       icon: Sparkles,
-      title: "Chất Lượng",
+      title: "Chất lượng",
       desc: "Cam kết chất lượng giảng dạy cao nhất, với giáo viên được đào tạo bài bản và kiểm duyệt nghiêm ngặt.",
       wrap: "rounded-xl",
     },
     {
       icon: Handshake,
-      title: "Đồng Hành",
+      title: "Đồng hành",
       desc: "DKS không chỉ là trung tâm – là người bạn đồng hành đáng tin cậy trên con đường chinh phục tiếng Anh.",
       wrap: "rounded-[1.5rem]",
     },
@@ -73,7 +73,7 @@ export async function AboutPage() {
       <PageHero
         icon={Building2}
         label="Về DKS"
-        title="Câu Chuyện Của Chúng Tôi"
+        title="Câu chuyện của chúng tôi"
         description="Hơn 8 năm đồng hành cùng học viên Việt Nam trên con đường chinh phục tiếng Anh và mở ra thế giới."
       />
 
@@ -83,9 +83,9 @@ export async function AboutPage() {
             <div>
               <SectionLabel icon={Target}>Tầm nhìn & Sứ mệnh</SectionLabel>
               <h2 className="mb-6 text-3xl font-black text-foreground font-[family-name:var(--font-nunito)] md:text-4xl">
-                Chúng Tôi Tin Rằng
+                Chúng tôi tin rằng
                 <br />
-                Mọi Người Đều Có Thể
+                mọi người đều có thể
               </h2>
               <div className="space-y-6 font-[family-name:var(--font-body)]">
                 <div className="flex gap-4">
@@ -159,7 +159,7 @@ export async function AboutPage() {
         </Reveal>
 
         <Reveal>
-          <SectionHeading icon={Sparkles} label="Giá trị cốt lõi" title="Những Gì DKS Tin Tưởng" />
+          <SectionHeading icon={Sparkles} label="Giá trị cốt lõi" title="Những gì DKS tin tưởng" />
         </Reveal>
         <div className="mb-24 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {values.map((v, index) => {
@@ -188,7 +188,7 @@ export async function AboutPage() {
           <SectionHeading
             icon={Users}
             label="Đội ngũ giáo viên"
-            title="Những Người Thầy Tận Tâm"
+            title="Những người thầy tận tâm"
             sub="Giáo viên DKS không chỉ giỏi chuyên môn mà còn đam mê giảng dạy, luôn lấy học viên làm trung tâm."
           />
         </Reveal>
@@ -197,7 +197,7 @@ export async function AboutPage() {
         </Reveal>
 
         <Reveal>
-          <SectionHeading icon={Building2} label="Cơ sở vật chất" title="Không Gian Học Tập Lý Tưởng" />
+          <SectionHeading icon={Building2} label="Cơ sở vật chất" title="Không gian học tập lý tưởng" />
         </Reveal>
         <Reveal delayMs={80}>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">

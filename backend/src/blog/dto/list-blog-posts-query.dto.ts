@@ -12,4 +12,9 @@ export class ListBlogPostsQueryDto extends ListPublishedOnlyQueryDto {
   @IsString()
   @MaxLength(80)
   category?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  tag?: string;
 }

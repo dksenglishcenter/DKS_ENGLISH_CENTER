@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/seo/metadata";
 import { coursesPageSchema } from "@/lib/seo/schemas";
 
 export const metadata = createPageMetadata({
-  title: "Khóa Học Tiếng Anh",
+  title: "Khóa học tiếng Anh",
   description:
     "Khóa luyện thi vào lớp 10, THPT và Đại học, IELTS 1:1 và tiếng Anh Global Success lớp 1–9 tại DKS English Center.",
   path: "/courses",

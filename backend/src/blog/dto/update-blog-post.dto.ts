@@ -45,6 +45,12 @@ export class UpdateBlogPostDto {
   category?: string;
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(40, { each: true })
+  tags?: string[];
+
+  @IsOptional()
   @IsDateString()
   publishedAt?: string;
 

@@ -52,6 +52,7 @@ function normalizeBlogPost(post: BlogPost): BlogPost {
   return {
     ...post,
     publishedAt: toDateOnly(post.publishedAt),
+    tags: Array.isArray(post.tags) ? post.tags : [],
     sections: normalizeSections(post.sections),
   };
 }
@@ -62,6 +63,7 @@ async function fetchBlogPosts(params: ListBlogPostsParams = {}) {
       `/blog-posts${toSearchParams({
         featured: params.featured,
         category: params.category,
+        tag: params.tag,
         publishedOnly: params.publishedOnly,
       })}`,
       {
@@ -98,6 +100,7 @@ export const getBlogPostSummaries = cache(
         title,
         excerpt,
         category,
+        tags,
         publishedAt,
         readTimeMinutes,
         coverImageUrl,
@@ -108,6 +111,7 @@ export const getBlogPostSummaries = cache(
         title,
         excerpt,
         category,
+        tags,
         publishedAt,
         readTimeMinutes,
         coverImageUrl,
@@ -159,6 +163,7 @@ export async function listBlogPosts(params: ListBlogPostsParams = {}) {
     `/blog-posts${toSearchParams({
       featured: params.featured,
       category: params.category,
+      tag: params.tag,
       publishedOnly: params.publishedOnly,
     })}`,
     { method: "GET", cache: "no-store" },

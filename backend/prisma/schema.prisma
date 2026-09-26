@@ -132,10 +132,14 @@ model Course {
   startDate     DateTime? @map("start_date") @db.Date
   endDate       DateTime? @map("end_date") @db.Date
   perks         String[]
+  /// Giáo trình sơ lược (bullet)
+  curriculum    String[]  @default([])
+  /// Lộ trình học: { stages: [{ name, band?, modules: string[] }] }
+  roadmap       Json?
   category      String
   coverImageUrl String    @map("cover_image_url")
-  accent        String    @default("#F16522")
-  bg            String    @default("#FFF4EC")
+  accent        String    @default("#C85A2E")
+  bg            String    @default("#F3EEE6")
   icon          String    @default("📚")
   featured      Boolean   @default(true)
   sortOrder     Int       @default(0) @map("sort_order")
@@ -257,6 +261,7 @@ model BlogPost {
   title           String
   excerpt         String
   category        String
+  tags            String[] @default([])
   publishedAt     DateTime @map("published_at") @db.Date
   readTimeMinutes Int      @map("read_time_minutes")
   coverImageUrl   String   @map("cover_image_url")
