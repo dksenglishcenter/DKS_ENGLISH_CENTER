@@ -10,7 +10,11 @@ export type FeatureName = 'MOCK_TEST' | 'PHASE3';
 export const RequireFeature = (name: FeatureName) =>
   SetMetadata(FEATURE_KEY, name);
 
-/** A feature is on only when its env var is exactly "true". Default: off. */
+/**
+ * MOCK_TEST: on only when FEATURE_MOCK_TEST=true.
+ * PHASE3: hardcoded off until GĐ3 — ignore env so client prod cannot turn it on by mistake.
+ */
 export function isFeatureEnabled(name: FeatureName): boolean {
+  if (name === 'PHASE3') return false;
   return process.env[`FEATURE_${name}`] === 'true';
 }

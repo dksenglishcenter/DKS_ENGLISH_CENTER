@@ -1,17 +1,16 @@
 /**
- * Feature flags — the appsettings-style on/off switches.
+ * Feature flags — on/off switches for unfinished product slices.
  *
- * Each flag defaults to OFF and is turned on by its env var, e.g.
- * NEXT_PUBLIC_FEATURE_MOCK_TEST=true. Keep the same flag on the backend
- * (FEATURE_MOCK_TEST) so a disabled feature is blocked at the API too.
+ * mockTest: env-driven (NEXT_PUBLIC_FEATURE_MOCK_TEST / FEATURE_MOCK_TEST).
+ * phase3: hardcoded OFF until GĐ3 ships — do not re-enable via env for client prod.
  */
 function flag(value: string | undefined): boolean {
   return value === "true" || value === "1";
 }
 
 export const features = {
-  /** Management suite: students, classes, attendance, tuition (GĐ3). */
-  phase3: flag(process.env.NEXT_PUBLIC_FEATURE_PHASE3),
+  /** Management suite: students, classes, attendance, tuition (GĐ3). Locked off in code. */
+  phase3: false,
   mockTest: flag(process.env.NEXT_PUBLIC_FEATURE_MOCK_TEST),
 } as const;
 

@@ -181,6 +181,36 @@ model GalleryImage {
   @@map("gallery_images")
 }
 
+model Event {
+  id            String    @id @default(cuid())
+  title         String
+  summary       String
+  body          String?
+  eventDate     DateTime? @map("event_date") @db.Date
+  coverImageUrl String?   @map("cover_image_url")
+  sortOrder     Int       @default(0) @map("sort_order")
+  isPublished   Boolean   @default(true) @map("is_published")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder])
+  @@map("events")
+}
+
+model EventPhoto {
+  id             String   @id @default(cuid())
+  imageUrl       String   @map("image_url")
+  alt            String
+  objectPosition String   @default("center") @map("object_position")
+  sortOrder      Int      @default(0) @map("sort_order")
+  isPublished    Boolean  @default(true) @map("is_published")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder])
+  @@map("event_photos")
+}
+
 model FacilityImage {
   id          String   @id @default(cuid())
   imageUrl    String   @map("image_url")

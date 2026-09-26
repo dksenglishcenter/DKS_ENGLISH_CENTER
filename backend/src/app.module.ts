@@ -14,6 +14,8 @@ import { ContactModule } from './contact/contact.module';
 import { ContactInformationModule } from './contact-information/contact-information.module';
 import { CoursesModule } from './courses/courses.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { EventsModule } from './events/events.module';
+import { EventPhotosModule } from './event-photos/event-photos.module';
 import { FacilityImagesModule } from './facility-images/facility-images.module';
 import { GalleryImagesModule } from './gallery-images/gallery-images.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -42,6 +44,8 @@ import { UsersModule } from './users/users.module';
     AboutContentModule,
     TeachersModule,
     JobsModule,
+    EventsModule,
+    EventPhotosModule,
     DashboardModule,
     UsersModule,
     StudentsModule,

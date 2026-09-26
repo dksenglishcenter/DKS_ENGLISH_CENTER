@@ -25,6 +25,7 @@ export function Header() {
     { label: "Khóa học", page: "courses" },
     { label: "Thi thử", page: "exam", feature: "mockTest" },
     { label: "Về chúng tôi", page: "about" },
+    { label: "Sự kiện", page: "events" },
     { label: "Blog", page: "blog" },
     { label: "Tuyển dụng", page: "careers" },
     { label: "Liên hệ", page: "contact" },
