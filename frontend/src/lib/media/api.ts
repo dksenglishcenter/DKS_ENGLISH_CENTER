@@ -4,6 +4,7 @@ export type MediaCategory =
   | "brand-logo"
   | "social-icon"
   | "home-gallery"
+  | "event-photo"
   | "about-facilities"
   | "about-vision"
   | "about-teacher"

@@ -362,6 +362,8 @@
 .reveal-pending {
   opacity: 0;
   transform: translateY(20px);
+  /* Fallback nếu JS chậm / fail — tránh trang trắng mãi */
+  animation: reveal-up 0.45s ease-out 1.2s both;
 }
 
 .reveal-visible {

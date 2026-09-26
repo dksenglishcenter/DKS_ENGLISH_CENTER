@@ -18,6 +18,7 @@ import {
   Menu,
   MessageSquareQuote,
   Newspaper,
+  CalendarDays,
   School,
   Users,
   UsersRound,
@@ -56,6 +57,11 @@ const ADMIN_NAV = [
     href: `${PAGE_PATHS.admin}/gallery`,
     label: "Môi trường Học Tập",
     icon: ImageIcon,
+  },
+  {
+    href: `${PAGE_PATHS.admin}/events`,
+    label: "Sự kiện",
+    icon: CalendarDays,
   },
   { href: `${PAGE_PATHS.admin}/about`, label: "Về chúng tôi", icon: Building2 },
   {
