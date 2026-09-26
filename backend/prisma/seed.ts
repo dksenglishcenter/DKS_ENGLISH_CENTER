@@ -125,32 +125,38 @@ const COURSES_SEED = [
 
 const SUCCESS_STORIES_SEED = [
   {
-    name: 'Nguyễn Thị Mai',
+    name: 'Mai, lớp IELTS',
     course: 'IELTS Preparation',
-    badge: 'IELTS 7.0 ↑ từ 5.0',
-    text: 'Sau 6 tháng học tại DKS, điểm IELTS của tôi từ 5.0 đã lên 7.0. Giáo viên rất tận tâm và phương pháp dạy hiệu quả. Các buổi mock test giúp tôi quen áp lực thi thật rất nhiều.',
+    badge: 'Thích buổi mock test',
+    text: 'Con về nhà hay kể chuyện trên lớp. Điểm tăng dần, quan trọng hơn là con không còn sợ nói.',
     stars: 5,
     avatar: 'MT',
+    imageUrl:
+      'https://res.cloudinary.com/hw92uddx/image/upload/v1783958210/dks-english-center/home/gallery/jusxkuz4es9b14uezyyc.jpg',
     sortOrder: 0,
     isPublished: true,
   },
   {
-    name: 'Trần Văn Hùng',
+    name: 'Phụ huynh bé Hùng',
     course: '9-to-10 Prep',
-    badge: '9.5 điểm vào 10 chuyên',
-    text: 'DKS đã giúp con trai tôi đạt 9.5 điểm thi vào lớp 10 chuyên. Giáo viên không chỉ dạy kiến thức mà còn truyền cảm hứng học tập. Rất biết ơn trung tâm!',
+    badge: 'Vào học đều đặn',
+    text: 'Mỗi tuần con đòi đi học. Thấy con vui là mình yên tâm hơn điểm số.',
     stars: 5,
     avatar: 'HT',
+    imageUrl:
+      'https://res.cloudinary.com/hw92uddx/image/upload/v1784447656/dks-english-center/home/gallery/or97g0ue2xpaxxdnkp6w.jpg',
     sortOrder: 1,
     isPublished: true,
   },
   {
-    name: 'Phạm Thị Linh',
+    name: 'Linh, Communicative',
     course: 'Communicative English',
-    badge: 'Tự tin giao tiếp công việc',
-    text: 'Tôi đã từng rất sợ nói tiếng Anh nhưng sau 3 tháng tại DKS, tôi có thể tự tin trình bày trước khách hàng nước ngoài. Lớp nhỏ giúp tôi được thực hành nhiều hơn.',
+    badge: 'Tự tin nói hơn',
+    text: 'Trước hay ngại mở miệng. Giờ dám trả lời khách nước ngoài — vẫn run nhưng vui.',
     stars: 5,
     avatar: 'LP',
+    imageUrl:
+      'https://res.cloudinary.com/hw92uddx/image/upload/v1783957984/dks-english-center/home/gallery/vxkeeeeonutskpdj3co1.jpg',
     sortOrder: 2,
     isPublished: true,
   },

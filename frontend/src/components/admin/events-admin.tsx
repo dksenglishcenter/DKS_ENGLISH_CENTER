@@ -58,7 +58,7 @@ export function EventsAdmin() {
   const openCreate = () => {
     setForm({
       ...EMPTY_FORM,
-      sortOrder: nextSortOrder(events.map((e) => e.sortOrder)),
+      sortOrder: nextSortOrder(events),
     });
     setFormError(null);
     setEditingId(null);

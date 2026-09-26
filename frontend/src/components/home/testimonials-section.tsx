@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, MessageSquareQuote, Trophy } from "lucide-react";
+import { Heart } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/layout/section-heading";
-import { StarRow } from "@/components/media/star-row";
+import { CourseCoverImage } from "@/components/media/course-cover-image";
 import { Reveal } from "@/components/motion/reveal";
 import type { SuccessStory } from "@/lib/success-stories/types";
 
@@ -14,109 +13,66 @@ type HomeTestimonialsProps = {
 };
 
 export function HomeTestimonials({ stories }: HomeTestimonialsProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
-
   if (stories.length === 0) {
     return null;
   }
-
-  const safeIndex = Math.min(activeIndex, stories.length - 1);
-  const testimonial = stories[safeIndex];
-
-  const showPrevious = () => {
-    setActiveIndex((current) =>
-      current === 0 ? stories.length - 1 : current - 1,
-    );
-  };
-
-  const showNext = () => {
-    setActiveIndex((current) => (current + 1) % stories.length);
-  };
 
   return (
     <section className="bg-card py-20 md:py-28" aria-labelledby="testimonials-title">
       <Container>
         <Reveal>
           <SectionHeading
-            icon={MessageSquareQuote}
-            label="Học viên nói gì?"
-            title="Câu Chuyện Thành Công"
-            sub="Hàng nghìn học viên đã thay đổi cuộc đời với DKS. Đây là một vài câu chuyện truyền cảm hứng."
+            icon={Heart}
+            label="Khoảnh khắc & cảm nhận"
+            title="Học Viên Thích Học Ở DKS"
+            sub="Ảnh thật và lời nhắn ngắn từ lớp — thành công cũng là khi các bé thích đến học."
             titleId="testimonials-title"
           />
         </Reveal>
 
-        <Reveal delayMs={80}>
-        <div className="mx-auto max-w-3xl">
-          <article
-            className="relative rounded-2xl bg-secondary p-8 md:p-12"
-            aria-live="polite"
-          >
-            <span
-              className="absolute left-8 top-6 text-6xl font-black text-primary/20 font-[family-name:var(--font-nunito)]"
-              aria-hidden="true"
-            >
-              &ldquo;
-            </span>
-            <StarRow count={testimonial.stars} />
-            <p className="relative z-10 my-6 text-lg leading-relaxed text-foreground md:text-xl">
-              {testimonial.text}
-            </p>
-            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-row sm:gap-4">
-              <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary font-black text-white font-[family-name:var(--font-nunito)]">
-                {testimonial.avatar}
-              </span>
-              <div className="min-w-0">
-                <h3 className="text-sm font-black text-foreground font-[family-name:var(--font-nunito)] sm:text-base">
-                  {testimonial.name}
-                </h3>
-                <p className="text-xs text-muted-foreground sm:text-sm">{testimonial.course}</p>
-              </div>
-              <div className="sm:ml-auto">
-                <span className="inline-flex max-w-32 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-center text-[10px] font-bold leading-tight text-primary-foreground font-[family-name:var(--font-nunito)] sm:max-w-none sm:px-4 sm:text-xs sm:leading-normal">
-                  <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  {testimonial.badge}
-                </span>
-              </div>
-            </div>
-          </article>
-
-          {stories.length > 1 ? (
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={showPrevious}
-                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="Xem cảm nhận trước"
-              >
-                <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-              </button>
-              {stories.map((item, index) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                  className={`rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none ${
-                    index === safeIndex
-                      ? "h-3 w-8 bg-primary"
-                      : "h-3 w-3 bg-border hover:bg-primary/50"
-                  }`}
-                  aria-label={`Xem cảm nhận ${index + 1}`}
-                  aria-current={index === safeIndex ? "true" : undefined}
-                />
-              ))}
-              <button
-                type="button"
-                onClick={showNext}
-                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="Xem cảm nhận tiếp theo"
-              >
-                <ChevronRight className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-          ) : null}
-        </div>
-        </Reveal>
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          {stories.map((story, index) => (
+            <Reveal key={story.id} delayMs={Math.min(index, 5) * 50} as="li">
+              <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-background">
+                <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
+                  {story.imageUrl ? (
+                    <CourseCoverImage
+                      src={story.imageUrl}
+                      alt={`${story.name} — ${story.course}`}
+                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                      className="transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
+                    />
+                  ) : (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ background: "var(--hero-gradient)" }}
+                    >
+                      <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-2xl font-black text-primary-foreground font-[family-name:var(--font-nunito)]">
+                        {story.avatar}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground/70 via-foreground/25 to-transparent p-4 pt-16">
+                    <p className="text-sm font-semibold leading-snug text-white md:text-[0.95rem]">
+                      “{story.text}”
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col gap-1 p-4">
+                  <h3 className="text-sm font-black text-foreground font-[family-name:var(--font-nunito)]">
+                    {story.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{story.course}</p>
+                  {story.badge ? (
+                    <p className="mt-auto pt-2 text-xs font-semibold text-primary font-[family-name:var(--font-nunito)]">
+                      {story.badge}
+                    </p>
+                  ) : null}
+                </div>
+              </article>
+            </Reveal>
+          ))}
+        </ul>
       </Container>
     </section>
   );

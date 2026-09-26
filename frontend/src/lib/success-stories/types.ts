@@ -6,6 +6,7 @@ export type SuccessStory = {
   text: string;
   stars: number;
   avatar: string;
+  imageUrl: string | null;
   sortOrder: number;
   isPublished: boolean;
   createdAt: string;
@@ -19,6 +20,7 @@ export type SuccessStoryPayload = {
   text: string;
   stars: number;
   avatar: string;
+  imageUrl?: string | null;
   sortOrder: number;
   isPublished: boolean;
 };

@@ -5,6 +5,7 @@ export const CLOUDINARY_FOLDERS = {
   social: `${CLOUDINARY_ROOT}/social`,
   homeGallery: `${CLOUDINARY_ROOT}/home/gallery`,
   eventPhotos: `${CLOUDINARY_ROOT}/events/photos`,
+  successStories: `${CLOUDINARY_ROOT}/success-stories`,
   aboutFacilities: `${CLOUDINARY_ROOT}/about/facilities`,
   aboutVision: `${CLOUDINARY_ROOT}/about/vision`,
   aboutTeachers: `${CLOUDINARY_ROOT}/about/teachers`,
@@ -27,6 +28,7 @@ export type MediaCategory =
   | 'social-icon'
   | 'home-gallery'
   | 'event-photo'
+  | 'success-story'
   | 'about-facilities'
   | 'about-vision'
   | 'about-teacher'
@@ -40,6 +42,7 @@ export const MEDIA_CATEGORIES: MediaCategory[] = [
   'social-icon',
   'home-gallery',
   'event-photo',
+  'success-story',
   'about-facilities',
   'about-vision',
   'about-teacher',
@@ -70,6 +73,8 @@ const FOLDER_RESOLVERS: Record<MediaCategory, FolderResolver> = {
   'home-gallery': () => CLOUDINARY_FOLDERS.homeGallery,
 
   'event-photo': () => CLOUDINARY_FOLDERS.eventPhotos,
+
+  'success-story': () => CLOUDINARY_FOLDERS.successStories,
 
   'about-facilities': () => CLOUDINARY_FOLDERS.aboutFacilities,
 

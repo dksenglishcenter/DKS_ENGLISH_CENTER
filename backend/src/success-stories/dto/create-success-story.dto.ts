@@ -3,10 +3,12 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUrl,
   Max,
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -27,8 +29,8 @@ export class CreateSuccessStoryDto {
   badge!: string;
 
   @IsString()
-  @MinLength(10)
-  @MaxLength(1000)
+  @MinLength(5)
+  @MaxLength(280)
   text!: string;
 
   @IsOptional()
@@ -42,6 +44,12 @@ export class CreateSuccessStoryDto {
   @MinLength(1)
   @MaxLength(4)
   avatar!: string;
+
+  @IsOptional()
+  @ValidateIf((_, v) => typeof v === 'string' && v.length > 0)
+  @IsUrl({ require_protocol: true })
+  @MaxLength(500)
+  imageUrl?: string | null;
 
   @IsOptional()
   @Type(() => Number)

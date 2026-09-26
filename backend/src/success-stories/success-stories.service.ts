@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { deleteReplacedMedia } from '../common/media-replace';
 import { swapSortOrderIfNeeded } from '../common/sort-order';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSuccessStoryDto } from './dto/create-success-story.dto';
@@ -14,6 +16,7 @@ const SELECT = {
   text: true,
   stars: true,
   avatar: true,
+  imageUrl: true,
   sortOrder: true,
   isPublished: true,
   createdAt: true,
@@ -22,7 +25,10 @@ const SELECT = {
 
 @Injectable()
 export class SuccessStoriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   list(query: ListSuccessStoriesQueryDto) {
     const where: Prisma.SuccessStoryWhereInput = {};
@@ -46,6 +52,7 @@ export class SuccessStoriesService {
         text: dto.text.trim(),
         stars: dto.stars ?? 5,
         avatar: dto.avatar.trim().toUpperCase(),
+        imageUrl: dto.imageUrl?.trim() || null,
         sortOrder: dto.sortOrder ?? 0,
         isPublished: dto.isPublished ?? true,
       },
@@ -56,11 +63,12 @@ export class SuccessStoriesService {
   async update(id: string, dto: UpdateSuccessStoryDto) {
     const existing = await this.prisma.successStory.findUnique({
       where: { id },
-      select: { id: true, sortOrder: true },
+      select: { id: true, sortOrder: true, imageUrl: true },
     });
     if (!existing) throw new NotFoundException('Không tìm thấy câu chuyện');
 
-    return this.prisma.$transaction(async (tx) => {
+    const nextUrl = dto.imageUrl;
+    const story = await this.prisma.$transaction(async (tx) => {
       await swapSortOrderIfNeeded(tx.successStory, {
         id,
         currentOrder: existing.sortOrder,
@@ -78,6 +86,9 @@ export class SuccessStoriesService {
           ...(dto.avatar !== undefined
             ? { avatar: dto.avatar.trim().toUpperCase() }
             : {}),
+          ...(dto.imageUrl !== undefined
+            ? { imageUrl: dto.imageUrl?.trim() || null }
+            : {}),
           ...(dto.sortOrder !== undefined ? { sortOrder: dto.sortOrder } : {}),
           ...(dto.isPublished !== undefined
             ? { isPublished: dto.isPublished }
@@ -86,16 +97,29 @@ export class SuccessStoriesService {
         select: SELECT,
       });
     });
+
+    if (dto.imageUrl !== undefined) {
+      await deleteReplacedMedia(
+        this.cloudinaryService,
+        existing.imageUrl ?? undefined,
+        typeof nextUrl === 'string' ? nextUrl : undefined,
+      );
+    }
+
+    return story;
   }
 
   async remove(id: string) {
     const existing = await this.prisma.successStory.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, imageUrl: true },
     });
     if (!existing) throw new NotFoundException('Không tìm thấy câu chuyện');
 
     await this.prisma.successStory.delete({ where: { id } });
+    if (existing.imageUrl) {
+      await this.cloudinaryService.deleteImageByUrl(existing.imageUrl);
+    }
     return { message: 'Đã xóa câu chuyện thành công' };
   }
 }

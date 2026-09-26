@@ -23,15 +23,18 @@ export function SectionHeading({
   sub,
   titleId,
   icon,
+  align = "center",
 }: {
   label: string;
   title: string;
   sub?: string;
   titleId?: string;
   icon?: LucideIcon;
+  align?: "center" | "left";
 }) {
+  const isLeft = align === "left";
   return (
-    <div className="mb-14 text-center">
+    <div className={cn(isLeft ? "mb-0 text-left" : "mb-14 text-center")}>
       <SectionLabel icon={icon}>{label}</SectionLabel>
       <h2
         id={titleId}
@@ -40,7 +43,12 @@ export function SectionHeading({
         {title}
       </h2>
       {sub ? (
-        <p className="mx-auto max-w-2xl text-lg text-muted-foreground font-[family-name:var(--font-body)]">
+        <p
+          className={cn(
+            "max-w-2xl text-lg text-muted-foreground font-[family-name:var(--font-body)]",
+            !isLeft && "mx-auto",
+          )}
+        >
           {sub}
         </p>
       ) : null}

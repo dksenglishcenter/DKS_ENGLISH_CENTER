@@ -1,7 +1,9 @@
 ﻿"use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import Image from "next/image";
 
+import { AdminImageField } from "@/components/admin/admin-image-field";
 import {
   BulkActionsBar,
   SelectAllHeaderCell,
@@ -12,11 +14,13 @@ import { Button } from "@/components/ui/button";
 import { RowActions } from "./row-actions";
 import { useAdminResourceList } from "@/hooks/use-admin-resource-list";
 import { useBulkSelection } from "@/hooks/use-bulk-selection";
+import { useCloudinaryImageReplace } from "@/hooks/use-cloudinary-image-replace";
 import { listCourses } from "@/lib/courses/api";
 import type { Course } from "@/lib/courses/types";
 import { scrollToFirstInvalid } from "@/lib/admin/scroll";
 import { nextSortOrder } from "@/lib/admin/sort-order";
 import { formatError } from "@/lib/errors/format-error";
+import { isHttpUrl } from "@/lib/media/is-http-url";
 import {
   createSuccessStory,
   deleteSuccessStory,
@@ -32,11 +36,11 @@ const EMPTY_FORM: SuccessStoryPayload = {
   text: "",
   stars: 5,
   avatar: "",
+  imageUrl: "",
   sortOrder: 0,
   isPublished: true,
 };
 
-/** Chữ viết tắt trên vòng tròn avatar (vd: Nguyễn Thị Mai → NM). */
 function initialsFromName(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "";
@@ -80,6 +84,20 @@ export function SuccessStoriesAdmin() {
   } = useAdminResourceList<SuccessStory>({ loadItems });
 
   const bulk = useBulkSelection(stories.map((item) => item.id));
+  const editingIdRef = useRef<string | null>(null);
+  editingIdRef.current = editingId;
+
+  const cover = useCloudinaryImageReplace({
+    category: "success-story",
+    onLivePersist: async (url) => {
+      const id = editingIdRef.current;
+      if (id) await updateSuccessStory(id, { imageUrl: url });
+    },
+    onLiveRestore: async (url) => {
+      const id = editingIdRef.current;
+      if (id) await updateSuccessStory(id, { imageUrl: url });
+    },
+  });
 
   const courseOptions = (() => {
     const titles = courses.map((course) => course.title);
@@ -89,35 +107,40 @@ export function SuccessStoriesAdmin() {
     return titles;
   })();
 
-  const closeForm = () => {
+  const closeForm = async () => {
+    await cover.discard();
     resetFormChrome();
     setFormError(null);
+    cover.reset(null);
     setForm(EMPTY_FORM);
   };
 
-  const openCreate = () => {
-    const nextOrder = nextSortOrder(stories);
+  const openCreate = async () => {
+    await cover.discard();
     setEditingId(null);
     setFormError(null);
+    cover.reset(null);
     setForm({
       ...EMPTY_FORM,
       course: courses[0]?.title ?? "",
-      sortOrder: nextOrder,
+      sortOrder: nextSortOrder(stories),
     });
     setShowForm(true);
   };
 
-  const toggleCreateForm = () => {
+  const toggleCreateForm = async () => {
     if (showForm && !editingId) {
-      closeForm();
+      await closeForm();
       return;
     }
-    openCreate();
+    await openCreate();
   };
 
-  const openEdit = (story: SuccessStory) => {
+  const openEdit = async (story: SuccessStory) => {
+    await cover.discard();
     setEditingId(story.id);
     setFormError(null);
+    cover.reset(story.imageUrl);
     setForm({
       name: story.name,
       course: story.course,
@@ -125,10 +148,22 @@ export function SuccessStoriesAdmin() {
       text: story.text,
       stars: story.stars,
       avatar: story.avatar,
+      imageUrl: story.imageUrl ?? "",
       sortOrder: story.sortOrder,
       isPublished: story.isPublished,
     });
     setShowForm(true);
+  };
+
+  const handleUpload = async (file: File | null) => {
+    setFormError(null);
+    try {
+      const url = await cover.upload(file);
+      if (url) setForm((prev) => ({ ...prev, imageUrl: url }));
+    } catch (err) {
+      setFormError(formatError(err));
+      scrollToFirstInvalid(formRef.current);
+    }
   };
 
   const handleSave = async () => {
@@ -144,12 +179,12 @@ export function SuccessStoriesAdmin() {
       return;
     }
     if (form.badge.trim().length < 2) {
-      setFormError("Badge cần tối thiểu 2 ký tự");
+      setFormError("Nhãn ngắn cần tối thiểu 2 ký tự");
       scrollToFirstInvalid(formRef.current);
       return;
     }
-    if (form.text.trim().length < 10) {
-      setFormError("Nội dung cần tối thiểu 10 ký tự");
+    if (form.text.trim().length < 5) {
+      setFormError("Comment cần tối thiểu 5 ký tự");
       scrollToFirstInvalid(formRef.current);
       return;
     }
@@ -168,10 +203,13 @@ export function SuccessStoriesAdmin() {
         badge: form.badge.trim(),
         text: form.text.trim(),
         avatar: form.avatar.trim().toUpperCase().slice(0, 4),
+        imageUrl: isHttpUrl(form.imageUrl) ? form.imageUrl!.trim() : null,
       };
       if (editingId) await updateSuccessStory(editingId, payload);
       else await createSuccessStory(payload);
-      closeForm();
+      if (payload.imageUrl) await cover.commit(payload.imageUrl);
+      else await cover.discard();
+      await closeForm();
       await load();
     } catch (err) {
       setFormError(formatError(err));
@@ -191,14 +229,13 @@ export function SuccessStoriesAdmin() {
     }
   };
 
-
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     setListError(null);
     try {
       await deleteSuccessStory(deleteTarget.id);
-      if (editingId === deleteTarget.id) closeForm();
+      if (editingId === deleteTarget.id) await closeForm();
       setDeleteTarget(null);
       await load();
     } catch (err) {
@@ -211,13 +248,18 @@ export function SuccessStoriesAdmin() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
-          Câu chuyện thành công
-        </h2>
+        <div>
+          <h2 className="text-2xl font-black text-foreground font-[family-name:var(--font-nunito)]">
+            Câu chuyện thành công
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Ảnh học viên/chứng chỉ + comment ngắn. Folder Cloudinary: success-stories.
+          </p>
+        </div>
         <Button
           type="button"
           variant={showForm && !editingId ? "outline" : "primary"}
-          onClick={toggleCreateForm}
+          onClick={() => void toggleCreateForm()}
         >
           {showForm && !editingId ? "Đóng form thêm" : "Thêm câu chuyện"}
         </Button>
@@ -237,13 +279,10 @@ export function SuccessStoriesAdmin() {
         <table className="min-w-[820px] text-left text-sm lg:min-w-full">
           <thead className="border-b border-border bg-muted text-muted-foreground">
             <tr>
-              <SelectAllHeaderCell
-                allSelected={bulk.allSelected}
-                onToggle={bulk.toggleAll}
-              />
-              <th className="w-44 min-w-44 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Học viên</th>
-              <th className="w-52 min-w-52 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Khóa</th>
-              <th className="w-56 min-w-56 px-4 py-3 font-semibold lg:w-auto lg:min-w-0">Badge</th>
+              <SelectAllHeaderCell allSelected={bulk.allSelected} onToggle={bulk.toggleAll} />
+              <th className="px-4 py-3 font-semibold">Ảnh</th>
+              <th className="px-4 py-3 font-semibold">Học viên</th>
+              <th className="px-4 py-3 font-semibold">Comment</th>
               <th className="px-4 py-3 font-semibold">Order</th>
               <th className="px-4 py-3 font-semibold">Published</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
@@ -257,32 +296,35 @@ export function SuccessStoriesAdmin() {
                   onToggle={() => bulk.toggle(story.id)}
                   label={story.name}
                 />
-                <td className="w-44 min-w-44 px-4 py-3 lg:w-auto lg:min-w-0">
-                  <div
-                    className="line-clamp-2 font-semibold leading-snug text-foreground lg:line-clamp-none"
-                    title={story.name}
-                  >
-                    {story.name}
-                  </div>
-                  <div className="truncate text-xs text-muted-foreground lg:overflow-visible lg:whitespace-normal">
-                    {story.avatar}
-                  </div>
-                </td>
-                <td className="w-52 min-w-52 px-4 py-3 lg:w-auto lg:min-w-0">
-                  <div className="line-clamp-2 lg:line-clamp-none" title={story.course}>
-                    {story.course}
-                  </div>
-                </td>
-                <td className="w-56 min-w-56 px-4 py-3 lg:w-auto lg:min-w-0">
-                  <div className="line-clamp-2 leading-snug lg:line-clamp-none" title={story.badge}>
-                    {story.badge}
+                <td className="px-4 py-3">
+                  <div className="relative h-14 w-12 overflow-hidden rounded-lg border border-border bg-muted">
+                    {story.imageUrl ? (
+                      <Image
+                        src={story.imageUrl}
+                        alt={story.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-xs font-bold text-primary">
+                        {story.avatar}
+                      </span>
+                    )}
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{story.sortOrder}</td>
-                <td className="whitespace-nowrap px-4 py-3 lg:whitespace-normal">{story.isPublished ? "Có" : "Ẩn"}</td>
+                <td className="px-4 py-3">
+                  <div className="font-semibold text-foreground">{story.name}</div>
+                  <div className="text-xs text-muted-foreground">{story.course}</div>
+                </td>
+                <td className="max-w-xs px-4 py-3">
+                  <div className="line-clamp-2 text-muted-foreground">{story.text}</div>
+                </td>
+                <td className="px-4 py-3">{story.sortOrder}</td>
+                <td className="px-4 py-3">{story.isPublished ? "Có" : "Ẩn"}</td>
                 <td className="px-4 py-3">
                   <RowActions
-                    onEdit={() => openEdit(story)}
+                    onEdit={() => void openEdit(story)}
                     onDelete={() => setDeleteTarget(story)}
                   />
                 </td>
@@ -304,12 +346,10 @@ export function SuccessStoriesAdmin() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-foreground">Tên học viên</span>
+              <span className="mb-1 block font-semibold text-foreground">Tên / phụ huynh</span>
               <input
-                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2"
                 value={form.name}
-                minLength={2}
-                maxLength={80}
                 onChange={(event) => {
                   const name = event.target.value;
                   setForm((prev) => ({
@@ -323,11 +363,10 @@ export function SuccessStoriesAdmin() {
                 }}
               />
             </label>
-
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Khóa học</span>
               <select
-                className="h-11 w-full rounded-lg border border-border bg-card px-3 py-2 lg:h-auto"
+                className="h-11 w-full rounded-lg border border-border bg-card px-3 py-2"
                 value={form.course}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, course: event.target.value }))
@@ -340,28 +379,22 @@ export function SuccessStoriesAdmin() {
                   </option>
                 ))}
               </select>
-              {courses.length === 0 ? (
-                <span className="mt-1 block text-xs text-red-600">
-                  Chưa có khóa học — thêm ở menu Khóa học trước.
-                </span>
-              ) : null}
             </label>
-
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-foreground">Badge thành tích</span>
+              <span className="mb-1 block font-semibold text-foreground">Nhãn ngắn</span>
               <input
-                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2"
                 value={form.badge}
+                placeholder="Vd: Thích đến lớp"
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, badge: event.target.value }))
                 }
               />
             </label>
-
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-foreground">Chữ trên avatar</span>
+              <span className="mb-1 block font-semibold text-foreground">Chữ avatar (fallback)</span>
               <input
-                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2"
                 value={form.avatar}
                 maxLength={4}
                 onChange={(event) =>
@@ -371,15 +404,11 @@ export function SuccessStoriesAdmin() {
                   }))
                 }
               />
-              <span className="mt-1 block text-xs text-muted-foreground">
-                1–4 chữ hiện trong vòng tròn cam trên trang chủ (vd: MT, NM).
-              </span>
             </label>
-
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-foreground">Số sao</span>
               <select
-                className="h-11 w-full rounded-lg border border-border bg-card px-3 py-2 lg:h-auto"
+                className="h-11 w-full rounded-lg border border-border bg-card px-3 py-2"
                 value={form.stars}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, stars: Number(event.target.value) }))
@@ -392,34 +421,45 @@ export function SuccessStoriesAdmin() {
                 ))}
               </select>
             </label>
-
             <label className="block text-sm">
-              <span className="mb-1 block font-semibold text-foreground">Thứ tự hiển thị</span>
+              <span className="mb-1 block font-semibold text-foreground">Thứ tự</span>
               <input
                 type="number"
                 min={0}
-                className="h-11 w-full rounded-lg border border-border px-3 py-2 lg:h-auto"
+                className="h-11 w-full rounded-lg border border-border px-3 py-2"
                 value={form.sortOrder}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, sortOrder: Number(event.target.value) }))
                 }
               />
-              <span className="mt-1 block text-xs text-muted-foreground">
-                Nếu chọn số đã có, hai câu chuyện sẽ tự đổi chỗ khi Lưu.
-              </span>
             </label>
           </div>
 
           <label className="block text-sm">
-            <span className="mb-1 block font-semibold text-foreground">Nội dung</span>
+            <span className="mb-1 block font-semibold text-foreground">Comment ngắn *</span>
             <textarea
-              className="min-h-28 w-full rounded-lg border border-border px-3 py-2"
+              className="min-h-24 w-full rounded-lg border border-border px-3 py-2"
+              maxLength={280}
               value={form.text}
+              placeholder="Vài câu thật, không marketing dài…"
               onChange={(event) => setForm((prev) => ({ ...prev, text: event.target.value }))}
             />
+            <span className="mt-1 block text-xs text-muted-foreground">
+              {form.text.length}/280
+            </span>
           </label>
 
-          <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <AdminImageField
+            url={form.imageUrl ?? ""}
+            uploading={cover.uploading}
+            objectPosition="center"
+            onFile={(file) => void handleUpload(file)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Ảnh học viên, lớp hoặc chứng chỉ/điểm thi.
+          </p>
+
+          <label className="flex items-center gap-2 text-sm font-semibold">
             <input
               type="checkbox"
               checked={form.isPublished}
@@ -427,14 +467,18 @@ export function SuccessStoriesAdmin() {
                 setForm((prev) => ({ ...prev, isPublished: event.target.checked }))
               }
             />
-            Published (hiện trang chủ)
+            Published
           </label>
 
           <div className="flex gap-2">
-            <Button type="button" disabled={saving} onClick={() => void handleSave()}>
-              {saving ? "Đang lưu..." : "Lưu"}
+            <Button
+              type="button"
+              disabled={saving || cover.uploading}
+              onClick={() => void handleSave()}
+            >
+              {cover.uploading ? "Đang upload…" : saving ? "Đang lưu…" : "Lưu"}
             </Button>
-            <Button type="button" variant="outline" onClick={closeForm}>
+            <Button type="button" variant="outline" onClick={() => void closeForm()}>
               Hủy
             </Button>
           </div>
@@ -444,22 +488,17 @@ export function SuccessStoriesAdmin() {
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Xóa câu chuyện?"
-        description={
-          deleteTarget
-            ? `Bạn chắc muốn xóa câu chuyện của “${deleteTarget.name}”?`
-            : ""
-        }
+        description={deleteTarget ? `Xóa “${deleteTarget.name}”?` : ""}
         busy={deleting}
         onCancel={() => {
           if (!deleting) setDeleteTarget(null);
         }}
         onConfirm={() => void handleDelete()}
       />
-
       <ConfirmDialog
         open={bulk.confirmOpen}
         title="Xóa các mục đã chọn?"
-        description={`Bạn chắc muốn xóa ${bulk.count} câu chuyện đã chọn? Thao tác này không hoàn tác được.`}
+        description={`Xóa ${bulk.count} câu chuyện đã chọn?`}
         busy={bulk.busy}
         onCancel={() => {
           if (!bulk.busy) bulk.closeConfirm();

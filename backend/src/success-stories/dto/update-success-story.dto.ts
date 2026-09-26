@@ -4,10 +4,12 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUrl,
   Max,
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class UpdateSuccessStoryDto {
@@ -31,8 +33,8 @@ export class UpdateSuccessStoryDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(10)
-  @MaxLength(1000)
+  @MinLength(5)
+  @MaxLength(280)
   text?: string;
 
   @IsOptional()
@@ -47,6 +49,12 @@ export class UpdateSuccessStoryDto {
   @MinLength(1)
   @MaxLength(4)
   avatar?: string;
+
+  @IsOptional()
+  @ValidateIf((_, v) => v === null || (typeof v === 'string' && v.length > 0))
+  @IsUrl({ require_protocol: true })
+  @MaxLength(500)
+  imageUrl?: string | null;
 
   @IsOptional()
   @Type(() => Number)

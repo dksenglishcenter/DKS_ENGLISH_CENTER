@@ -205,43 +205,66 @@ async function CoursesSection() {
 
 function WhyChooseUs() {
   return (
-    <section className="bg-card py-20 md:py-28" aria-labelledby="why-dks-title">
-      <Container>
-        <Reveal>
-          <SectionHeading
-            icon={Sparkles}
-            label="Tại sao chọn DKS?"
-            title="Điều Làm Nên Sự Khác Biệt"
-            sub="Chúng tôi không chỉ dạy tiếng Anh – chúng tôi xây dựng nền tảng để bạn tự tin chinh phục thế giới."
-            titleId="why-dks-title"
-          />
-        </Reveal>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((feature, index) => {
-            const Icon = feature.icon;
+    <section
+      className="relative overflow-hidden py-20 md:py-28"
+      style={{ background: "var(--hero-gradient)" }}
+      aria-labelledby="why-dks-title"
+    >
+      <div
+        className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full opacity-25 dark:opacity-40"
+        style={{ background: "var(--hero-glow-1)" }}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full opacity-20 dark:opacity-30"
+        style={{ background: "var(--hero-glow-2)" }}
+        aria-hidden
+      />
 
-            return (
-              <Reveal key={feature.title} delayMs={index * 60} as="article" className="h-full">
-                <div className="flex h-full flex-col rounded-2xl border border-border bg-secondary p-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none">
-                  <span
-                    className={`relative mb-5 flex h-14 w-14 items-center justify-center bg-primary/10 text-primary shadow-[inset_0_0_0_1px] shadow-primary/20 ${feature.iconWrap}`}
-                  >
-                    <Icon
-                      className="absolute h-9 w-9 fill-current opacity-[0.18]"
-                      aria-hidden="true"
-                    />
-                    <Icon className="relative h-7 w-7" strokeWidth={2.25} aria-hidden="true" />
-                  </span>
-                  <h3 className="mb-3 text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
-                    {feature.title}
-                  </h3>
-                  <p className="min-h-[4.5rem] flex-1 text-sm leading-relaxed text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </div>
-              </Reveal>
-            );
-          })}
+      <Container className="relative">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16 lg:items-start">
+          <Reveal>
+            <div className="lg:sticky lg:top-28">
+              <SectionHeading
+                align="left"
+                icon={Sparkles}
+                label="Tại sao chọn DKS?"
+                title="Điều Làm Nên Sự Khác Biệt"
+                sub="Không chỉ dạy tiếng Anh — chúng tôi xây nền tự tin để học viên thích học và tiến bộ bền vững."
+                titleId="why-dks-title"
+              />
+            </div>
+          </Reveal>
+
+          <ul className="space-y-0 border-t border-border/80">
+            {FEATURES.map((feature, index) => {
+              const Icon = feature.icon;
+              const num = String(index + 1).padStart(2, "0");
+              return (
+                <Reveal key={feature.title} delayMs={index * 50} as="li">
+                  <div className="group grid grid-cols-[auto_minmax(0,1fr)] gap-4 border-b border-border/80 py-6 sm:gap-5 sm:py-7 md:grid-cols-[3rem_auto_minmax(0,1fr)]">
+                    <span className="hidden text-2xl font-black tabular-nums text-primary/35 font-[family-name:var(--font-nunito)] md:block">
+                      {num}
+                    </span>
+                    <span
+                      className={`mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center bg-primary text-primary-foreground shadow-sm transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none ${feature.iconWrap}`}
+                    >
+                      <Icon className="h-6 w-6" strokeWidth={2.25} aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="mb-1.5 text-lg font-black text-foreground font-[family-name:var(--font-nunito)]">
+                        <span className="mr-2 text-primary/50 md:hidden">{num}</span>
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm leading-relaxed text-muted-foreground md:text-[0.95rem]">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </ul>
         </div>
       </Container>
     </section>
