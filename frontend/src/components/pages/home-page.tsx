@@ -13,7 +13,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { FoxMascot } from "@/components/brand/fox-mascot";
+import { EducationMascot } from "@/components/brand/education-mascot";
 import { AnimatedHeroStats } from "@/components/home/animated-hero-stats";
 import { FeaturedCoursesSlider } from "@/components/home/featured-courses-slider";
 import { HomeTestimonials } from "@/components/home/testimonials-section";
@@ -141,16 +141,15 @@ function Hero() {
 
           <div className="hidden items-center justify-center md:col-start-2 md:row-start-1 md:flex lg:row-span-2 lg:justify-end">
             <div
-              className="relative h-[320px] w-[270px] animate-hero-enter lg:h-[400px] lg:w-[340px]"
+              className="relative flex h-[360px] w-[360px] animate-hero-enter items-center justify-center overflow-visible lg:h-[440px] lg:w-[440px]"
               style={{ animationDelay: "200ms" }}
             >
               <div
-                className="absolute inset-0 rounded-full opacity-30 dark:opacity-20"
+                className="absolute inset-[8%] rounded-full opacity-35 dark:opacity-20"
                 style={{ background: "var(--hero-glow-1)" }}
+                aria-hidden="true"
               />
-              <div className="animate-fox-float">
-                <FoxMascot />
-              </div>
+              <EducationMascot className="relative z-10 h-[120%] w-[120%] max-w-none scale-125 [&_svg]:bg-transparent" />
             </div>
           </div>
 
@@ -176,7 +175,7 @@ async function CoursesSection() {
   }
 
   return (
-    <section className="bg-card py-20 md:py-28" aria-labelledby="featured-courses-title">
+    <section className="bg-secondary py-20 md:py-28" aria-labelledby="featured-courses-title">
       <Container>
         <Reveal>
           <SectionHeading
@@ -206,7 +205,7 @@ async function CoursesSection() {
 
 function WhyChooseUs() {
   return (
-    <section className="bg-secondary py-20 md:py-28" aria-labelledby="why-dks-title">
+    <section className="bg-card py-20 md:py-28" aria-labelledby="why-dks-title">
       <Container>
         <Reveal>
           <SectionHeading
@@ -223,7 +222,7 @@ function WhyChooseUs() {
 
             return (
               <Reveal key={feature.title} delayMs={index * 60} as="article" className="h-full">
-                <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none">
+                <div className="flex h-full flex-col rounded-2xl border border-border bg-secondary p-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none">
                   <span
                     className={`relative mb-5 flex h-14 w-14 items-center justify-center bg-primary/10 text-primary shadow-[inset_0_0_0_1px] shadow-primary/20 ${feature.iconWrap}`}
                   >
@@ -401,8 +400,8 @@ export async function HomePage() {
   return (
     <>
       <Hero />
-      <CoursesSection />
       <WhyChooseUs />
+      <CoursesSection />
       <HomeTestimonials stories={stories} />
       <GallerySection photos={galleryPhotos} />
       <CallToAction />
