@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
+import { inflateRawSync } from 'zlib';
 
 import {
   CLOUDINARY_FOLDERS,
@@ -91,6 +92,186 @@ export class CloudinaryService {
     });
   }
 
+  private static readonly CAREER_CV_MIME = new Set([
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ]);
+
+  /** Upload CV/portfolio (PDF / Word) as Cloudinary raw asset. */
+  async uploadCareerCv(file: Express.Multer.File): Promise<UploadApiResponse> {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('File CV không hợp lệ');
+    }
+
+    const mime = file.mimetype?.toLowerCase() ?? '';
+    const name = file.originalname?.toLowerCase() ?? '';
+    const byExt =
+      name.endsWith('.pdf') ||
+      name.endsWith('.doc') ||
+      name.endsWith('.docx');
+    if (!CloudinaryService.CAREER_CV_MIME.has(mime) && !byExt) {
+      throw new BadRequestException(
+        'Chỉ chấp nhận CV định dạng PDF hoặc Word (.pdf, .doc, .docx)',
+      );
+    }
+
+    const folder = CLOUDINARY_FOLDERS.careerCvs;
+    const ext = name.endsWith('.docx')
+      ? 'docx'
+      : name.endsWith('.doc')
+        ? 'doc'
+        : mime.includes('wordprocessingml')
+          ? 'docx'
+          : mime === 'application/msword'
+            ? 'doc'
+            : 'pdf';
+    const safeBase = (file.originalname || 'cv')
+      .replace(/\.[^.]+$/, '')
+      .replace(/[^\w.-]+/g, '-')
+      .slice(0, 60);
+    // Raw public_id PHẢI kèm extension — không thì URL mất MIME → browser tải file “dị”.
+    const publicId = `${safeBase}-${Date.now()}.${ext}`;
+
+    return new Promise((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          public_id: publicId,
+          resource_type: 'raw',
+          overwrite: false,
+          use_filename: false,
+          unique_filename: false,
+        },
+        (error, result) => {
+          if (error || !result) {
+            reject(error ?? new Error('Upload CV lên Cloudinary thất bại'));
+            return;
+          }
+          resolve(result);
+        },
+      );
+      upload.end(file.buffer);
+    });
+  }
+
+  /**
+   * public_id raw (CV) — GIỮ extension trong public_id.
+   * Khác image: raw upload của ta luôn nhúng .pdf/.doc/.docx vào public_id.
+   */
+  extractRawPublicId(url: string | null | undefined): string | null {
+    if (!url) return null;
+
+    try {
+      const parsed = new URL(url);
+      if (!parsed.hostname.includes('res.cloudinary.com')) return null;
+
+      // Bỏ transformation (fl_attachment:...) nếu có — lấy path sau /upload/
+      const pathname = decodeURIComponent(parsed.pathname);
+      const folder = CLOUDINARY_FOLDERS.careerCvs;
+      const folderPrefix = `${folder}/`;
+      const nestedIdx = pathname.indexOf(folderPrefix);
+      if (nestedIdx === -1) return null;
+
+      const publicId = pathname.slice(nestedIdx);
+      return publicId || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Account Cloudinary đang chặn delivery PDF/raw (401 deny/ACL).
+   * Tải qua Admin generate_archive (signed) rồi bung file trong zip.
+   */
+  async fetchRawBytes(url: string): Promise<Buffer> {
+    const publicId = this.extractRawPublicId(url);
+    if (!publicId) {
+      throw new BadRequestException('URL CV Cloudinary không hợp lệ');
+    }
+
+    const archiveUrl = cloudinary.utils.download_archive_url({
+      resource_type: 'raw',
+      type: 'upload',
+      public_ids: [publicId],
+      target_format: 'zip',
+      flatten_folders: true,
+      expires_at: Math.floor(Date.now() / 1000) + 300,
+    });
+
+    const response = await fetch(archiveUrl);
+    if (!response.ok) {
+      this.logger.warn(
+        `Cloudinary archive CV thất bại (${publicId}): HTTP ${response.status}`,
+      );
+      throw new BadRequestException('Không tải được file CV từ Cloudinary');
+    }
+
+    const zip = Buffer.from(await response.arrayBuffer());
+    try {
+      return CloudinaryService.extractFirstZipEntry(zip);
+    } catch (error) {
+      this.logger.warn(
+        `Giải nén CV thất bại (${publicId}): ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      throw new BadRequestException('Không đọc được file CV từ Cloudinary');
+    }
+  }
+
+  /** Bung entry đầu trong zip đơn giản (Cloudinary generate_archive). */
+  private static extractFirstZipEntry(zip: Buffer): Buffer {
+    let eocd = -1;
+    for (let i = zip.length - 22; i >= 0; i -= 1) {
+      if (zip.readUInt32LE(i) === 0x06054b50) {
+        eocd = i;
+        break;
+      }
+    }
+    if (eocd < 0) throw new Error('ZIP EOCD không hợp lệ');
+
+    const cdOffset = zip.readUInt32LE(eocd + 16);
+    if (zip.readUInt32LE(cdOffset) !== 0x02014b50) {
+      throw new Error('ZIP central directory không hợp lệ');
+    }
+
+    const method = zip.readUInt16LE(cdOffset + 10);
+    const compSize = zip.readUInt32LE(cdOffset + 20);
+    const localHeaderOffset = zip.readUInt32LE(cdOffset + 42);
+
+    if (zip.readUInt32LE(localHeaderOffset) !== 0x04034b50) {
+      throw new Error('ZIP local header không hợp lệ');
+    }
+    const lhNameLen = zip.readUInt16LE(localHeaderOffset + 26);
+    const lhExtraLen = zip.readUInt16LE(localHeaderOffset + 28);
+    const dataStart = localHeaderOffset + 30 + lhNameLen + lhExtraLen;
+    const compressed = zip.subarray(dataStart, dataStart + compSize);
+
+    if (method === 0) return Buffer.from(compressed);
+    if (method === 8) return inflateRawSync(compressed);
+    throw new Error(`ZIP compression method ${method} không hỗ trợ`);
+  }
+
+  async deleteRawByUrl(url: string | null | undefined): Promise<boolean> {
+    const publicId = this.extractRawPublicId(url);
+    if (!publicId) return false;
+    try {
+      const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: 'raw',
+        invalidate: true,
+      });
+      return result.result === 'ok' || result.result === 'not found';
+    } catch (error) {
+      this.logger.warn(
+        `Xóa CV Cloudinary thất bại (${publicId}): ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return false;
+    }
+  }
+
   private managedFolders() {
     return [
       CLOUDINARY_FOLDERS.courses,
@@ -100,6 +281,7 @@ export class CloudinaryService {
       CLOUDINARY_FOLDERS.aboutVision,
       CLOUDINARY_FOLDERS.aboutTeachers,
       CLOUDINARY_FOLDERS.tuitionProofs,
+      CLOUDINARY_FOLDERS.careerCvs,
     ];
   }
 

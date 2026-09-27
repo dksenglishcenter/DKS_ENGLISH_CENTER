@@ -81,6 +81,8 @@ model CareerApplication {
   phone        String
   position     String
   introduction String?
+  cvUrl        String   @map("cv_url")
+  cvFileName   String?  @map("cv_file_name")
   createdAt    DateTime @default(now()) @map("created_at")
 
   job Job? @relation(fields: [jobId], references: [id], onDelete: SetNull)

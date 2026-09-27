@@ -11,7 +11,7 @@ export const metadata = createPageMetadata({
     "về DKS English Center",
     "trung tâm tiếng Anh TP HCM",
     "giáo viên tiếng Anh",
-    "sứ mệnh DKS",
+    "định hướng đào tạo DKS",
     "học tiếng Anh uy tín",
   ],
 });

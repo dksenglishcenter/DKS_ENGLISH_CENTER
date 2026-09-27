@@ -5,6 +5,8 @@ export type CareerApplicationPayload = {
   fullName: string;
   email: string;
   phone: string;
+  cvUrl: string;
+  cvFileName: string;
   introduction?: string;
 };
 
@@ -27,6 +29,8 @@ export type CareerApplication = {
   phone: string;
   position: string;
   introduction: string | null;
+  cvUrl: string;
+  cvFileName: string | null;
   createdAt: string;
   job: {
     id: string;

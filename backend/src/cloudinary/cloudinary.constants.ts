@@ -12,6 +12,7 @@ export const CLOUDINARY_FOLDERS = {
   courses: `${CLOUDINARY_ROOT}/courses`,
   blog: `${CLOUDINARY_ROOT}/blog`,
   tuitionProofs: `${CLOUDINARY_ROOT}/tuition/proofs`,
+  careerCvs: `${CLOUDINARY_ROOT}/careers/cv`,
 } as const;
 
 export const SOCIAL_PLATFORMS = [
@@ -35,7 +36,8 @@ export type MediaCategory =
   | 'course-cover'
   | 'blog-cover'
   | 'blog-section'
-  | 'tuition-proof';
+  | 'tuition-proof'
+  | 'career-cv';
 
 export const MEDIA_CATEGORIES: MediaCategory[] = [
   'brand-logo',
@@ -50,6 +52,7 @@ export const MEDIA_CATEGORIES: MediaCategory[] = [
   'blog-cover',
   'blog-section',
   'tuition-proof',
+  'career-cv',
 ];
 
 export type FolderContext = {
@@ -89,6 +92,8 @@ const FOLDER_RESOLVERS: Record<MediaCategory, FolderResolver> = {
   'blog-section': () => CLOUDINARY_FOLDERS.blog,
 
   'tuition-proof': () => CLOUDINARY_FOLDERS.tuitionProofs,
+
+  'career-cv': () => CLOUDINARY_FOLDERS.careerCvs,
 };
 
 export function resolveCloudinaryFolder(

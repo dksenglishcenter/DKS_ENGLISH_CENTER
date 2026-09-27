@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { LoaderCircle, Send } from "lucide-react";
+import { useRef, useState } from "react";
+import { FileUp, LoaderCircle, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { submitCareerApplication } from "@/lib/careers/api";
+import { submitCareerApplication, uploadCareerCv } from "@/lib/careers/api";
 import type { CareerApplicationPayload } from "@/lib/careers/types";
 import {
   containsHtmlCharacters,
@@ -27,7 +27,11 @@ const FORM_LIMITS = {
   fullName: { min: 4, max: 100 },
   email: 255,
   introduction: { min: 10, max: 2000 },
+  cvMaxBytes: 5 * 1024 * 1024,
 } as const;
+
+const CV_ACCEPT =
+  ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 type CareerFormValues = {
   fullName: string;
@@ -37,7 +41,7 @@ type CareerFormValues = {
   introduction: string;
 };
 
-type CareerField = keyof CareerFormValues;
+type CareerField = keyof CareerFormValues | "cvFile";
 type FieldErrors = Partial<Record<CareerField, string>>;
 
 const INITIAL_FORM_VALUES: CareerFormValues = {
@@ -48,13 +52,26 @@ const INITIAL_FORM_VALUES: CareerFormValues = {
   introduction: "",
 };
 
-const CAREER_FIELDS: CareerField[] = [
+const CAREER_FIELDS: (keyof CareerFormValues)[] = [
   "fullName",
   "email",
   "phone",
   "jobId",
   "introduction",
 ];
+
+function isAllowedCvFile(file: File) {
+  const name = file.name.toLowerCase();
+  const byExt =
+    name.endsWith(".pdf") || name.endsWith(".doc") || name.endsWith(".docx");
+  const mime = file.type.toLowerCase();
+  const byMime =
+    mime === "application/pdf" ||
+    mime === "application/msword" ||
+    mime ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  return byExt || byMime;
+}
 
 type CareerPosition = {
   id: string;
@@ -163,11 +180,13 @@ export function CareerApplicationForm({
     ...INITIAL_FORM_VALUES,
     jobId: initialJobId,
   });
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
+  const cvInputRef = useRef<HTMLInputElement>(null);
 
-  function updateField(field: CareerField, value: string) {
+  function updateField(field: keyof CareerFormValues, value: string) {
     const nextValue = field === "phone" ? sanitizePhoneInput(value) : value;
     setValues((current) => ({ ...current, [field]: nextValue }));
     setSubmissionError("");
@@ -181,11 +200,44 @@ export function CareerApplicationForm({
     }
   }
 
-  function validateField(field: CareerField) {
+  function validateField(field: keyof CareerFormValues) {
     setFieldErrors((current) => ({
       ...current,
       [field]: getFieldError(field, values[field], positions),
     }));
+  }
+
+  function handleCvChange(fileList: FileList | null) {
+    setSubmissionError("");
+    const file = fileList?.[0] ?? null;
+    if (!file) {
+      setCvFile(null);
+      return;
+    }
+    if (!isAllowedCvFile(file)) {
+      setCvFile(null);
+      setFieldErrors((current) => ({
+        ...current,
+        cvFile: "Chỉ chấp nhận PDF hoặc Word (.pdf, .doc, .docx).",
+      }));
+      if (cvInputRef.current) cvInputRef.current.value = "";
+      return;
+    }
+    if (file.size > FORM_LIMITS.cvMaxBytes) {
+      setCvFile(null);
+      setFieldErrors((current) => ({
+        ...current,
+        cvFile: "File CV tối đa 5MB.",
+      }));
+      if (cvInputRef.current) cvInputRef.current.value = "";
+      return;
+    }
+    setCvFile(file);
+    setFieldErrors((current) => {
+      const next = { ...current };
+      delete next.cvFile;
+      return next;
+    });
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -195,12 +247,21 @@ export function CareerApplicationForm({
     const form = event.currentTarget;
     const normalizedValues = normalizeFormValues(values);
     const errors = validateForm(normalizedValues, positions);
-    const firstInvalidField = CAREER_FIELDS.find((field) => errors[field]);
+    if (!cvFile) {
+      errors.cvFile = "Vui lòng đính kèm CV / portfolio (PDF hoặc Word).";
+    }
+    const firstInvalidField =
+      CAREER_FIELDS.find((field) => errors[field]) ??
+      (errors.cvFile ? "cvFile" : undefined);
 
     setValues(normalizedValues);
     setFieldErrors(errors);
     setSubmissionError("");
 
+    if (firstInvalidField === "cvFile") {
+      cvInputRef.current?.focus();
+      return;
+    }
     if (firstInvalidField) {
       const firstInvalidControl = form.elements.namedItem(firstInvalidField);
       if (firstInvalidControl instanceof HTMLElement)
@@ -208,23 +269,28 @@ export function CareerApplicationForm({
       return;
     }
 
-    if (!isCareerPosition(normalizedValues.jobId, positions)) return;
-
-    const payload: CareerApplicationPayload = {
-      jobId: normalizedValues.jobId,
-      fullName: normalizedValues.fullName,
-      email: normalizedValues.email,
-      phone: normalizedValues.phone,
-      ...(normalizedValues.introduction
-        ? { introduction: normalizedValues.introduction }
-        : {}),
-    };
+    if (!isCareerPosition(normalizedValues.jobId, positions) || !cvFile) return;
 
     setIsSubmitting(true);
 
     try {
+      const uploaded = await uploadCareerCv(cvFile);
+      const payload: CareerApplicationPayload = {
+        jobId: normalizedValues.jobId,
+        fullName: normalizedValues.fullName,
+        email: normalizedValues.email,
+        phone: normalizedValues.phone,
+        cvUrl: uploaded.url,
+        cvFileName: uploaded.fileName,
+        ...(normalizedValues.introduction
+          ? { introduction: normalizedValues.introduction }
+          : {}),
+      };
+
       const response = await submitCareerApplication(payload);
       setValues({ ...INITIAL_FORM_VALUES, jobId: initialJobId });
+      setCvFile(null);
+      if (cvInputRef.current) cvInputRef.current.value = "";
       setFieldErrors({});
       onSuccess?.(response.message);
     } catch (error) {
@@ -346,6 +412,45 @@ export function CareerApplicationForm({
           ))}
         </select>
         <FieldError id="career-position-error" error={fieldErrors.jobId} />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="career-cv">
+          CV / Portfolio <span className="ml-0.5 text-primary">*</span>
+        </Label>
+        <div
+          className={cn(
+            "flex flex-col gap-2 rounded-lg border border-dashed bg-input-background px-4 py-3",
+            fieldErrors.cvFile ? "border-red-500" : "border-border",
+          )}
+        >
+          <input
+            ref={cvInputRef}
+            id="career-cv"
+            name="cvFile"
+            type="file"
+            accept={CV_ACCEPT}
+            className="sr-only"
+            onChange={(event) => handleCvChange(event.target.files)}
+            required
+          />
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-center sm:w-auto"
+            disabled={isSubmitting}
+            onClick={() => cvInputRef.current?.click()}
+          >
+            <FileUp className="h-4 w-4" aria-hidden="true" />
+            {cvFile ? "Đổi file" : "Add file"}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            {cvFile
+              ? `Đã chọn: ${cvFile.name}`
+              : "Bắt buộc · PDF hoặc Word (.pdf, .doc, .docx) · tối đa 5MB"}
+          </p>
+        </div>
+        <FieldError id="career-cv-error" error={fieldErrors.cvFile} />
       </div>
 
       <div className="flex flex-col gap-1.5">

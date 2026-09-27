@@ -24,6 +24,7 @@ export function SectionHeading({
   titleId,
   icon,
   align = "center",
+  className,
 }: {
   label: string;
   title: string;
@@ -31,10 +32,13 @@ export function SectionHeading({
   titleId?: string;
   icon?: LucideIcon;
   align?: "center" | "left";
+  className?: string;
 }) {
   const isLeft = align === "left";
   return (
-    <div className={cn(isLeft ? "mb-0 text-left" : "mb-14 text-center")}>
+    <div
+      className={cn(isLeft ? "mb-0 text-left" : "mb-14 text-center", className)}
+    >
       <SectionLabel icon={icon}>{label}</SectionLabel>
       <h2
         id={titleId}

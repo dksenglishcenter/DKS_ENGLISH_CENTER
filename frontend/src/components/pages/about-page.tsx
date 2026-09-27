@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   Building2,
   Handshake,
@@ -18,6 +19,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { getAboutContent } from "@/lib/about-content/api";
 import { listFacilityImages } from "@/lib/facility-images/api";
 import type { FacilityImage } from "@/lib/facility-images/types";
+import { PAGE_PATHS } from "@/lib/navigation-paths";
 import { listTeachers } from "@/lib/teachers/api";
 import type { Teacher } from "@/lib/teachers/types";
 
@@ -81,41 +83,22 @@ export async function AboutPage() {
         <Reveal>
           <div className="mb-24 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div>
-              <SectionLabel icon={Target}>Tầm nhìn & Sứ mệnh</SectionLabel>
+              <SectionLabel icon={Target}>Định hướng đào tạo</SectionLabel>
               <h2 className="mb-6 text-3xl font-black text-foreground font-[family-name:var(--font-nunito)] md:text-4xl">
-                Chúng tôi tin rằng
-                <br />
-                mọi người đều có thể
+                Định hướng đào tạo của{" "}
+                <span className="text-primary">DKS</span>
               </h2>
-              <div className="space-y-6 font-[family-name:var(--font-body)]">
-                <div className="flex gap-4">
-                  <div className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                    <Target className="h-5 w-5" strokeWidth={2.25} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h4 className="mb-1 font-bold text-foreground font-[family-name:var(--font-nunito)]">
-                      Tầm nhìn
-                    </h4>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      Trở thành trung tâm tiếng Anh hàng đầu Việt Nam, nơi mỗi học viên tìm được phương
-                      pháp học phù hợp và đạt mục tiêu một cách vui vẻ, bền vững.
-                    </p>
-                  </div>
+              <div className="rounded-2xl border border-border bg-secondary/50 p-5 md:p-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                  <Target className="h-6 w-6" strokeWidth={2.25} aria-hidden="true" />
                 </div>
-                <div className="flex gap-4">
-                  <div className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                    <Lightbulb className="h-5 w-5" strokeWidth={2.25} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h4 className="mb-1 font-bold text-foreground font-[family-name:var(--font-nunito)]">
-                      Sứ mệnh
-                    </h4>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      Cung cấp nền giáo dục tiếng Anh chất lượng cao, sáng tạo và cá nhân hóa – giúp học
-                      viên không chỉ học tốt tiếng Anh mà còn yêu thích ngôn ngữ này.
-                    </p>
-                  </div>
-                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground font-[family-name:var(--font-body)] md:text-base">
+                  DKS là nơi cung cấp hệ thống giáo dục tiếng Anh chất lượng cao, sáng tạo
+                  và hiệu quả. Hệ thống giảng viên và giáo trình với phương pháp đào tạo có
+                  thể cá nhân hóa, phù hợp với nhiều đối tượng khác nhau; giúp người học tìm
+                  được phương pháp học hiệu quả và niềm yêu thích với tiếng Anh, sử dụng
+                  ngoại ngữ một cách tự tin và nhuần nhuyễn.
+                </p>
               </div>
             </div>
             <div className="relative">
@@ -147,7 +130,7 @@ export async function AboutPage() {
                 </div>
               </div>
               <div className="absolute -top-5 -right-5 rounded-2xl border border-border bg-card p-5 shadow-xl">
-                <div className="text-3xl font-black text-accent font-[family-name:var(--font-nunito)]">
+                <div className="text-3xl font-black text-primary font-[family-name:var(--font-nunito)]">
                   2K+
                 </div>
                 <div className="text-sm text-muted-foreground font-[family-name:var(--font-body)]">
@@ -184,44 +167,64 @@ export async function AboutPage() {
           })}
         </div>
 
-        <Reveal>
-          <SectionHeading
-            icon={Users}
-            label="Đội ngũ giáo viên"
-            title="Những người thầy tận tâm"
-            sub="Giáo viên DKS không chỉ giỏi chuyên môn mà còn đam mê giảng dạy, luôn lấy học viên làm trung tâm."
-          />
-        </Reveal>
-        <Reveal delayMs={80}>
-          <TeachersSlider teachers={teachers} />
-        </Reveal>
-
-        <Reveal>
-          <SectionHeading icon={Building2} label="Cơ sở vật chất" title="Không gian học tập lý tưởng" />
-        </Reveal>
-        <Reveal delayMs={80}>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-            {facilities.map((facility) => (
-              <div
-                key={facility.id}
-                className="group relative h-[200px] overflow-hidden rounded-2xl bg-secondary"
+        <section className="mb-20">
+          <Reveal>
+            <SectionHeading
+              icon={Users}
+              label="Đội ngũ giáo viên"
+              title="Những người thầy tận tâm"
+              sub="Giáo viên DKS không chỉ giỏi chuyên môn mà còn đam mê giảng dạy, luôn lấy học viên làm trung tâm."
+              className="mb-8"
+            />
+          </Reveal>
+          <Reveal delayMs={80}>
+            <TeachersSlider teachers={teachers} />
+          </Reveal>
+          <Reveal delayMs={100}>
+            <div className="mt-6 flex justify-center">
+              <Link
+                href={PAGE_PATHS.contact}
+                className="inline-flex items-center justify-center bg-primary px-10 py-4 text-sm font-bold uppercase tracking-wide text-primary-foreground underline decoration-2 underline-offset-[6px] transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:text-base"
               >
-                <CloudinaryGalleryImage
-                  src={facility.imageUrl}
-                  alt={facility.title}
-                  sizes="(max-width: 767px) 50vw, 33vw"
-                  objectPosition="center"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3">
-                  <span className="text-sm font-bold text-white font-[family-name:var(--font-nunito)]">
-                    {facility.title}
-                  </span>
+                Đăng ký học thử miễn phí
+              </Link>
+            </div>
+          </Reveal>
+        </section>
+
+        <section>
+          <Reveal>
+            <SectionHeading
+              icon={Building2}
+              label="Cơ sở vật chất"
+              title="Không gian học tập lý tưởng"
+              className="mb-8"
+            />
+          </Reveal>
+          <Reveal delayMs={80}>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              {facilities.map((facility) => (
+                <div
+                  key={facility.id}
+                  className="group relative h-[200px] overflow-hidden rounded-2xl bg-secondary"
+                >
+                  <CloudinaryGalleryImage
+                    src={facility.imageUrl}
+                    alt={facility.title}
+                    sizes="(max-width: 767px) 50vw, 33vw"
+                    objectPosition="center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <span className="text-sm font-bold text-white font-[family-name:var(--font-nunito)]">
+                      {facility.title}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </Reveal>
+              ))}
+            </div>
+          </Reveal>
+        </section>
       </Container>
     </div>
   );

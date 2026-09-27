@@ -15,12 +15,12 @@ type TeachersSliderProps = {
 export function TeachersSlider({ teachers }: TeachersSliderProps) {
   if (teachers.length === 0) {
     return (
-      <p className="mb-24 text-sm text-muted-foreground">Chưa có giáo viên.</p>
+      <p className="text-sm text-muted-foreground">Chưa có giáo viên.</p>
     );
   }
 
   return (
-    <div className="mb-24">
+    <div>
       <HorizontalSnapSlider
         itemCount={teachers.length}
         prevLabel="Giáo viên trước"
@@ -54,7 +54,7 @@ export function TeachersSlider({ teachers }: TeachersSliderProps) {
               <div className="mb-2 text-xs font-semibold text-primary font-[family-name:var(--font-body)]">
                 {t.title}
               </div>
-              <div className="mb-3 text-xs font-medium text-muted-foreground font-[family-name:var(--font-body)]">
+              <div className="mb-3 text-[0.8125rem] font-semibold leading-snug text-foreground/85 font-[family-name:var(--font-body)]">
                 {t.cred}
               </div>
               <p className="text-justify text-xs leading-relaxed text-muted-foreground font-[family-name:var(--font-body)]">

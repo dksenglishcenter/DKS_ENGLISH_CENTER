@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUrl,
   MinLength,
   MaxLength,
   Matches,
@@ -72,6 +73,19 @@ export class CreateCareerApplicationDto {
     message: 'Số điện thoại phải có từ 8 đến 15 chữ số và đúng định dạng.',
   })
   phone!: string;
+
+  @Trim()
+  @IsString()
+  @IsNotEmpty({ message: 'Vui lòng đính kèm CV / portfolio.' })
+  @IsUrl({ require_protocol: true }, { message: 'URL CV không hợp lệ.' })
+  @MaxLength(500)
+  cvUrl!: string;
+
+  @Trim()
+  @IsString()
+  @IsNotEmpty({ message: 'Thiếu tên file CV.' })
+  @MaxLength(200)
+  cvFileName!: string;
 
   @TrimOptional()
   @IsOptional()

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { BriefcaseBusiness, FileUser } from "lucide-react";
+import { BriefcaseBusiness, ExternalLink, FileUser } from "lucide-react";
 
 import {
   EmailLink,
@@ -12,6 +12,7 @@ import {
   deleteCareerApplication,
   listCareerApplications,
 } from "@/lib/careers/api";
+import { getCareerCvAdminDownloadPath } from "@/lib/careers/cv-preview";
 import type { CareerApplication } from "@/lib/careers/types";
 
 const CONFIG: SubmissionsListConfig<CareerApplication> = {
@@ -36,19 +37,19 @@ const CONFIG: SubmissionsListConfig<CareerApplication> = {
     {
       key: "phone",
       header: "Số điện thoại",
-      widthClass: "w-[14%]",
+      widthClass: "w-[12%]",
       render: (application) => <PhoneLink phone={application.phone} />,
     },
     {
       key: "email",
       header: "Email",
-      widthClass: "w-[18%]",
+      widthClass: "w-[16%]",
       render: (application) => <EmailLink email={application.email} />,
     },
     {
       key: "position",
       header: "Vị trí ứng tuyển",
-      widthClass: "w-[17%]",
+      widthClass: "w-[14%]",
       render: (application) => (
         <span className="flex items-start gap-2 text-muted-foreground">
           <BriefcaseBusiness
@@ -60,9 +61,31 @@ const CONFIG: SubmissionsListConfig<CareerApplication> = {
       ),
     },
     {
+      key: "cvUrl",
+      header: "CV",
+      widthClass: "w-[14%]",
+      render: (application) => {
+        if (!application.cvUrl) {
+          return <span className="text-muted-foreground">—</span>;
+        }
+        const href = getCareerCvAdminDownloadPath(application.id);
+        const label = application.cvFileName?.trim() || "Tải CV";
+        return (
+          <a
+            href={href}
+            className="inline-flex max-w-full items-center gap-1.5 font-semibold text-primary underline-offset-2 hover:underline"
+            title={`Tải CV: ${label}`}
+          >
+            <span className="truncate">{label}</span>
+            <ExternalLink className="size-3.5 shrink-0" aria-hidden="true" />
+          </a>
+        );
+      },
+    },
+    {
       key: "introduction",
       header: "Giới thiệu",
-      widthClass: "w-[19%]",
+      widthClass: "w-[16%]",
       render: (application) =>
         application.introduction ? (
           <span className="whitespace-pre-wrap [overflow-wrap:anywhere] text-muted-foreground">
