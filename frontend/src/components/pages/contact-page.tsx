@@ -256,7 +256,9 @@ export function ContactPage({
                 <h3 className="mb-1 text-sm font-bold text-foreground font-[family-name:var(--font-nunito)]">
                   Chat Zalo
                 </h3>
-                <p className="text-xs text-muted-foreground">Phản hồi ngay lập tức</p>
+                <p className="text-xs text-muted-foreground">
+                  Mở Zalo để nhắn tin với DKS
+                </p>
               </a>
               <a
                 href={contactInfo ? getPhoneHref(contactInfo.phone) : undefined}

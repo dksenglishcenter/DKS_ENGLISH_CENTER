@@ -120,7 +120,10 @@ Production (Vercel FE + Render BE): set `FRONTEND_URL` = URL Vercel, `COOKIE_SAM
 ```env
 BACKEND_URL=http://localhost:3001
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# Zalo trung tâm (SĐT Zalo của DKS là đủ — không cần OA username).
 NEXT_PUBLIC_ZALO_CONTACT_URL=https://zalo.me/0834513456
+# Chỉ set nếu trung tâm có Zalo Official Account và muốn dùng link “Nhắn tin” OA:
+# NEXT_PUBLIC_ZALO_OA_USERNAME=ten-oa
 # Optional:
 # NEXT_PUBLIC_API_URL=http://localhost:3001/api
 # NEXT_PUBLIC_GA_MEASUREMENT_ID=

@@ -12,7 +12,44 @@ import {
   deleteContactSubmission,
   listContactSubmissions,
 } from "@/lib/contact/api";
+import {
+  getWhatsAppHref,
+  getZaloChatHrefFromPhone,
+} from "@/lib/contact/messaging-links";
+import {
+  contactChannelLabel,
+  contactSenderRoleLabel,
+} from "@/lib/contact/options";
 import type { ContactSubmission } from "@/lib/contact/types";
+
+function MessagingPhoneCell({ phone }: { phone: string }) {
+  const zaloHref = getZaloChatHrefFromPhone(phone);
+  const whatsappHref = getWhatsAppHref(phone, "Xin chào, DKS English Center liên hệ tư vấn.");
+
+  return (
+    <div className="space-y-1.5">
+      <PhoneLink phone={phone} />
+      <div className="flex flex-wrap gap-x-2 gap-y-1 pl-6 text-xs font-semibold">
+        <a
+          href={zaloHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#0068FF] underline-offset-2 hover:underline"
+        >
+          Zalo
+        </a>
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#128C7E] underline-offset-2 hover:underline"
+        >
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  );
+}
 
 const CONFIG: SubmissionsListConfig<ContactSubmission> = {
   idPrefix: "contact-submissions",
@@ -35,20 +72,40 @@ const CONFIG: SubmissionsListConfig<ContactSubmission> = {
   columns: [
     {
       key: "phone",
-      header: "Số điện thoại",
+      header: "SĐT / nhắn tin",
       widthClass: "w-[14%]",
-      render: (submission) => <PhoneLink phone={submission.phone} />,
+      render: (submission) => <MessagingPhoneCell phone={submission.phone} />,
+    },
+    {
+      key: "contactChannel",
+      header: "Kênh ưa thích",
+      widthClass: "w-[10%]",
+      render: (submission) => (
+        <span className="text-muted-foreground">
+          {contactChannelLabel(submission.contactChannel)}
+        </span>
+      ),
+    },
+    {
+      key: "senderRole",
+      header: "Bạn là…",
+      widthClass: "w-[12%]",
+      render: (submission) => (
+        <span className="text-muted-foreground">
+          {contactSenderRoleLabel(submission.senderRole)}
+        </span>
+      ),
     },
     {
       key: "email",
       header: "Email",
-      widthClass: "w-[18%]",
+      widthClass: "w-[14%]",
       render: (submission) => <EmailLink email={submission.email} />,
     },
     {
       key: "courseInterest",
       header: "Khóa quan tâm",
-      widthClass: "w-[17%]",
+      widthClass: "w-[14%]",
       render: (submission) => (
         <span className="break-words text-muted-foreground">
           {submission.courseInterest}
@@ -58,7 +115,7 @@ const CONFIG: SubmissionsListConfig<ContactSubmission> = {
     {
       key: "learningNeeds",
       header: "Nhu cầu học tập",
-      widthClass: "w-[19%]",
+      widthClass: "w-[14%]",
       render: (submission) =>
         submission.learningNeeds ? (
           <span className="whitespace-pre-wrap [overflow-wrap:anywhere] text-muted-foreground">

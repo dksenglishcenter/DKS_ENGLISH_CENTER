@@ -5,9 +5,12 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 
-// TODO(email): bật lại cùng notifyContactSubmission bên dưới
-// import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  CONTACT_OTHER_COURSE,
+  isContactChannel,
+  isContactSenderRole,
+} from './contact.constants';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { ListContactSubmissionsQueryDto } from './dto/list-contact-submissions-query.dto';
 
@@ -18,15 +21,14 @@ const CONTACT_SUBMISSION_SELECT = {
   email: true,
   courseInterest: true,
   learningNeeds: true,
+  senderRole: true,
+  contactChannel: true,
   createdAt: true,
 } satisfies Prisma.ContactSubmissionSelect;
 
 @Injectable()
 export class ContactService {
-  constructor(
-    private readonly prisma: PrismaService,
-    // private readonly mailService: MailService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async listSubmissions(query: ListContactSubmissionsQueryDto) {
     const { page, pageSize } = query;
@@ -38,6 +40,7 @@ export class ContactService {
             { phone: { contains: search } },
             { email: { contains: search, mode: 'insensitive' } },
             { courseInterest: { contains: search, mode: 'insensitive' } },
+            { senderRole: { contains: search, mode: 'insensitive' } },
           ],
         }
       : {};
@@ -94,16 +97,35 @@ export class ContactService {
   }
 
   async create(dto: CreateContactDto) {
-    const course = await this.prisma.course.findFirst({
-      where: {
-        title: dto.courseInterest,
-        isPublished: true,
-      },
-      select: { title: true },
-    });
+    if (!isContactSenderRole(dto.senderRole)) {
+      throw new BadRequestException('Vui lòng chọn bạn đang là ai.');
+    }
 
-    if (!course) {
-      throw new BadRequestException('Khóa học đã chọn không còn mở đăng ký.');
+    const contactChannel = dto.contactChannel?.trim() || null;
+    if (contactChannel && !isContactChannel(contactChannel)) {
+      throw new BadRequestException('Kênh liên hệ không hợp lệ.');
+    }
+
+    let courseInterest: string;
+    if (dto.courseInterest.trim() === CONTACT_OTHER_COURSE) {
+      const other = dto.courseInterestOther?.trim();
+      if (!other) {
+        throw new BadRequestException('Vui lòng mô tả khóa học quan tâm.');
+      }
+      courseInterest = `${CONTACT_OTHER_COURSE}: ${other}`;
+    } else {
+      const course = await this.prisma.course.findFirst({
+        where: {
+          title: dto.courseInterest,
+          isPublished: true,
+        },
+        select: { title: true },
+      });
+
+      if (!course) {
+        throw new BadRequestException('Khóa học đã chọn không còn mở đăng ký.');
+      }
+      courseInterest = course.title;
     }
 
     const submission = await this.prisma.contactSubmission.create({
@@ -111,22 +133,16 @@ export class ContactService {
         fullName: dto.fullName.trim(),
         phone: dto.phone.trim(),
         email: dto.email?.trim() || null,
-        courseInterest: course.title,
+        courseInterest,
         learningNeeds: dto.learningNeeds?.trim() || null,
+        senderRole: dto.senderRole,
+        contactChannel,
       },
-      select: CONTACT_SUBMISSION_SELECT,
+      select: {
+        id: true,
+        createdAt: true,
+      },
     });
-
-    // TODO(email): bật lại khi EMAIL_FEATURES_ENABLED=true trong mail.service
-    // void this.mailService.notifyContactSubmission({
-    //   id: submission.id,
-    //   fullName: submission.fullName,
-    //   phone: submission.phone,
-    //   email: submission.email,
-    //   courseInterest: submission.courseInterest,
-    //   learningNeeds: submission.learningNeeds,
-    //   createdAt: submission.createdAt,
-    // });
 
     return {
       id: submission.id,

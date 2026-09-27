@@ -1,10 +1,14 @@
 import type { ApiResponse } from "@/lib/api/client";
+import type { ContactChannel, ContactSenderRole } from "@/lib/contact/options";
 
 export type ContactFormPayload = {
   fullName: string;
   phone: string;
   email?: string;
+  senderRole: ContactSenderRole;
+  contactChannel?: ContactChannel;
   courseInterest: string;
+  courseInterestOther?: string;
   learningNeeds?: string;
 };
 
@@ -22,6 +26,8 @@ export type ContactSubmission = {
   email: string | null;
   courseInterest: string;
   learningNeeds: string | null;
+  senderRole: string;
+  contactChannel: string | null;
   createdAt: string;
 };
 
